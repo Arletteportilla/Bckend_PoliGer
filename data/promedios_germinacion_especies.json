@@ -1,0 +1,6410 @@
+{
+  "Acianthera crinita": {
+    "promedio_dias": 75.0,
+    "mediana_dias": 70.0,
+    "desviacion_std": 30.5,
+    "min_dias": 45,
+    "max_dias": 115,
+    "num_registros": 4
+  },
+  "Acianthera luteola": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 60.0,
+    "desviacion_std": 27.9,
+    "min_dias": 24,
+    "max_dias": 92,
+    "num_registros": 4
+  },
+  "Acianthera nikoleae": {
+    "promedio_dias": 96.0,
+    "mediana_dias": 109.0,
+    "desviacion_std": 25.2,
+    "min_dias": 67,
+    "max_dias": 112,
+    "num_registros": 3
+  },
+  "Acianthera polystachya 1 001642": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 3.5,
+    "min_dias": 30,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Acianthera prolifera": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 16.3,
+    "min_dias": 21,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Aerangis ellisii": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Aerangis kotschyana": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 8.5,
+    "min_dias": 44,
+    "max_dias": 56,
+    "num_registros": 2
+  },
+  "Aerangis luteoalba var rhodosticta": {
+    "promedio_dias": 59.8,
+    "mediana_dias": 49.0,
+    "desviacion_std": 23.6,
+    "min_dias": 35,
+    "max_dias": 86,
+    "num_registros": 5
+  },
+  "Aerides odorata": {
+    "promedio_dias": 35.3,
+    "mediana_dias": 49.0,
+    "desviacion_std": 25.4,
+    "min_dias": 6,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Aerides rubescens": {
+    "promedio_dias": 71.5,
+    "mediana_dias": 71.5,
+    "desviacion_std": 55.9,
+    "min_dias": 32,
+    "max_dias": 111,
+    "num_registros": 2
+  },
+  "Amesiella minor": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 6.4,
+    "min_dias": 29,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Angraecum didieri": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 9.2,
+    "min_dias": 25,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Anguloa cliftonii x Maxillaria striata red": {
+    "promedio_dias": 98.5,
+    "mediana_dias": 98.5,
+    "desviacion_std": 34.6,
+    "min_dias": 74,
+    "max_dias": 123,
+    "num_registros": 2
+  },
+  "Anguloa x acostae": {
+    "promedio_dias": 97.3,
+    "mediana_dias": 93.0,
+    "desviacion_std": 9.3,
+    "min_dias": 91,
+    "max_dias": 108,
+    "num_registros": 3
+  },
+  "Angulocaste Joiceyi X Lycaste x donadrianii 'Splash'H00831 x Lyc. Muromachii": {
+    "promedio_dias": 82.5,
+    "mediana_dias": 82.5,
+    "desviacion_std": 4.9,
+    "min_dias": 79,
+    "max_dias": 86,
+    "num_registros": 2
+  },
+  "Anthurium bullatus": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 7.1,
+    "min_dias": 18,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Anthurium calense": {
+    "promedio_dias": 63.5,
+    "mediana_dias": 63.5,
+    "desviacion_std": 0.7,
+    "min_dias": 63,
+    "max_dias": 64,
+    "num_registros": 2
+  },
+  "Anthurium clavigerum (Autopoli)": {
+    "promedio_dias": 30.3,
+    "mediana_dias": 32.0,
+    "desviacion_std": 5.7,
+    "min_dias": 24,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Anthurium coriaceum (Autopoli)": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 6.4,
+    "min_dias": 23,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Anthurium effusilobum (Autopoli)": {
+    "promedio_dias": 20.7,
+    "mediana_dias": 23.0,
+    "desviacion_std": 4.9,
+    "min_dias": 15,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Anthurium eminens (Autopoli)": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 9.2,
+    "min_dias": 31,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Anthurium gracile type (Autopoli)": {
+    "promedio_dias": 30.7,
+    "mediana_dias": 32.0,
+    "desviacion_std": 7.1,
+    "min_dias": 23,
+    "max_dias": 37,
+    "num_registros": 3
+  },
+  "Anthurium lutheri (Autopoli)": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 2.1,
+    "min_dias": 25,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Anthurium magnificum": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 4.2,
+    "min_dias": 17,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Anthurium magnificum (Autopoli)": {
+    "promedio_dias": 28.8,
+    "mediana_dias": 29.0,
+    "desviacion_std": 4.9,
+    "min_dias": 24,
+    "max_dias": 35,
+    "num_registros": 5
+  },
+  "Anthurium marmoratum 2 (Autopoli)": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 7.1,
+    "min_dias": 25,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Anthurium pallidiflorum (Autopoli)": {
+    "promedio_dias": 27.7,
+    "mediana_dias": 28.0,
+    "desviacion_std": 3.5,
+    "min_dias": 24,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Anthurium peltigerum": {
+    "promedio_dias": 51.5,
+    "mediana_dias": 51.5,
+    "desviacion_std": 17.7,
+    "min_dias": 39,
+    "max_dias": 64,
+    "num_registros": 2
+  },
+  "Anthurium peltigerum (Autopoli)": {
+    "promedio_dias": 20.3,
+    "mediana_dias": 17.0,
+    "desviacion_std": 7.8,
+    "min_dias": 10,
+    "max_dias": 31,
+    "num_registros": 7
+  },
+  "Anthurium pendens 5 (Autopoli)": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 5.7,
+    "min_dias": 23,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Anthurium recavum": {
+    "promedio_dias": 48.5,
+    "mediana_dias": 48.5,
+    "desviacion_std": 20.5,
+    "min_dias": 34,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Anthurium recavum (Autopoli)": {
+    "promedio_dias": 25.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 3.8,
+    "min_dias": 23,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Anthurium reflexinervium (Autopoli)": {
+    "promedio_dias": 27.7,
+    "mediana_dias": 25.0,
+    "desviacion_std": 6.4,
+    "min_dias": 23,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Anthurium regale (Autopoli)": {
+    "promedio_dias": 49.0,
+    "mediana_dias": 36.0,
+    "desviacion_std": 28.8,
+    "min_dias": 29,
+    "max_dias": 82,
+    "num_registros": 3
+  },
+  "Anthurium rotundistigmatum (Autopoli)": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 4.2,
+    "min_dias": 30,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Anthurium scolopendrinum": {
+    "promedio_dias": 48.0,
+    "mediana_dias": 48.0,
+    "desviacion_std": 2.8,
+    "min_dias": 46,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Anthurium sp Apolo gigante": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 2.1,
+    "min_dias": 20,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Anthurium sp Guayzimi ´Hoja Larga´": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 1.4,
+    "min_dias": 23,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Anthurium waterburyanum (Autopoli)": {
+    "promedio_dias": 40.8,
+    "mediana_dias": 33.0,
+    "desviacion_std": 22.2,
+    "min_dias": 25,
+    "max_dias": 80,
+    "num_registros": 5
+  },
+  "Aspasia epidendroides": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 5.7,
+    "min_dias": 21,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Barkeria skinneri": {
+    "promedio_dias": 48.0,
+    "mediana_dias": 48.0,
+    "desviacion_std": 14.1,
+    "min_dias": 38,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Batemannia colleyi": {
+    "promedio_dias": 45.5,
+    "mediana_dias": 45.5,
+    "desviacion_std": 10.6,
+    "min_dias": 38,
+    "max_dias": 53,
+    "num_registros": 2
+  },
+  "Bifrenaria aureofulva": {
+    "promedio_dias": 43.0,
+    "mediana_dias": 45.0,
+    "desviacion_std": 5.3,
+    "min_dias": 37,
+    "max_dias": 47,
+    "num_registros": 3
+  },
+  "Bletia catenulata (Autopoli)": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 7.1,
+    "min_dias": 32,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Bletia sp ec Banos": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 17.8,
+    "min_dias": 23,
+    "max_dias": 57,
+    "num_registros": 3
+  },
+  "Bollea hirtzii x Pescatorea lehmannii": {
+    "promedio_dias": 61.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 22.9,
+    "min_dias": 44,
+    "max_dias": 87,
+    "num_registros": 3
+  },
+  "Brassavola cucullata": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.9,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Brassia Rex x Oncidium macranthum": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Brassia andreettae": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 20.5,
+    "min_dias": 17,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Brassia andreettae 000338": {
+    "promedio_dias": 24.5,
+    "mediana_dias": 24.5,
+    "desviacion_std": 0.7,
+    "min_dias": 24,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Brassia arcuigera (Autopoli)": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 3.5,
+    "min_dias": 24,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Brassidium Cholita Gualacena": {
+    "promedio_dias": 44.5,
+    "mediana_dias": 44.5,
+    "desviacion_std": 30.4,
+    "min_dias": 23,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Brassocattleya Edna": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 12.0,
+    "min_dias": 28,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Brassocattleya Felicia": {
+    "promedio_dias": 39.0,
+    "mediana_dias": 39.0,
+    "desviacion_std": 8.5,
+    "min_dias": 33,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Brassocattleya Ivan Portilla": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 5.7,
+    "min_dias": 24,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Brassocattleya Maria Hatnay": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 12.7,
+    "min_dias": 10,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Brassocattleya Nobile's Bruno Bruno x C. Chocolate Drop x Blc. Ports of Paradise": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 3.5,
+    "min_dias": 31,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya Goldenzelle 'Lemon Chiffon' x Blc. Haadyai Delight X Blc. Shifong Purple x Cattleya dowiana": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 15.6,
+    "min_dias": 17,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya Hibrida Clearly Pink x Blc. Yen 24 Karat": {
+    "promedio_dias": 60.0,
+    "mediana_dias": 60.0,
+    "desviacion_std": 25.5,
+    "min_dias": 42,
+    "max_dias": 78,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya M173  Black Jack Universal x Blc. Hibrido Blanco": {
+    "promedio_dias": 58.0,
+    "mediana_dias": 58.0,
+    "desviacion_std": 19.8,
+    "min_dias": 44,
+    "max_dias": 72,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya M184 Chunyeah N.8 x Blc. tubtim Sayam x Lc. Phainloeng - waianae x Blc. Korat Sunset": {
+    "promedio_dias": 54.0,
+    "mediana_dias": 54.0,
+    "desviacion_std": 2.8,
+    "min_dias": 52,
+    "max_dias": 56,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya Mishima Luminous x Rhyc. Blumen Insel X Blc. Zamora Chinchipe": {
+    "promedio_dias": 32.3,
+    "mediana_dias": 36.0,
+    "desviacion_std": 8.1,
+    "min_dias": 23,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Brassolaeliocattleya Pastoral 'Inocence' x Laelia superbiens f. alba": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 59.0,
+    "desviacion_std": 19.8,
+    "min_dias": 45,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya Ports Of Paradise Esmerald Isle x Lc.Lee Long Ford Copper Quen x C Nigrella": {
+    "promedio_dias": 126.0,
+    "mediana_dias": 126.0,
+    "desviacion_std": 19.8,
+    "min_dias": 112,
+    "max_dias": 140,
+    "num_registros": 2
+  },
+  "Brassolaeliocattleya Ports of Paradise x Bc. Nobile's Bruno Bruno x C. Chocolate Drop 4N X Potinara Ruby Acc/abe": {
+    "promedio_dias": 53.5,
+    "mediana_dias": 45.5,
+    "desviacion_std": 36.3,
+    "min_dias": 21,
+    "max_dias": 102,
+    "num_registros": 4
+  },
+  "Brassolaeliocattleya Waianae Leopard Ching Hua M127 x Blc. Dewy Forest Blumen Insel": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 13.4,
+    "min_dias": 23,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Bulbophyllum auratum f. flava": {
+    "promedio_dias": 86.0,
+    "mediana_dias": 86.0,
+    "desviacion_std": 39.6,
+    "min_dias": 58,
+    "max_dias": 114,
+    "num_registros": 2
+  },
+  "Bulbophyllum barbigerum": {
+    "promedio_dias": 38.8,
+    "mediana_dias": 40.0,
+    "desviacion_std": 7.5,
+    "min_dias": 30,
+    "max_dias": 45,
+    "num_registros": 4
+  },
+  "Bulbophyllum biflorum": {
+    "promedio_dias": 41.0,
+    "mediana_dias": 41.0,
+    "desviacion_std": 1.4,
+    "min_dias": 40,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Bulbophyllum bolsteri": {
+    "promedio_dias": 72.0,
+    "mediana_dias": 72.0,
+    "desviacion_std": 19.8,
+    "min_dias": 58,
+    "max_dias": 86,
+    "num_registros": 2
+  },
+  "Bulbophyllum calceolus": {
+    "promedio_dias": 76.7,
+    "mediana_dias": 73.0,
+    "desviacion_std": 29.7,
+    "min_dias": 49,
+    "max_dias": 108,
+    "num_registros": 3
+  },
+  "Bulbophyllum collettii": {
+    "promedio_dias": 45.0,
+    "mediana_dias": 45.0,
+    "desviacion_std": 14.1,
+    "min_dias": 35,
+    "max_dias": 55,
+    "num_registros": 2
+  },
+  "Bulbophyllum cruentum": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 6.4,
+    "min_dias": 22,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Bulbophyllum elisae": {
+    "promedio_dias": 64.0,
+    "mediana_dias": 64.0,
+    "desviacion_std": 28.3,
+    "min_dias": 44,
+    "max_dias": 84,
+    "num_registros": 2
+  },
+  "Bulbophyllum fascinator": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 21.9,
+    "min_dias": 14,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Bulbophyllum fascinator corazonae": {
+    "promedio_dias": 56.5,
+    "mediana_dias": 56.5,
+    "desviacion_std": 17.7,
+    "min_dias": 44,
+    "max_dias": 69,
+    "num_registros": 2
+  },
+  "Bulbophyllum graveolens": {
+    "promedio_dias": 51.5,
+    "mediana_dias": 51.5,
+    "desviacion_std": 0.7,
+    "min_dias": 51,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Bulbophyllum lasiochilum": {
+    "promedio_dias": 38.3,
+    "mediana_dias": 35.0,
+    "desviacion_std": 11.4,
+    "min_dias": 29,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Bulbophyllum pardalotum": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 2.1,
+    "min_dias": 49,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Bulbophyllum sanguineopunctatum": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 16.3,
+    "min_dias": 29,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Bulbophyllum steyermarkii": {
+    "promedio_dias": 47.5,
+    "mediana_dias": 47.5,
+    "desviacion_std": 23.3,
+    "min_dias": 31,
+    "max_dias": 64,
+    "num_registros": 2
+  },
+  "Bulbophyllum umbellatum Syn. trisetum": {
+    "promedio_dias": 62.3,
+    "mediana_dias": 66.0,
+    "desviacion_std": 37.6,
+    "min_dias": 23,
+    "max_dias": 98,
+    "num_registros": 3
+  },
+  "Burrageara Living Fire 'Red Man' x Onc. Cholita Cuencana": {
+    "promedio_dias": 56.5,
+    "mediana_dias": 56.5,
+    "desviacion_std": 20.5,
+    "min_dias": 42,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Cadetia taylorii": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 12.0,
+    "min_dias": 35,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Calanthe aristulifera x liebuldii": {
+    "promedio_dias": 141.7,
+    "mediana_dias": 171.0,
+    "desviacion_std": 53.4,
+    "min_dias": 80,
+    "max_dias": 174,
+    "num_registros": 3
+  },
+  "Catasetum macroglossum": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 5.2,
+    "min_dias": 20,
+    "max_dias": 29,
+    "num_registros": 3
+  },
+  "Catasetum sp Javin": {
+    "promedio_dias": 36.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 7.5,
+    "min_dias": 29,
+    "max_dias": 44,
+    "num_registros": 3
+  },
+  "Catasetum sp Patricia Pilar": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 17.7,
+    "min_dias": 28,
+    "max_dias": 53,
+    "num_registros": 2
+  },
+  "Cattleya Anahi Carchi": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 0.0,
+    "min_dias": 22,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Cattleya Andes Breezze": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 2.1,
+    "min_dias": 42,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Cattleya Arcadio Arosemena": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 27.0,
+    "desviacion_std": 9.1,
+    "min_dias": 24,
+    "max_dias": 44,
+    "num_registros": 4
+  },
+  "Cattleya Balsas x Laeliocattleya Carmela Mildred": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 28.3,
+    "min_dias": 30,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Cattleya Carlitos G.": {
+    "promedio_dias": 32.7,
+    "mediana_dias": 25.0,
+    "desviacion_std": 16.9,
+    "min_dias": 21,
+    "max_dias": 52,
+    "num_registros": 3
+  },
+  "Cattleya Chusy Recinos": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 5.7,
+    "min_dias": 24,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Cattleya Cora Menezes": {
+    "promedio_dias": 23.7,
+    "mediana_dias": 23.0,
+    "desviacion_std": 1.2,
+    "min_dias": 23,
+    "max_dias": 25,
+    "num_registros": 3
+  },
+  "Cattleya Cruella": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 20.0,
+    "min_dias": 20,
+    "max_dias": 59,
+    "num_registros": 3
+  },
+  "Cattleya Cuenca City": {
+    "promedio_dias": 91.5,
+    "mediana_dias": 91.5,
+    "desviacion_std": 19.1,
+    "min_dias": 78,
+    "max_dias": 105,
+    "num_registros": 2
+  },
+  "Cattleya Delta Fire Wing": {
+    "promedio_dias": 31.8,
+    "mediana_dias": 33.5,
+    "desviacion_std": 13.3,
+    "min_dias": 14,
+    "max_dias": 46,
+    "num_registros": 4
+  },
+  "Cattleya Elegans (1879) x Lc. Frenchy's Melange 'Cylvia'": {
+    "promedio_dias": 20.3,
+    "mediana_dias": 21.0,
+    "desviacion_std": 4.0,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Cattleya Ethel Lewis": {
+    "promedio_dias": 58.0,
+    "mediana_dias": 58.0,
+    "desviacion_std": 42.4,
+    "min_dias": 28,
+    "max_dias": 88,
+    "num_registros": 2
+  },
+  "Cattleya Flavescens (1901)": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 1.4,
+    "min_dias": 19,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Cattleya Fox x Blc. Chia Lin New City": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya Furnes (Chris Locke - Belgica)": {
+    "promedio_dias": 58.5,
+    "mediana_dias": 58.5,
+    "desviacion_std": 27.6,
+    "min_dias": 39,
+    "max_dias": 78,
+    "num_registros": 2
+  },
+  "Cattleya Gigi Portilla": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 4.2,
+    "min_dias": 22,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya Hawaiian Fair": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 7.8,
+    "min_dias": 31,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Cattleya Hibrida (Brassolaeliocattleya Purple The Best) X Rlc. Korat Red": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 22.5,
+    "desviacion_std": 4.1,
+    "min_dias": 15,
+    "max_dias": 24,
+    "num_registros": 4
+  },
+  "Cattleya Hibrida Ec 1053 X Cattleya intermedia alba x C. aquimi x Soph. coccinea": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 7.8,
+    "min_dias": 25,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Cattleya Ivan Dream x Cattleya Pornthip H00161": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 18.4,
+    "min_dias": 24,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Cattleya Kay": {
+    "promedio_dias": 56.0,
+    "mediana_dias": 56.0,
+    "desviacion_std": 49.5,
+    "min_dias": 21,
+    "max_dias": 91,
+    "num_registros": 2
+  },
+  "Cattleya Kiat Tan": {
+    "promedio_dias": 54.7,
+    "mediana_dias": 46.0,
+    "desviacion_std": 29.0,
+    "min_dias": 31,
+    "max_dias": 87,
+    "num_registros": 3
+  },
+  "Cattleya LLampasay": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 2.1,
+    "min_dias": 28,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cattleya Lavender Ice": {
+    "promedio_dias": 36.0,
+    "mediana_dias": 36.0,
+    "desviacion_std": 9.9,
+    "min_dias": 29,
+    "max_dias": 43,
+    "num_registros": 2
+  },
+  "Cattleya Louise Odom": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 6.4,
+    "min_dias": 29,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya Maria Elena Cazar": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 3.5,
+    "min_dias": 27,
+    "max_dias": 35,
+    "num_registros": 4
+  },
+  "Cattleya Marilyn Lew": {
+    "promedio_dias": 23.8,
+    "mediana_dias": 23.0,
+    "desviacion_std": 5.9,
+    "min_dias": 16,
+    "max_dias": 31,
+    "num_registros": 5
+  },
+  "Cattleya My Special Angel": {
+    "promedio_dias": 23.3,
+    "mediana_dias": 22.0,
+    "desviacion_std": 7.1,
+    "min_dias": 17,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Cattleya Oro Andino": {
+    "promedio_dias": 45.5,
+    "mediana_dias": 45.5,
+    "desviacion_std": 4.9,
+    "min_dias": 42,
+    "max_dias": 49,
+    "num_registros": 2
+  },
+  "Cattleya Patricio Almeida": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 35.0,
+    "desviacion_std": 9.1,
+    "min_dias": 23,
+    "max_dias": 45,
+    "num_registros": 4
+  },
+  "Cattleya Purpurata Dream": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 1.4,
+    "min_dias": 16,
+    "max_dias": 18,
+    "num_registros": 2
+  },
+  "Cattleya Sabiango": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 2.1,
+    "min_dias": 28,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cattleya Salmon Punking x Blc. Pamela": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 12.7,
+    "min_dias": 18,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Cattleya Siam 80 x Potinara Mc-475 Golden Squire spring": {
+    "promedio_dias": 55.0,
+    "mediana_dias": 60.0,
+    "desviacion_std": 31.8,
+    "min_dias": 21,
+    "max_dias": 84,
+    "num_registros": 3
+  },
+  "Cattleya Super Andes": {
+    "promedio_dias": 107.5,
+    "mediana_dias": 107.5,
+    "desviacion_std": 47.4,
+    "min_dias": 74,
+    "max_dias": 141,
+    "num_registros": 2
+  },
+  "Cattleya Tainan City 'General' x Slc. Misty Girl Autumn Symphony x sib": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 2.1,
+    "min_dias": 33,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Cattleya Triumphans": {
+    "promedio_dias": 19.5,
+    "mediana_dias": 19.5,
+    "desviacion_std": 4.9,
+    "min_dias": 16,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Cattleya Uzhupud Garden": {
+    "promedio_dias": 18.3,
+    "mediana_dias": 15.0,
+    "desviacion_std": 10.4,
+    "min_dias": 10,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Cattleya Walter Wolff": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya White Sky": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 35.0,
+    "desviacion_std": 6.4,
+    "min_dias": 23,
+    "max_dias": 37,
+    "num_registros": 4
+  },
+  "Cattleya amethystoglossa Pink x Big": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 10.4,
+    "min_dias": 14,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Cattleya bicalhoi": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 1.4,
+    "min_dias": 16,
+    "max_dias": 18,
+    "num_registros": 2
+  },
+  "Cattleya bicolor": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 2.1,
+    "min_dias": 28,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cattleya bowringiana": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 7.2,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Cattleya dormaniana": {
+    "promedio_dias": 34.7,
+    "mediana_dias": 31.0,
+    "desviacion_std": 7.2,
+    "min_dias": 30,
+    "max_dias": 43,
+    "num_registros": 3
+  },
+  "Cattleya dowiana": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 23.0,
+    "desviacion_std": 10.3,
+    "min_dias": 14,
+    "max_dias": 38,
+    "num_registros": 6
+  },
+  "Cattleya dowiana 'La Reina'": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 3.5,
+    "min_dias": 23,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya dowiana (Autopoli)": {
+    "promedio_dias": 24.5,
+    "mediana_dias": 24.5,
+    "desviacion_std": 4.9,
+    "min_dias": 21,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya dowiana aurea": {
+    "promedio_dias": 41.8,
+    "mediana_dias": 39.0,
+    "desviacion_std": 19.6,
+    "min_dias": 23,
+    "max_dias": 66,
+    "num_registros": 4
+  },
+  "Cattleya dowiana x Hibrido Amarillo": {
+    "promedio_dias": 94.0,
+    "mediana_dias": 94.0,
+    "desviacion_std": 50.9,
+    "min_dias": 58,
+    "max_dias": 130,
+    "num_registros": 2
+  },
+  "Cattleya flavasulina": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.9,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Cattleya forbesii": {
+    "promedio_dias": 61.0,
+    "mediana_dias": 61.0,
+    "desviacion_std": 42.4,
+    "min_dias": 31,
+    "max_dias": 91,
+    "num_registros": 2
+  },
+  "Cattleya granulosa 'Colibri x self'": {
+    "promedio_dias": 22.7,
+    "mediana_dias": 22.0,
+    "desviacion_std": 1.2,
+    "min_dias": 22,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Cattleya guttata f. alba": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 7.8,
+    "min_dias": 16,
+    "max_dias": 27,
+    "num_registros": 2
+  },
+  "Cattleya hoehnei": {
+    "promedio_dias": 35.7,
+    "mediana_dias": 28.0,
+    "desviacion_std": 17.8,
+    "min_dias": 23,
+    "max_dias": 56,
+    "num_registros": 3
+  },
+  "Cattleya intermedia": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 9.6,
+    "min_dias": 14,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Cattleya intermedia alba x 'Aquimii' 'Gigi' X Cattleya maxima coerulea 'Hector'": {
+    "promedio_dias": 22.8,
+    "mediana_dias": 18.0,
+    "desviacion_std": 8.7,
+    "min_dias": 14,
+    "max_dias": 34,
+    "num_registros": 5
+  },
+  "Cattleya intermedia coerulea x C. maxima coerulea Hector": {
+    "promedio_dias": 17.5,
+    "mediana_dias": 17.5,
+    "desviacion_std": 4.9,
+    "min_dias": 14,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Cattleya intermedia f. coerulea": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 48.8,
+    "min_dias": 16,
+    "max_dias": 85,
+    "num_registros": 2
+  },
+  "Cattleya iricolor": {
+    "promedio_dias": 36.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 20.5,
+    "min_dias": 22,
+    "max_dias": 66,
+    "num_registros": 4
+  },
+  "Cattleya jenmanii": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 12.0,
+    "min_dias": 25,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Cattleya jenmanii Splash": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.9,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Cattleya jenmanii f. semialba": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 2.1,
+    "min_dias": 49,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Cattleya kleberi": {
+    "promedio_dias": 26.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 4.6,
+    "min_dias": 24,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Cattleya labiata 'amesiana'": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 13.4,
+    "min_dias": 27,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Cattleya labiata coerulea 'Budny x Nunes'": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 1.4,
+    "min_dias": 28,
+    "max_dias": 30,
+    "num_registros": 2
+  },
+  "Cattleya labiata f. coerulea Bundy x coerulea": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 2.8,
+    "min_dias": 28,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Cattleya lawrenceana f. coerulea": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 14.8,
+    "min_dias": 17,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya leopoldii Cetro de Esmeralda x C. leopoldii semi alba Budny X Laeliocattleya Vivi Arosemena": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 7.8,
+    "min_dias": 27,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya leopoldii x L. purpurata x Blc. Ports of Paradise": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 14.8,
+    "min_dias": 17,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya liliputana": {
+    "promedio_dias": 48.3,
+    "mediana_dias": 49.0,
+    "desviacion_std": 17.0,
+    "min_dias": 31,
+    "max_dias": 65,
+    "num_registros": 3
+  },
+  "Cattleya loddigesii": {
+    "promedio_dias": 25.3,
+    "mediana_dias": 30.0,
+    "desviacion_std": 9.0,
+    "min_dias": 15,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Cattleya longipes": {
+    "promedio_dias": 24.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 5.0,
+    "min_dias": 20,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Cattleya lueddemanniana": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 4.9,
+    "min_dias": 22,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Cattleya lueddemanniana 'Brillante'": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 9.9,
+    "min_dias": 24,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya lueddemanniana 'Cesar Fernandez' x 'Infierno' 'Ecuagenera'": {
+    "promedio_dias": 47.0,
+    "mediana_dias": 47.0,
+    "desviacion_std": 7.1,
+    "min_dias": 42,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Cattleya lueddemanniana Camila x Rombito": {
+    "promedio_dias": 20.7,
+    "mediana_dias": 16.0,
+    "desviacion_std": 9.0,
+    "min_dias": 15,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Cattleya lueddemanniana Rombito x 013": {
+    "promedio_dias": 24.5,
+    "mediana_dias": 24.5,
+    "desviacion_std": 0.7,
+    "min_dias": 24,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Cattleya lueddemanniana semi alba": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 1.4,
+    "min_dias": 28,
+    "max_dias": 30,
+    "num_registros": 2
+  },
+  "Cattleya luteola": {
+    "promedio_dias": 26.7,
+    "mediana_dias": 29.0,
+    "desviacion_std": 9.7,
+    "min_dias": 16,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Cattleya maxima 'La Churonita'": {
+    "promedio_dias": 24.5,
+    "mediana_dias": 24.5,
+    "desviacion_std": 0.7,
+    "min_dias": 24,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Cattleya maxima Big Lip x Atupaña": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 7.1,
+    "min_dias": 27,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Cattleya maxima Ecua 00138 x ecua 00139": {
+    "promedio_dias": 19.3,
+    "mediana_dias": 19.0,
+    "desviacion_std": 3.5,
+    "min_dias": 16,
+    "max_dias": 23,
+    "num_registros": 3
+  },
+  "Cattleya maxima Ecua 00139 x Ecua 00138": {
+    "promedio_dias": 13.0,
+    "mediana_dias": 13.0,
+    "desviacion_std": 4.2,
+    "min_dias": 10,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Cattleya maxima Ecua 0147 x Ecua 0145": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.9,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. coerulea 'Gigi' x 'Angelo' X 'Scott'": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 12.7,
+    "min_dias": 17,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. coerulea 'Gigi' x 'Angelo' x f. coerulea 'Gigi' P-071": {
+    "promedio_dias": 95.5,
+    "mediana_dias": 95.5,
+    "desviacion_std": 54.4,
+    "min_dias": 57,
+    "max_dias": 134,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. coerulea 'Hector' X 'Gigi' x 'Angelo'": {
+    "promedio_dias": 79.0,
+    "mediana_dias": 79.0,
+    "desviacion_std": 8.5,
+    "min_dias": 73,
+    "max_dias": 85,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. coerulea Gigi Ecuagenera #1": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 5.6,
+    "min_dias": 18,
+    "max_dias": 29,
+    "num_registros": 3
+  },
+  "Cattleya maxima f. semialba 'Angel' x 'Rolando'": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 1.4,
+    "min_dias": 21,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. semialba 'Gigi'": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 2.8,
+    "min_dias": 29,
+    "max_dias": 33,
+    "num_registros": 2
+  },
+  "Cattleya maxima f. semialba tall 'striada'": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 9.9,
+    "min_dias": 31,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Cattleya maxima x C. amethystoglossa": {
+    "promedio_dias": 30.7,
+    "mediana_dias": 22.0,
+    "desviacion_std": 15.0,
+    "min_dias": 22,
+    "max_dias": 48,
+    "num_registros": 3
+  },
+  "Cattleya maxima x coerulea Delicata": {
+    "promedio_dias": 19.5,
+    "mediana_dias": 19.5,
+    "desviacion_std": 6.4,
+    "min_dias": 15,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya mendelii 'Labios Azules' x 'La Bonita' 4N": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 7.1,
+    "min_dias": 14,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya mendelii f. caerulescens 'Ecuagenera' x 'La Bonita' cod 1569": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 4.2,
+    "min_dias": 25,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cattleya mendelii f. coerulea 'La Bonita' 000663": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 44.0,
+    "desviacion_std": 17.1,
+    "min_dias": 24,
+    "max_dias": 58,
+    "num_registros": 3
+  },
+  "Cattleya mendelii f. coerulea splash 'Ecuagenera'": {
+    "promedio_dias": 16.0,
+    "mediana_dias": 16.0,
+    "desviacion_std": 1.4,
+    "min_dias": 15,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Cattleya milleri": {
+    "promedio_dias": 42.5,
+    "mediana_dias": 42.5,
+    "desviacion_std": 17.7,
+    "min_dias": 30,
+    "max_dias": 55,
+    "num_registros": 2
+  },
+  "Cattleya mooreana": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 2.8,
+    "min_dias": 24,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya percivaliana 'Ecuagenera'": {
+    "promedio_dias": 57.5,
+    "mediana_dias": 57.5,
+    "desviacion_std": 12.0,
+    "min_dias": 49,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Cattleya quadricolor": {
+    "promedio_dias": 35.8,
+    "mediana_dias": 37.0,
+    "desviacion_std": 8.0,
+    "min_dias": 23,
+    "max_dias": 45,
+    "num_registros": 5
+  },
+  "Cattleya quadricolor del tronco ec esperada 0093": {
+    "promedio_dias": 49.3,
+    "mediana_dias": 38.0,
+    "desviacion_std": 20.5,
+    "min_dias": 37,
+    "max_dias": 73,
+    "num_registros": 3
+  },
+  "Cattleya quadricolor f. coerulea": {
+    "promedio_dias": 34.0,
+    "mediana_dias": 34.0,
+    "desviacion_std": 4.2,
+    "min_dias": 31,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Cattleya rex semialba 'Ayacucho'": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 4.9,
+    "min_dias": 31,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya rex x C. mooreana x C. Fox": {
+    "promedio_dias": 11.5,
+    "mediana_dias": 11.5,
+    "desviacion_std": 2.1,
+    "min_dias": 10,
+    "max_dias": 13,
+    "num_registros": 2
+  },
+  "Cattleya schilleriana 001208 x self": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 44.0,
+    "desviacion_std": 10.1,
+    "min_dias": 31,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Cattleya schroederae": {
+    "promedio_dias": 89.7,
+    "mediana_dias": 88.0,
+    "desviacion_std": 45.5,
+    "min_dias": 45,
+    "max_dias": 136,
+    "num_registros": 3
+  },
+  "Cattleya schroederae Ecua 0491 x Ecua 0463": {
+    "promedio_dias": 24.7,
+    "mediana_dias": 25.0,
+    "desviacion_std": 7.5,
+    "min_dias": 17,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Cattleya skinneri": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya skinneri f. alba": {
+    "promedio_dias": 64.5,
+    "mediana_dias": 64.5,
+    "desviacion_std": 62.9,
+    "min_dias": 20,
+    "max_dias": 109,
+    "num_registros": 2
+  },
+  "Cattleya tigrina": {
+    "promedio_dias": 24.7,
+    "mediana_dias": 21.0,
+    "desviacion_std": 6.4,
+    "min_dias": 21,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Cattleya trianae 'Amesiana' alba": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 3.5,
+    "min_dias": 23,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya trianae 'Michael 7A' x 'Sangre de Toro Dark Lip'": {
+    "promedio_dias": 51.0,
+    "mediana_dias": 51.0,
+    "desviacion_std": 29.7,
+    "min_dias": 30,
+    "max_dias": 72,
+    "num_registros": 2
+  },
+  "Cattleya trianae Michael x splash #118": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya trianae f. alba": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 17.0,
+    "min_dias": 14,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya trianae f. coerulea 'Angel' Ecua 0465": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 4.9,
+    "min_dias": 31,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cattleya trianae f. semialba": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 18.4,
+    "min_dias": 20,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Cattleya trianae la Morlaquita 1000 x Catt. trianaei splash": {
+    "promedio_dias": 20.3,
+    "mediana_dias": 21.0,
+    "desviacion_std": 4.0,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Cattleya trianae splash 'Priscila' x splash #146": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 0.7,
+    "min_dias": 22,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Cattleya trianae splash 172 x splash Nikole": {
+    "promedio_dias": 16.5,
+    "mediana_dias": 16.5,
+    "desviacion_std": 0.7,
+    "min_dias": 16,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Cattleya trianae splash Dayaneth x Ron": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 9.9,
+    "min_dias": 15,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Cattleya trianae splash x 'Venezuela'": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 11.3,
+    "min_dias": 34,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Cattleya trianaei splash 109 x Cattleya trianaei splash 131": {
+    "promedio_dias": 48.5,
+    "mediana_dias": 48.5,
+    "desviacion_std": 16.3,
+    "min_dias": 37,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Cattleya violacea": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 8.7,
+    "min_dias": 21,
+    "max_dias": 37,
+    "num_registros": 3
+  },
+  "Cattleya violacea 'Chuck'": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Cattleya violacea f. alba": {
+    "promedio_dias": 25.3,
+    "mediana_dias": 23.0,
+    "desviacion_std": 4.0,
+    "min_dias": 23,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Cattleya violacea f. semialba rubra": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.5,
+    "desviacion_std": 4.2,
+    "min_dias": 14,
+    "max_dias": 23,
+    "num_registros": 4
+  },
+  "Cattleya violacea labio rojo": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 5.7,
+    "min_dias": 20,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattleya virens": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 3.5,
+    "min_dias": 16,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Cattleya warscewiczii": {
+    "promedio_dias": 23.1,
+    "mediana_dias": 21.5,
+    "desviacion_std": 6.8,
+    "min_dias": 17,
+    "max_dias": 36,
+    "num_registros": 8
+  },
+  "Cattleya warscewiczii f. coerulea 'Gigi'": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 9.9,
+    "min_dias": 17,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cattleya warscewiczii f. semialba": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 4.9,
+    "min_dias": 18,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Cattleya warscewiczii sanderiana Pangui": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 1.4,
+    "min_dias": 16,
+    "max_dias": 18,
+    "num_registros": 2
+  },
+  "Cattlianthe Anton": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 1.4,
+    "min_dias": 26,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattlianthe Chloris": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 7.8,
+    "min_dias": 17,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Cattlianthe Jardin del Azuay": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 7.8,
+    "min_dias": 18,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Cattlianthe Mayan Gold": {
+    "promedio_dias": 73.5,
+    "mediana_dias": 73.5,
+    "desviacion_std": 14.8,
+    "min_dias": 63,
+    "max_dias": 84,
+    "num_registros": 2
+  },
+  "Cattlianthe Michael Riley": {
+    "promedio_dias": 22.2,
+    "mediana_dias": 21.5,
+    "desviacion_std": 2.6,
+    "min_dias": 20,
+    "max_dias": 26,
+    "num_registros": 4
+  },
+  "Caucaea sanguinolenta": {
+    "promedio_dias": 54.3,
+    "mediana_dias": 64.0,
+    "desviacion_std": 18.5,
+    "min_dias": 33,
+    "max_dias": 66,
+    "num_registros": 3
+  },
+  "Cauchostele Ingrid de Portilla": {
+    "promedio_dias": 61.5,
+    "mediana_dias": 61.5,
+    "desviacion_std": 6.4,
+    "min_dias": 57,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Caularthron bilamellatum": {
+    "promedio_dias": 15.7,
+    "mediana_dias": 15.0,
+    "desviacion_std": 1.2,
+    "min_dias": 15,
+    "max_dias": 17,
+    "num_registros": 3
+  },
+  "Ceratostema loucianae": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 4.2,
+    "min_dias": 22,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Ceratostema loucianae (Autopoli)": {
+    "promedio_dias": 31.2,
+    "mediana_dias": 24.0,
+    "desviacion_std": 18.3,
+    "min_dias": 16,
+    "max_dias": 60,
+    "num_registros": 5
+  },
+  "Ceratostema rauhii (Autopoli)": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 11.4,
+    "min_dias": 17,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Chaubardiella dalessandroi": {
+    "promedio_dias": 66.0,
+    "mediana_dias": 66.0,
+    "desviacion_std": 1.4,
+    "min_dias": 65,
+    "max_dias": 67,
+    "num_registros": 2
+  },
+  "Chondroscaphe amabilis": {
+    "promedio_dias": 108.7,
+    "mediana_dias": 80.0,
+    "desviacion_std": 57.6,
+    "min_dias": 71,
+    "max_dias": 175,
+    "num_registros": 3
+  },
+  "Christensonia vietnamica": {
+    "promedio_dias": 70.0,
+    "mediana_dias": 70.0,
+    "desviacion_std": 49.5,
+    "min_dias": 35,
+    "max_dias": 105,
+    "num_registros": 2
+  },
+  "Chysis aurea": {
+    "promedio_dias": 118.5,
+    "mediana_dias": 118.5,
+    "desviacion_std": 17.7,
+    "min_dias": 106,
+    "max_dias": 131,
+    "num_registros": 2
+  },
+  "Chysis bractescens": {
+    "promedio_dias": 62.7,
+    "mediana_dias": 66.0,
+    "desviacion_std": 5.8,
+    "min_dias": 56,
+    "max_dias": 66,
+    "num_registros": 3
+  },
+  "Cirrhaea dependens": {
+    "promedio_dias": 47.5,
+    "mediana_dias": 47.5,
+    "desviacion_std": 26.2,
+    "min_dias": 29,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Cischweinfia rostrata": {
+    "promedio_dias": 51.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 12.5,
+    "min_dias": 38,
+    "max_dias": 63,
+    "num_registros": 3
+  },
+  "Cleisostoma racemiferum": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 12.0,
+    "min_dias": 17,
+    "max_dias": 34,
+    "num_registros": 2
+  },
+  "Cochleanthes aromatica": {
+    "promedio_dias": 41.5,
+    "mediana_dias": 41.5,
+    "desviacion_std": 4.9,
+    "min_dias": 38,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Cochleanthes flabelliformis": {
+    "promedio_dias": 74.0,
+    "mediana_dias": 74.0,
+    "desviacion_std": 31.1,
+    "min_dias": 52,
+    "max_dias": 96,
+    "num_registros": 2
+  },
+  "Cochleanthes marginata": {
+    "promedio_dias": 78.0,
+    "mediana_dias": 78.0,
+    "desviacion_std": 21.2,
+    "min_dias": 63,
+    "max_dias": 93,
+    "num_registros": 2
+  },
+  "Coelogyne asperata": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 0.7,
+    "min_dias": 22,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Coelogyne flaccida": {
+    "promedio_dias": 78.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 95.4,
+    "min_dias": 18,
+    "max_dias": 188,
+    "num_registros": 3
+  },
+  "Coelogyne nitida": {
+    "promedio_dias": 40.0,
+    "mediana_dias": 40.0,
+    "desviacion_std": 12.7,
+    "min_dias": 31,
+    "max_dias": 49,
+    "num_registros": 2
+  },
+  "Coelogyne salmonicolor": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 13.4,
+    "min_dias": 31,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Coelogyne velutina": {
+    "promedio_dias": 48.5,
+    "mediana_dias": 48.5,
+    "desviacion_std": 34.6,
+    "min_dias": 24,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Columnea purpureovittata (Autopoli)": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 1.4,
+    "min_dias": 24,
+    "max_dias": 26,
+    "num_registros": 2
+  },
+  "Columnea tenensis (Autopoli)": {
+    "promedio_dias": 16.0,
+    "mediana_dias": 16.0,
+    "desviacion_std": 2.8,
+    "min_dias": 14,
+    "max_dias": 18,
+    "num_registros": 2
+  },
+  "Comparettia falcata": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 9.9,
+    "min_dias": 10,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Comparettia macroplectron": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Comparettia ottonis aff 000175 x self": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 3.5,
+    "min_dias": 19,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Comparettia stenochila 001176": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 5.7,
+    "min_dias": 23,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Comparettia x maloi": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 12.0,
+    "min_dias": 24,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Coryanthes bergoldii": {
+    "promedio_dias": 32.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 17.7,
+    "min_dias": 21,
+    "max_dias": 53,
+    "num_registros": 3
+  },
+  "Coryanthes leucocorys": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 7.1,
+    "min_dias": 23,
+    "max_dias": 33,
+    "num_registros": 2
+  },
+  "Coryanthes picturata": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 4.9,
+    "min_dias": 26,
+    "max_dias": 33,
+    "num_registros": 2
+  },
+  "Cycnoches sp 'Canelos'": {
+    "promedio_dias": 57.0,
+    "mediana_dias": 57.0,
+    "desviacion_std": 28.3,
+    "min_dias": 37,
+    "max_dias": 77,
+    "num_registros": 2
+  },
+  "Cycnoches sp 'Iricolor'": {
+    "promedio_dias": 60.5,
+    "mediana_dias": 60.5,
+    "desviacion_std": 3.5,
+    "min_dias": 58,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Cymbidiella pardalina": {
+    "promedio_dias": 52.8,
+    "mediana_dias": 43.0,
+    "desviacion_std": 29.2,
+    "min_dias": 30,
+    "max_dias": 95,
+    "num_registros": 4
+  },
+  "Cymbidium Coraki Tacey Rw x Red Daway X Cymb. Or511": {
+    "promedio_dias": 79.5,
+    "mediana_dias": 79.5,
+    "desviacion_std": 9.2,
+    "min_dias": 73,
+    "max_dias": 86,
+    "num_registros": 2
+  },
+  "Cymbidium canaliculatum 'st Ronans' very heavy spotting": {
+    "promedio_dias": 75.0,
+    "mediana_dias": 75.0,
+    "desviacion_std": 15.6,
+    "min_dias": 64,
+    "max_dias": 86,
+    "num_registros": 2
+  },
+  "Cyrtochilum angustatum": {
+    "promedio_dias": 27.7,
+    "mediana_dias": 28.0,
+    "desviacion_std": 2.5,
+    "min_dias": 25,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Cyrtochilum aureum": {
+    "promedio_dias": 153.0,
+    "mediana_dias": 153.0,
+    "desviacion_std": 11.3,
+    "min_dias": 145,
+    "max_dias": 161,
+    "num_registros": 2
+  },
+  "Cyrtochilum myanthum": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 11.3,
+    "min_dias": 22,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Cyrtochilum pardinum": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 33.9,
+    "min_dias": 18,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Cyrtochilum pozoi": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 19.1,
+    "min_dias": 15,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Cyrtochilum volubile": {
+    "promedio_dias": 49.0,
+    "mediana_dias": 49.0,
+    "desviacion_std": 19.8,
+    "min_dias": 35,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Cyrtocidium Andean Spirit": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 12.7,
+    "min_dias": 17,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Cyrtocidium Ecuagenera": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 9.9,
+    "min_dias": 17,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Cyrtostele Antiope": {
+    "promedio_dias": 38.7,
+    "mediana_dias": 36.0,
+    "desviacion_std": 12.2,
+    "min_dias": 28,
+    "max_dias": 52,
+    "num_registros": 3
+  },
+  "Dasyglossum confertum": {
+    "promedio_dias": 52.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 29.7,
+    "min_dias": 31,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Dendrobium Swiss Mountain Palace red 'Gualaceo'": {
+    "promedio_dias": 89.5,
+    "mediana_dias": 89.5,
+    "desviacion_std": 51.6,
+    "min_dias": 53,
+    "max_dias": 126,
+    "num_registros": 2
+  },
+  "Dendrobium anosmum": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 7.1,
+    "min_dias": 24,
+    "max_dias": 34,
+    "num_registros": 2
+  },
+  "Dendrobium bigibbum": {
+    "promedio_dias": 26.7,
+    "mediana_dias": 21.0,
+    "desviacion_std": 13.4,
+    "min_dias": 17,
+    "max_dias": 42,
+    "num_registros": 3
+  },
+  "Dendrobium cumulatum": {
+    "promedio_dias": 86.0,
+    "mediana_dias": 86.0,
+    "desviacion_std": 1.4,
+    "min_dias": 85,
+    "max_dias": 87,
+    "num_registros": 2
+  },
+  "Dendrobium fytchianum": {
+    "promedio_dias": 12.0,
+    "mediana_dias": 12.0,
+    "desviacion_std": 5.7,
+    "min_dias": 8,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Dendrobium hadsowi": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 15.6,
+    "min_dias": 17,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Dendrobium hancockii": {
+    "promedio_dias": 20.5,
+    "mediana_dias": 20.5,
+    "desviacion_std": 4.9,
+    "min_dias": 17,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Dendrobium macrophyllum var. macrophyllum": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 10.9,
+    "min_dias": 14,
+    "max_dias": 38,
+    "num_registros": 4
+  },
+  "Dendrobium papilio": {
+    "promedio_dias": 99.5,
+    "mediana_dias": 99.5,
+    "desviacion_std": 41.7,
+    "min_dias": 70,
+    "max_dias": 129,
+    "num_registros": 2
+  },
+  "Dendrobium parishii semialba": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 11.3,
+    "min_dias": 24,
+    "max_dias": 40,
+    "num_registros": 2
+  },
+  "Dendrobium spectabile": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 1.4,
+    "min_dias": 21,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Dendrobium wardianum": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 20.0,
+    "min_dias": 14,
+    "max_dias": 53,
+    "num_registros": 3
+  },
+  "Doritaenopsis Hibrida X Phalaenopsis Madre Salesia White H00339": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 1.4,
+    "min_dias": 21,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Doritaenopsis Hsinying Black Spots x Phalaenopsis Wild Cat": {
+    "promedio_dias": 17.5,
+    "mediana_dias": 17.5,
+    "desviacion_std": 3.5,
+    "min_dias": 15,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Doritaenopsis I-Hsin Sun Beauty x Doritaenopsis Chian Xen Happy Dancer": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 0.0,
+    "min_dias": 17,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Doritaenopsis Jiubao Fairy CA 20683": {
+    "promedio_dias": 35.5,
+    "mediana_dias": 35.5,
+    "desviacion_std": 16.3,
+    "min_dias": 24,
+    "max_dias": 47,
+    "num_registros": 2
+  },
+  "Doritaenopsis Jiuhbao Red Rose Jb 4N x Phalaenopsis JB-2033": {
+    "promedio_dias": 27.3,
+    "mediana_dias": 23.0,
+    "desviacion_std": 9.3,
+    "min_dias": 21,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Doritaenopsis Joy Leopard Marrie x Hibrida #13 X Phal. Rosada Grande": {
+    "promedio_dias": 62.0,
+    "mediana_dias": 62.0,
+    "desviacion_std": 25.5,
+    "min_dias": 44,
+    "max_dias": 80,
+    "num_registros": 2
+  },
+  "Doritaenopsis Joy Leopard Maurie x Phalaenopsis Rosada 2": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 5.7,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Doritaenopsis Shu Long Happy Song Pink Spot x Doritaenopsis Jiuhbao Red Rose Jb 4N": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 6.4,
+    "min_dias": 23,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Doritaenopsis Sogo Medal  x Phal. Taiwan Red Cat": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 3.5,
+    "min_dias": 32,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Doritaenopsis Sogo Medal Yellow x Phal. Alex Alemania 4N X Phalaenopsis Shu Long Topaz": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 10.6,
+    "min_dias": 23,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Draconanthes sp (Jimbura)": {
+    "promedio_dias": 83.5,
+    "mediana_dias": 83.5,
+    "desviacion_std": 13.4,
+    "min_dias": 74,
+    "max_dias": 93,
+    "num_registros": 2
+  },
+  "Dracula bellerophon 001741": {
+    "promedio_dias": 85.0,
+    "mediana_dias": 85.0,
+    "desviacion_std": 38.2,
+    "min_dias": 58,
+    "max_dias": 112,
+    "num_registros": 2
+  },
+  "Dracula gorgona": {
+    "promedio_dias": 107.5,
+    "mediana_dias": 107.5,
+    "desviacion_std": 40.3,
+    "min_dias": 79,
+    "max_dias": 136,
+    "num_registros": 2
+  },
+  "Dracula gorgona type": {
+    "promedio_dias": 120.5,
+    "mediana_dias": 120.5,
+    "desviacion_std": 12.0,
+    "min_dias": 112,
+    "max_dias": 129,
+    "num_registros": 2
+  },
+  "Dracula gorgona xanthina 002253": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 29.7,
+    "min_dias": 14,
+    "max_dias": 56,
+    "num_registros": 2
+  },
+  "Dracula hirtzii black": {
+    "promedio_dias": 99.5,
+    "mediana_dias": 99.5,
+    "desviacion_std": 41.7,
+    "min_dias": 70,
+    "max_dias": 129,
+    "num_registros": 2
+  },
+  "Dracula marsupialis": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 64.0,
+    "desviacion_std": 34.8,
+    "min_dias": 22,
+    "max_dias": 91,
+    "num_registros": 3
+  },
+  "Dracula orientalis": {
+    "promedio_dias": 143.0,
+    "mediana_dias": 131.5,
+    "desviacion_std": 32.5,
+    "min_dias": 120,
+    "max_dias": 189,
+    "num_registros": 4
+  },
+  "Dryadella crassicaudata": {
+    "promedio_dias": 109.0,
+    "mediana_dias": 109.0,
+    "desviacion_std": 25.5,
+    "min_dias": 91,
+    "max_dias": 127,
+    "num_registros": 2
+  },
+  "Elleanthus aureus": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 2.8,
+    "min_dias": 17,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Embreea rodigasiana": {
+    "promedio_dias": 54.0,
+    "mediana_dias": 54.0,
+    "desviacion_std": 22.6,
+    "min_dias": 38,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Encyclia advena": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 11.8,
+    "min_dias": 15,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Encyclia bocourtii": {
+    "promedio_dias": 48.3,
+    "mediana_dias": 37.0,
+    "desviacion_std": 25.0,
+    "min_dias": 31,
+    "max_dias": 77,
+    "num_registros": 3
+  },
+  "Encyclia bracteata": {
+    "promedio_dias": 48.0,
+    "mediana_dias": 48.0,
+    "desviacion_std": 17.0,
+    "min_dias": 36,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Encyclia citrina": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 21.0,
+    "desviacion_std": 8.3,
+    "min_dias": 7,
+    "max_dias": 25,
+    "num_registros": 4
+  },
+  "Encyclia cordigera f. alba": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 6.4,
+    "min_dias": 29,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Encyclia duveenii": {
+    "promedio_dias": 52.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 4.2,
+    "min_dias": 49,
+    "max_dias": 55,
+    "num_registros": 2
+  },
+  "Encyclia mariae": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 31.5,
+    "desviacion_std": 8.0,
+    "min_dias": 18,
+    "max_dias": 35,
+    "num_registros": 4
+  },
+  "Encyclia naranjapatensis": {
+    "promedio_dias": 58.0,
+    "mediana_dias": 56.0,
+    "desviacion_std": 8.2,
+    "min_dias": 51,
+    "max_dias": 67,
+    "num_registros": 3
+  },
+  "Encyclia oncidioides": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 3.5,
+    "min_dias": 16,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Encyclia phoenicea": {
+    "promedio_dias": 28.3,
+    "mediana_dias": 29.0,
+    "desviacion_std": 4.0,
+    "min_dias": 24,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Encyclia phoenicea 'Ecuagenera'": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 7.1,
+    "min_dias": 19,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Encyclia randii": {
+    "promedio_dias": 51.0,
+    "mediana_dias": 51.0,
+    "desviacion_std": 38.2,
+    "min_dias": 24,
+    "max_dias": 78,
+    "num_registros": 2
+  },
+  "Encyclia sp ec cuba": {
+    "promedio_dias": 94.5,
+    "mediana_dias": 94.5,
+    "desviacion_std": 89.8,
+    "min_dias": 31,
+    "max_dias": 158,
+    "num_registros": 2
+  },
+  "Encyclia thienii 'Indanza'": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Encyclia vitellina": {
+    "promedio_dias": 60.0,
+    "mediana_dias": 60.0,
+    "desviacion_std": 63.6,
+    "min_dias": 15,
+    "max_dias": 105,
+    "num_registros": 2
+  },
+  "Epidendrum amethystinum": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 5.7,
+    "min_dias": 17,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Epidendrum atacazoicum": {
+    "promedio_dias": 49.0,
+    "mediana_dias": 49.0,
+    "desviacion_std": 9.9,
+    "min_dias": 42,
+    "max_dias": 56,
+    "num_registros": 2
+  },
+  "Epidendrum calanthum": {
+    "promedio_dias": 40.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 26.7,
+    "min_dias": 19,
+    "max_dias": 70,
+    "num_registros": 3
+  },
+  "Epidendrum calanthum alba (Autopoli)": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 18.0,
+    "desviacion_std": 14.0,
+    "min_dias": 14,
+    "max_dias": 40,
+    "num_registros": 3
+  },
+  "Epidendrum centropetalum": {
+    "promedio_dias": 13.0,
+    "mediana_dias": 13.0,
+    "desviacion_std": 4.2,
+    "min_dias": 10,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Epidendrum cotacachiense (Autopoli)": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 12.0,
+    "min_dias": 35,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Epidendrum difforme": {
+    "promedio_dias": 42.7,
+    "mediana_dias": 45.0,
+    "desviacion_std": 9.7,
+    "min_dias": 32,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Epidendrum elegantissimum": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 21.2,
+    "min_dias": 22,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Epidendrum eximium": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 4.2,
+    "min_dias": 25,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Epidendrum hemiscleria (Autopoli)": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 33.2,
+    "min_dias": 14,
+    "max_dias": 61,
+    "num_registros": 2
+  },
+  "Epidendrum kockii": {
+    "promedio_dias": 81.0,
+    "mediana_dias": 81.0,
+    "desviacion_std": 55.2,
+    "min_dias": 42,
+    "max_dias": 120,
+    "num_registros": 2
+  },
+  "Epidendrum lacustre": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 19.8,
+    "min_dias": 10,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Epidendrum macrocarpum": {
+    "promedio_dias": 17.5,
+    "mediana_dias": 17.5,
+    "desviacion_std": 10.6,
+    "min_dias": 10,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Epidendrum macrocarpum (Autopoli)": {
+    "promedio_dias": 24.7,
+    "mediana_dias": 29.0,
+    "desviacion_std": 13.1,
+    "min_dias": 10,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Epidendrum macrum": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 9.6,
+    "min_dias": 28,
+    "max_dias": 46,
+    "num_registros": 3
+  },
+  "Epidendrum macrum (Autopoli)": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 4.9,
+    "min_dias": 28,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Epidendrum magnificum": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 23.3,
+    "min_dias": 34,
+    "max_dias": 67,
+    "num_registros": 2
+  },
+  "Epidendrum marmoratum": {
+    "promedio_dias": 40.0,
+    "mediana_dias": 40.0,
+    "desviacion_std": 2.8,
+    "min_dias": 38,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Epidendrum medusae": {
+    "promedio_dias": 84.8,
+    "mediana_dias": 86.0,
+    "desviacion_std": 39.9,
+    "min_dias": 45,
+    "max_dias": 122,
+    "num_registros": 4
+  },
+  "Epidendrum medusae x Epidendrum parkinsonianum": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 0.7,
+    "min_dias": 29,
+    "max_dias": 30,
+    "num_registros": 2
+  },
+  "Epidendrum melanoporphyreum": {
+    "promedio_dias": 46.3,
+    "mediana_dias": 33.0,
+    "desviacion_std": 27.5,
+    "min_dias": 28,
+    "max_dias": 78,
+    "num_registros": 3
+  },
+  "Epidendrum nocturnum var. minor (Autopoli)": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 7.1,
+    "min_dias": 21,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Epidendrum panguiense": {
+    "promedio_dias": 63.0,
+    "mediana_dias": 63.0,
+    "desviacion_std": 14.1,
+    "min_dias": 53,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Epidendrum podocarpophilum": {
+    "promedio_dias": 40.0,
+    "mediana_dias": 40.0,
+    "desviacion_std": 12.7,
+    "min_dias": 31,
+    "max_dias": 49,
+    "num_registros": 2
+  },
+  "Epidendrum pteroglottis (Autopoli)": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 8.5,
+    "min_dias": 32,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Epidendrum purum": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 8.5,
+    "min_dias": 24,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Epidendrum quitensium": {
+    "promedio_dias": 35.5,
+    "mediana_dias": 35.5,
+    "desviacion_std": 31.8,
+    "min_dias": 13,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Epidendrum rhizomaniacum": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 21.2,
+    "min_dias": 8,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Epidendrum rhizomaniacum type 'La Pradera'": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 20.5,
+    "min_dias": 16,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Epidendrum sangayense": {
+    "promedio_dias": 16.7,
+    "mediana_dias": 17.0,
+    "desviacion_std": 1.5,
+    "min_dias": 15,
+    "max_dias": 18,
+    "num_registros": 3
+  },
+  "Epidendrum schweinfurthianum": {
+    "promedio_dias": 35.5,
+    "mediana_dias": 35.5,
+    "desviacion_std": 7.8,
+    "min_dias": 30,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Epidendrum sobralioides": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 17.0,
+    "min_dias": 25,
+    "max_dias": 49,
+    "num_registros": 2
+  },
+  "Epidendrum sophronitoides": {
+    "promedio_dias": 53.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 39.1,
+    "min_dias": 28,
+    "max_dias": 98,
+    "num_registros": 3
+  },
+  "Epidendrum sophronitoides (Autopoli)": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 7.8,
+    "min_dias": 32,
+    "max_dias": 43,
+    "num_registros": 2
+  },
+  "Epidendrum sp": {
+    "promedio_dias": 41.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 31.6,
+    "min_dias": 17,
+    "max_dias": 94,
+    "num_registros": 5
+  },
+  "Epidendrum sp 001122": {
+    "promedio_dias": 47.5,
+    "mediana_dias": 47.5,
+    "desviacion_std": 34.6,
+    "min_dias": 23,
+    "max_dias": 72,
+    "num_registros": 2
+  },
+  "Epidendrum sp Baeza": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 16.3,
+    "min_dias": 18,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Epidendrum sp Baños": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 12.0,
+    "min_dias": 35,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Epidendrum sp Celia 2": {
+    "promedio_dias": 15.0,
+    "mediana_dias": 15.0,
+    "desviacion_std": 7.1,
+    "min_dias": 10,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Epidendrum sp Papallacta": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 1.4,
+    "min_dias": 25,
+    "max_dias": 27,
+    "num_registros": 2
+  },
+  "Epidendrum sp ants Borja": {
+    "promedio_dias": 12.7,
+    "mediana_dias": 10.0,
+    "desviacion_std": 11.2,
+    "min_dias": 3,
+    "max_dias": 25,
+    "num_registros": 3
+  },
+  "Epidendrum stamfordianum": {
+    "promedio_dias": 27.3,
+    "mediana_dias": 24.0,
+    "desviacion_std": 12.3,
+    "min_dias": 17,
+    "max_dias": 41,
+    "num_registros": 3
+  },
+  "Epidendrum tetraceros": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 21.2,
+    "min_dias": 10,
+    "max_dias": 40,
+    "num_registros": 2
+  },
+  "Epidendrum tridens": {
+    "promedio_dias": 63.5,
+    "mediana_dias": 64.5,
+    "desviacion_std": 38.6,
+    "min_dias": 21,
+    "max_dias": 104,
+    "num_registros": 4
+  },
+  "Epidendrum upanodifforme": {
+    "promedio_dias": 54.0,
+    "mediana_dias": 54.0,
+    "desviacion_std": 42.4,
+    "min_dias": 24,
+    "max_dias": 84,
+    "num_registros": 2
+  },
+  "Epidendrum wallisii": {
+    "promedio_dias": 43.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 28.5,
+    "min_dias": 15,
+    "max_dias": 72,
+    "num_registros": 3
+  },
+  "Eriopsis sceptrum": {
+    "promedio_dias": 83.7,
+    "mediana_dias": 51.0,
+    "desviacion_std": 57.4,
+    "min_dias": 50,
+    "max_dias": 150,
+    "num_registros": 3
+  },
+  "Erycina glossomystax": {
+    "promedio_dias": 55.0,
+    "mediana_dias": 70.0,
+    "desviacion_std": 26.0,
+    "min_dias": 25,
+    "max_dias": 70,
+    "num_registros": 3
+  },
+  "Erycina pusilla": {
+    "promedio_dias": 24.5,
+    "mediana_dias": 24.5,
+    "desviacion_std": 10.6,
+    "min_dias": 17,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Fernandezia maculata": {
+    "promedio_dias": 133.3,
+    "mediana_dias": 132.0,
+    "desviacion_std": 21.0,
+    "min_dias": 113,
+    "max_dias": 155,
+    "num_registros": 3
+  },
+  "Fernandezia subbiflora": {
+    "promedio_dias": 65.0,
+    "mediana_dias": 65.0,
+    "desviacion_std": 42.4,
+    "min_dias": 35,
+    "max_dias": 95,
+    "num_registros": 2
+  },
+  "Fernandezia subbiflora (Autopoli)": {
+    "promedio_dias": 92.5,
+    "mediana_dias": 92.5,
+    "desviacion_std": 38.9,
+    "min_dias": 65,
+    "max_dias": 120,
+    "num_registros": 2
+  },
+  "Galeottia fimbriata": {
+    "promedio_dias": 165.0,
+    "mediana_dias": 165.0,
+    "desviacion_std": 15.6,
+    "min_dias": 154,
+    "max_dias": 176,
+    "num_registros": 2
+  },
+  "Gastrochilus bellinus": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 59.0,
+    "desviacion_std": 0.0,
+    "min_dias": 59,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Gastrochilus japonicus.": {
+    "promedio_dias": 35.5,
+    "mediana_dias": 35.5,
+    "desviacion_std": 7.8,
+    "min_dias": 30,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Gomesa croesus": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 17.7,
+    "min_dias": 28,
+    "max_dias": 53,
+    "num_registros": 2
+  },
+  "Gongora aromatica": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 10.6,
+    "min_dias": 23,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Gongora atropurpurea": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 13.4,
+    "min_dias": 18,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Gongora bufonia": {
+    "promedio_dias": 28.3,
+    "mediana_dias": 31.0,
+    "desviacion_std": 4.6,
+    "min_dias": 23,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Gongora catilligera": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 27.6,
+    "min_dias": 24,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Gongora chocoensis 000856": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 24.0,
+    "min_dias": 25,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Gongora claviodora": {
+    "promedio_dias": 36.2,
+    "mediana_dias": 27.5,
+    "desviacion_std": 22.2,
+    "min_dias": 21,
+    "max_dias": 69,
+    "num_registros": 4
+  },
+  "Gongora gibba": {
+    "promedio_dias": 41.0,
+    "mediana_dias": 41.0,
+    "desviacion_std": 26.9,
+    "min_dias": 22,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Gongora gratulabunda": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 8.6,
+    "min_dias": 21,
+    "max_dias": 40,
+    "num_registros": 5
+  },
+  "Gongora ilense 'Ecuagenera'": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 4.2,
+    "min_dias": 23,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Gongora irmgardiae": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 6.4,
+    "min_dias": 17,
+    "max_dias": 26,
+    "num_registros": 2
+  },
+  "Gongora portentosa": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 1.4,
+    "min_dias": 20,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Gongora rufescens": {
+    "promedio_dias": 33.3,
+    "mediana_dias": 33.0,
+    "desviacion_std": 14.5,
+    "min_dias": 17,
+    "max_dias": 58,
+    "num_registros": 6
+  },
+  "Gongora xanthina": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Guarianthe aurantiaca": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 8.3,
+    "min_dias": 17,
+    "max_dias": 37,
+    "num_registros": 4
+  },
+  "Hofmeisterella eumicroscopica": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 30.4,
+    "min_dias": 16,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Holcoglossum wangii": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 9.9,
+    "min_dias": 24,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Houlletia odoratissima": {
+    "promedio_dias": 61.0,
+    "mediana_dias": 61.0,
+    "desviacion_std": 36.8,
+    "min_dias": 35,
+    "max_dias": 87,
+    "num_registros": 2
+  },
+  "Ionopsis utricularioides": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 7.0,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Isochilus linearis": {
+    "promedio_dias": 52.3,
+    "mediana_dias": 65.0,
+    "desviacion_std": 41.5,
+    "min_dias": 6,
+    "max_dias": 86,
+    "num_registros": 3
+  },
+  "Jumellea arborescens": {
+    "promedio_dias": 39.0,
+    "mediana_dias": 40.5,
+    "desviacion_std": 5.9,
+    "min_dias": 31,
+    "max_dias": 44,
+    "num_registros": 4
+  },
+  "Jumellea comorensis": {
+    "promedio_dias": 53.7,
+    "mediana_dias": 50.0,
+    "desviacion_std": 17.8,
+    "min_dias": 38,
+    "max_dias": 73,
+    "num_registros": 3
+  },
+  "Koellensteinia graminea": {
+    "promedio_dias": 94.0,
+    "mediana_dias": 67.0,
+    "desviacion_std": 73.3,
+    "min_dias": 38,
+    "max_dias": 177,
+    "num_registros": 3
+  },
+  "Laelia albida": {
+    "promedio_dias": 22.7,
+    "mediana_dias": 17.0,
+    "desviacion_std": 10.7,
+    "min_dias": 16,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Laelia anceps": {
+    "promedio_dias": 26.8,
+    "mediana_dias": 25.0,
+    "desviacion_std": 6.7,
+    "min_dias": 21,
+    "max_dias": 36,
+    "num_registros": 4
+  },
+  "Laelia anceps coerulea X Cattleya maxima coerulea 'Gigi' x 'Angelo'": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 17.7,
+    "min_dias": 21,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Laelia anceps f. alba 'Dona Marina'": {
+    "promedio_dias": 31.3,
+    "mediana_dias": 30.0,
+    "desviacion_std": 5.1,
+    "min_dias": 27,
+    "max_dias": 37,
+    "num_registros": 3
+  },
+  "Laelia anceps f. alba 'Garganta Roja'": {
+    "promedio_dias": 51.5,
+    "mediana_dias": 51.5,
+    "desviacion_std": 0.7,
+    "min_dias": 51,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Laelia anceps f. coerulea": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 33.0,
+    "desviacion_std": 11.6,
+    "min_dias": 16,
+    "max_dias": 44,
+    "num_registros": 4
+  },
+  "Laelia anceps f. semialba": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 12.0,
+    "min_dias": 20,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Laelia briegeri": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 0.7,
+    "min_dias": 21,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Laelia caulescens": {
+    "promedio_dias": 31.8,
+    "mediana_dias": 31.0,
+    "desviacion_std": 7.0,
+    "min_dias": 25,
+    "max_dias": 40,
+    "num_registros": 4
+  },
+  "Laelia cinnabarina": {
+    "promedio_dias": 18.7,
+    "mediana_dias": 17.0,
+    "desviacion_std": 2.9,
+    "min_dias": 17,
+    "max_dias": 22,
+    "num_registros": 3
+  },
+  "Laelia crispa": {
+    "promedio_dias": 24.3,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.1,
+    "min_dias": 14,
+    "max_dias": 31,
+    "num_registros": 3
+  },
+  "Laelia crispata": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 2.8,
+    "min_dias": 24,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Laelia endsfeldzii": {
+    "promedio_dias": 80.0,
+    "mediana_dias": 80.0,
+    "desviacion_std": 14.1,
+    "min_dias": 70,
+    "max_dias": 90,
+    "num_registros": 2
+  },
+  "Laelia esalqueana": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 4.2,
+    "min_dias": 32,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Laelia furfuracea": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 10.6,
+    "min_dias": 30,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Laelia purpurata Ecuagenera x vinicolor Inti": {
+    "promedio_dias": 19.7,
+    "mediana_dias": 19.0,
+    "desviacion_std": 4.0,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Laelia purpurata Rubra Canever # 14 Budny x L.p. Sanguinea '105' X L. purpurata 'Flamea'": {
+    "promedio_dias": 27.7,
+    "mediana_dias": 29.0,
+    "desviacion_std": 3.2,
+    "min_dias": 24,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Laelia purpurata Rubra Canever # 14 Budny x L.p. Sanguínea '105'": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 12.7,
+    "min_dias": 23,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Laelia purpurata Sanguinea # 20 Celio x L.p. Sanguinea Dirlene": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 6.4,
+    "min_dias": 14,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Laelia purpurata Sanguinea x Rubra": {
+    "promedio_dias": 23.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 2.5,
+    "min_dias": 21,
+    "max_dias": 26,
+    "num_registros": 3
+  },
+  "Laelia purpurata f. purple": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 8.5,
+    "min_dias": 25,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Laelia purpurata f. vinicolor x f. carnea": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Laelia purpurata sanguinea": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 7.2,
+    "min_dias": 25,
+    "max_dias": 39,
+    "num_registros": 3
+  },
+  "Laelia purpurata uba tuba x Rubra Canaver #14 Budny X Sanguinea 105": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 4.2,
+    "min_dias": 14,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Laelia purpurata var. atropurpurea 'Ecuagenera' x vinicolor": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 0.0,
+    "min_dias": 17,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Laelia purpurata var. gilbert x Laelia purpurata var. atropurpurea 'Ecuagenera'": {
+    "promedio_dias": 12.3,
+    "mediana_dias": 14.0,
+    "desviacion_std": 2.9,
+    "min_dias": 9,
+    "max_dias": 14,
+    "num_registros": 3
+  },
+  "Laelia purpurata var. sanguinea": {
+    "promedio_dias": 16.5,
+    "mediana_dias": 16.5,
+    "desviacion_std": 9.2,
+    "min_dias": 10,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Laelia purpurata var. vinicolor  x atropurpurea 'Ecuagenera'": {
+    "promedio_dias": 22.7,
+    "mediana_dias": 22.0,
+    "desviacion_std": 6.0,
+    "min_dias": 17,
+    "max_dias": 29,
+    "num_registros": 3
+  },
+  "Laelia purpurata x C. leopoldii X Brassolaeliocattleya Pink Empress": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 14.8,
+    "min_dias": 30,
+    "max_dias": 51,
+    "num_registros": 2
+  },
+  "Laelia purpurata x C. leopoldii x Laelia purple 'The Best'": {
+    "promedio_dias": 35.3,
+    "mediana_dias": 22.0,
+    "desviacion_std": 30.3,
+    "min_dias": 14,
+    "max_dias": 70,
+    "num_registros": 3
+  },
+  "Laelia reginae": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 9.2,
+    "min_dias": 15,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Laelia rubescens": {
+    "promedio_dias": 22.4,
+    "mediana_dias": 23.0,
+    "desviacion_std": 3.1,
+    "min_dias": 17,
+    "max_dias": 25,
+    "num_registros": 5
+  },
+  "Laelia rubescens f. alba": {
+    "promedio_dias": 51.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 57.7,
+    "min_dias": 14,
+    "max_dias": 136,
+    "num_registros": 4
+  },
+  "Laelia sanguiloba": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 2.6,
+    "min_dias": 23,
+    "max_dias": 28,
+    "num_registros": 3
+  },
+  "Laelia sincorana": {
+    "promedio_dias": 68.3,
+    "mediana_dias": 59.0,
+    "desviacion_std": 25.3,
+    "min_dias": 49,
+    "max_dias": 97,
+    "num_registros": 3
+  },
+  "Laelia speciosa": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 2.8,
+    "min_dias": 17,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Laelia tenebrosa": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 7.0,
+    "min_dias": 22,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Laelia tenebrosa 002234 x Blc. Waianae Leopard Ching Hua M127": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 2.8,
+    "min_dias": 21,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Laeliocattleya Edissa": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 8.5,
+    "min_dias": 16,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Laeliocattleya Gigi Portilla": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.0,
+    "desviacion_std": 4.1,
+    "min_dias": 37,
+    "max_dias": 45,
+    "num_registros": 4
+  },
+  "Laeliocattleya Ingrid de Portilla": {
+    "promedio_dias": 17.7,
+    "mediana_dias": 16.0,
+    "desviacion_std": 13.6,
+    "min_dias": 5,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Laeliocattleya Maria": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 16.3,
+    "min_dias": 21,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Laeliocattleya Melody Fair 'Carol' M214 x Potinara Nonthaburi Fancy x Pot. Phiti": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 12.2,
+    "min_dias": 16,
+    "max_dias": 42,
+    "num_registros": 4
+  },
+  "Laeliocattleya Mi Morena x Cattleya maxima 'Cariño' 3412": {
+    "promedio_dias": 52.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 9.9,
+    "min_dias": 45,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Laeliocattleya Mi Pautena": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 17.7,
+    "min_dias": 28,
+    "max_dias": 53,
+    "num_registros": 2
+  },
+  "Laeliocattleya Roeblingii Sentinel x Brassolaeliocattleya Pastoral Inocence": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 2.1,
+    "min_dias": 25,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Laeliocattleya Ross Otto": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 0.0,
+    "min_dias": 29,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Laeliocattleya The Future is Better x Schomburgkia splendida": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 2.1,
+    "min_dias": 25,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Laeliocattleya Vitoria Munoz": {
+    "promedio_dias": 43.3,
+    "mediana_dias": 50.0,
+    "desviacion_std": 12.4,
+    "min_dias": 29,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Laeliocattleya Vivi Arosemena x Cattleya leopoldii": {
+    "promedio_dias": 71.0,
+    "mediana_dias": 71.0,
+    "desviacion_std": 29.7,
+    "min_dias": 50,
+    "max_dias": 92,
+    "num_registros": 2
+  },
+  "Lepanthes Sherry Bridygham (Autopoli)": {
+    "promedio_dias": 96.3,
+    "mediana_dias": 99.0,
+    "desviacion_std": 4.6,
+    "min_dias": 91,
+    "max_dias": 99,
+    "num_registros": 3
+  },
+  "Lepanthes acarina": {
+    "promedio_dias": 62.0,
+    "mediana_dias": 62.0,
+    "desviacion_std": 21.2,
+    "min_dias": 47,
+    "max_dias": 77,
+    "num_registros": 2
+  },
+  "Lepanthes calodictyon": {
+    "promedio_dias": 48.9,
+    "mediana_dias": 49.0,
+    "desviacion_std": 26.3,
+    "min_dias": 14,
+    "max_dias": 88,
+    "num_registros": 17
+  },
+  "Lepanthes calodictyon  x Lths. tentaculata": {
+    "promedio_dias": 53.5,
+    "mediana_dias": 53.0,
+    "desviacion_std": 14.2,
+    "min_dias": 35,
+    "max_dias": 77,
+    "num_registros": 6
+  },
+  "Lepanthes calodictyon  x Lths. tentaculata (Autopoli)": {
+    "promedio_dias": 82.5,
+    "mediana_dias": 82.5,
+    "desviacion_std": 23.3,
+    "min_dias": 66,
+    "max_dias": 99,
+    "num_registros": 2
+  },
+  "Lepanthes calodictyon (Autopoli)": {
+    "promedio_dias": 73.2,
+    "mediana_dias": 59.0,
+    "desviacion_std": 36.5,
+    "min_dias": 24,
+    "max_dias": 126,
+    "num_registros": 11
+  },
+  "Lepanthes echo": {
+    "promedio_dias": 80.0,
+    "mediana_dias": 73.0,
+    "desviacion_std": 17.6,
+    "min_dias": 67,
+    "max_dias": 100,
+    "num_registros": 3
+  },
+  "Lepanthes grandiflora": {
+    "promedio_dias": 85.5,
+    "mediana_dias": 85.5,
+    "desviacion_std": 47.4,
+    "min_dias": 52,
+    "max_dias": 119,
+    "num_registros": 2
+  },
+  "Lepanthes guatemalensis": {
+    "promedio_dias": 95.3,
+    "mediana_dias": 85.0,
+    "desviacion_std": 17.9,
+    "min_dias": 85,
+    "max_dias": 116,
+    "num_registros": 3
+  },
+  "Lepanthes helgae": {
+    "promedio_dias": 71.5,
+    "mediana_dias": 71.5,
+    "desviacion_std": 19.1,
+    "min_dias": 58,
+    "max_dias": 85,
+    "num_registros": 2
+  },
+  "Lepanthes ingridiana": {
+    "promedio_dias": 82.0,
+    "mediana_dias": 82.0,
+    "desviacion_std": 7.1,
+    "min_dias": 77,
+    "max_dias": 87,
+    "num_registros": 2
+  },
+  "Lepanthes mulleriana": {
+    "promedio_dias": 127.0,
+    "mediana_dias": 125.5,
+    "desviacion_std": 16.3,
+    "min_dias": 109,
+    "max_dias": 148,
+    "num_registros": 4
+  },
+  "Lepanthes orchestris": {
+    "promedio_dias": 97.0,
+    "mediana_dias": 56.0,
+    "desviacion_std": 77.5,
+    "min_dias": 28,
+    "max_dias": 240,
+    "num_registros": 7
+  },
+  "Lepanthes polytricha": {
+    "promedio_dias": 57.5,
+    "mediana_dias": 57.5,
+    "desviacion_std": 17.7,
+    "min_dias": 45,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Lepanthes saltatrix": {
+    "promedio_dias": 60.2,
+    "mediana_dias": 61.5,
+    "desviacion_std": 38.7,
+    "min_dias": 13,
+    "max_dias": 127,
+    "num_registros": 10
+  },
+  "Lepanthes sp 'Shg' (Autopol)": {
+    "promedio_dias": 139.0,
+    "mediana_dias": 139.0,
+    "desviacion_std": 35.4,
+    "min_dias": 114,
+    "max_dias": 164,
+    "num_registros": 2
+  },
+  "Lepanthes telipogoniflora": {
+    "promedio_dias": 68.9,
+    "mediana_dias": 55.5,
+    "desviacion_std": 38.9,
+    "min_dias": 21,
+    "max_dias": 165,
+    "num_registros": 10
+  },
+  "Lepanthes telipogoniflora (Autopoli)": {
+    "promedio_dias": 101.2,
+    "mediana_dias": 91.0,
+    "desviacion_std": 50.9,
+    "min_dias": 31,
+    "max_dias": 207,
+    "num_registros": 9
+  },
+  "Lepanthes tentaculata": {
+    "promedio_dias": 53.6,
+    "mediana_dias": 46.0,
+    "desviacion_std": 34.7,
+    "min_dias": 6,
+    "max_dias": 112,
+    "num_registros": 11
+  },
+  "Lepanthes tentaculata (Autopoli)": {
+    "promedio_dias": 83.6,
+    "mediana_dias": 91.0,
+    "desviacion_std": 48.7,
+    "min_dias": 24,
+    "max_dias": 183,
+    "num_registros": 11
+  },
+  "Lepanthes tsubotae 'Seminario San Luis' AOS/CCM 86": {
+    "promedio_dias": 84.5,
+    "mediana_dias": 84.5,
+    "desviacion_std": 24.7,
+    "min_dias": 67,
+    "max_dias": 102,
+    "num_registros": 2
+  },
+  "Lepanthes uxoria": {
+    "promedio_dias": 110.5,
+    "mediana_dias": 110.5,
+    "desviacion_std": 7.8,
+    "min_dias": 105,
+    "max_dias": 116,
+    "num_registros": 2
+  },
+  "Lepanthopsis ubangii": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 38.2,
+    "min_dias": 6,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Lueddemannia pescatorei": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 26.9,
+    "min_dias": 8,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Lycaste Ecuagenera Gold": {
+    "promedio_dias": 81.3,
+    "mediana_dias": 87.0,
+    "desviacion_std": 13.4,
+    "min_dias": 66,
+    "max_dias": 91,
+    "num_registros": 3
+  },
+  "Lycaste Gigi Portilla": {
+    "promedio_dias": 57.0,
+    "mediana_dias": 57.0,
+    "desviacion_std": 12.7,
+    "min_dias": 48,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Lycaste Gladys Eljuri 'Sangre de Toro' x Lyc. Shoalhaven Moriyama  x Lyc. Shonan Melody 'Gigi'": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 59.0,
+    "desviacion_std": 19.8,
+    "min_dias": 45,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Lycaste Gualaceo Sunrise": {
+    "promedio_dias": 78.0,
+    "mediana_dias": 67.0,
+    "desviacion_std": 19.9,
+    "min_dias": 66,
+    "max_dias": 101,
+    "num_registros": 3
+  },
+  "Lycaste John Ezzy 'Erik' H00102 x 'Michael' H00003": {
+    "promedio_dias": 67.7,
+    "mediana_dias": 59.0,
+    "desviacion_std": 27.1,
+    "min_dias": 46,
+    "max_dias": 98,
+    "num_registros": 3
+  },
+  "Lycaste Reina del Cisne 'Nikole' x Lyc. John Ezzy 'Alexandra'": {
+    "promedio_dias": 49.5,
+    "mediana_dias": 49.5,
+    "desviacion_std": 0.7,
+    "min_dias": 49,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Lycaste Shoalhaven Moriyama 'Superior Ecuagenera' X Lycaste Mercury x Chita Melody": {
+    "promedio_dias": 55.7,
+    "mediana_dias": 56.0,
+    "desviacion_std": 2.5,
+    "min_dias": 53,
+    "max_dias": 58,
+    "num_registros": 3
+  },
+  "Lycaste Shonan Bright": {
+    "promedio_dias": 56.5,
+    "mediana_dias": 56.5,
+    "desviacion_std": 20.5,
+    "min_dias": 42,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Lycaste Shonan Melody 'Doris' X Lyc. skinneri x Lyc. deppei": {
+    "promedio_dias": 107.0,
+    "mediana_dias": 79.0,
+    "desviacion_std": 62.9,
+    "min_dias": 63,
+    "max_dias": 179,
+    "num_registros": 3
+  },
+  "Lycaste Shonan Melody ('Skin' x 'Kyoto') x John Ezzy 'Michael'": {
+    "promedio_dias": 44.5,
+    "mediana_dias": 44.5,
+    "desviacion_std": 2.1,
+    "min_dias": 43,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Lycaste brevispatha": {
+    "promedio_dias": 118.5,
+    "mediana_dias": 118.5,
+    "desviacion_std": 34.6,
+    "min_dias": 94,
+    "max_dias": 143,
+    "num_registros": 2
+  },
+  "Lycaste cinnabarina": {
+    "promedio_dias": 71.5,
+    "mediana_dias": 71.5,
+    "desviacion_std": 2.1,
+    "min_dias": 70,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Lycaste macrobulbon": {
+    "promedio_dias": 55.0,
+    "mediana_dias": 55.0,
+    "desviacion_std": 9.9,
+    "min_dias": 48,
+    "max_dias": 62,
+    "num_registros": 2
+  },
+  "Lycaste macrophylla": {
+    "promedio_dias": 79.7,
+    "mediana_dias": 73.0,
+    "desviacion_std": 24.7,
+    "min_dias": 59,
+    "max_dias": 107,
+    "num_registros": 3
+  },
+  "Lycaste x michelii x Lycaste Muromachi": {
+    "promedio_dias": 74.5,
+    "mediana_dias": 74.5,
+    "desviacion_std": 6.4,
+    "min_dias": 70,
+    "max_dias": 79,
+    "num_registros": 2
+  },
+  "Macroclinium bicolor 'Mexico'": {
+    "promedio_dias": 48.5,
+    "mediana_dias": 48.5,
+    "desviacion_std": 33.2,
+    "min_dias": 25,
+    "max_dias": 72,
+    "num_registros": 2
+  },
+  "Macroclinium borjaense": {
+    "promedio_dias": 27.0,
+    "mediana_dias": 27.0,
+    "desviacion_std": 2.8,
+    "min_dias": 25,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Macroclinium dalstromii": {
+    "promedio_dias": 40.8,
+    "mediana_dias": 26.0,
+    "desviacion_std": 35.9,
+    "min_dias": 17,
+    "max_dias": 94,
+    "num_registros": 4
+  },
+  "Macroclinium sp Ivan": {
+    "promedio_dias": 53.0,
+    "mediana_dias": 47.0,
+    "desviacion_std": 25.8,
+    "min_dias": 31,
+    "max_dias": 87,
+    "num_registros": 4
+  },
+  "Masdevallia Ivanne": {
+    "promedio_dias": 127.0,
+    "mediana_dias": 127.0,
+    "desviacion_std": 58.0,
+    "min_dias": 86,
+    "max_dias": 168,
+    "num_registros": 2
+  },
+  "Masdevallia Ximena Neira x Dracula gigas xanthina": {
+    "promedio_dias": 85.5,
+    "mediana_dias": 85.5,
+    "desviacion_std": 7.8,
+    "min_dias": 80,
+    "max_dias": 91,
+    "num_registros": 2
+  },
+  "Masdevallia ampullacea": {
+    "promedio_dias": 62.5,
+    "mediana_dias": 62.5,
+    "desviacion_std": 10.6,
+    "min_dias": 55,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Masdevallia lucernula": {
+    "promedio_dias": 110.0,
+    "mediana_dias": 110.0,
+    "desviacion_std": 12.7,
+    "min_dias": 101,
+    "max_dias": 119,
+    "num_registros": 2
+  },
+  "Masdevallia macrura": {
+    "promedio_dias": 94.5,
+    "mediana_dias": 94.5,
+    "desviacion_std": 29.0,
+    "min_dias": 74,
+    "max_dias": 115,
+    "num_registros": 2
+  },
+  "Masdevallia posadae": {
+    "promedio_dias": 154.0,
+    "mediana_dias": 154.0,
+    "desviacion_std": 19.8,
+    "min_dias": 140,
+    "max_dias": 168,
+    "num_registros": 2
+  },
+  "Masdevallia seiti": {
+    "promedio_dias": 132.5,
+    "mediana_dias": 132.5,
+    "desviacion_std": 54.4,
+    "min_dias": 94,
+    "max_dias": 171,
+    "num_registros": 2
+  },
+  "Maxillaria Fabricio Suarez": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 14.1,
+    "min_dias": 14,
+    "max_dias": 34,
+    "num_registros": 2
+  },
+  "Maxillaria Fabricio Suarez (f. xanthina x f. orange)": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 29.0,
+    "desviacion_std": 18.4,
+    "min_dias": 16,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Maxillaria chlorantha": {
+    "promedio_dias": 33.3,
+    "mediana_dias": 33.0,
+    "desviacion_std": 18.5,
+    "min_dias": 15,
+    "max_dias": 52,
+    "num_registros": 3
+  },
+  "Maxillaria fractiflexa": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 16.3,
+    "min_dias": 14,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Maxillaria longissima": {
+    "promedio_dias": 19.5,
+    "mediana_dias": 19.5,
+    "desviacion_std": 4.9,
+    "min_dias": 16,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Maxillaria molitor": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 5.7,
+    "min_dias": 29,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Maxillaria platypetala": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 29.0,
+    "min_dias": 16,
+    "max_dias": 57,
+    "num_registros": 2
+  },
+  "Maxillaria reichenheimiana": {
+    "promedio_dias": 38.5,
+    "mediana_dias": 38.5,
+    "desviacion_std": 10.6,
+    "min_dias": 31,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Maxillaria scalariformis": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 12.0,
+    "min_dias": 21,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Maxillaria speciosa var tigrina 002485": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 7.1,
+    "min_dias": 25,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Maxillaria striata 000102": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 24.0,
+    "min_dias": 18,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Maxillaria striata f. red 'Gigi'": {
+    "promedio_dias": 56.5,
+    "mediana_dias": 56.5,
+    "desviacion_std": 30.4,
+    "min_dias": 35,
+    "max_dias": 78,
+    "num_registros": 2
+  },
+  "Maxillaria striata red x Anguloa cliftonii": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 24.0,
+    "min_dias": 18,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Maxillaria striata red x Anguloa ruckeri": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 59.0,
+    "desviacion_std": 1.4,
+    "min_dias": 58,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Maxillaria striata x Maxillaria striata red": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 4.2,
+    "min_dias": 23,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Meiracyllium trinasutum": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 7.8,
+    "min_dias": 24,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Miltoniopsis Diners": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 24.0,
+    "desviacion_std": 9.9,
+    "min_dias": 17,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Miltoniopsis Evelyn Crumpley x Miltoniopsis Mary Sugiyama": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 27.6,
+    "min_dias": 31,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Miltoniopsis Twin Peaks h00033 X Miltoniopsis IK 678 x Miltoniopsis Fire Walter Butterfly 4N": {
+    "promedio_dias": 50.5,
+    "mediana_dias": 50.5,
+    "desviacion_std": 17.7,
+    "min_dias": 38,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Miltoniopsis vexillaria": {
+    "promedio_dias": 9.0,
+    "mediana_dias": 9.0,
+    "desviacion_std": 0.0,
+    "min_dias": 9,
+    "max_dias": 9,
+    "num_registros": 2
+  },
+  "Mormodes sp ec": {
+    "promedio_dias": 39.5,
+    "mediana_dias": 36.0,
+    "desviacion_std": 7.7,
+    "min_dias": 35,
+    "max_dias": 51,
+    "num_registros": 4
+  },
+  "Mormodes sp ec El Paraiso": {
+    "promedio_dias": 58.0,
+    "mediana_dias": 58.0,
+    "desviacion_std": 0.0,
+    "min_dias": 58,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Mormodes sp ec El pescado": {
+    "promedio_dias": 56.0,
+    "mediana_dias": 56.0,
+    "desviacion_std": 26.9,
+    "min_dias": 37,
+    "max_dias": 75,
+    "num_registros": 2
+  },
+  "Mormodes sp ec San Antonio": {
+    "promedio_dias": 61.0,
+    "mediana_dias": 61.0,
+    "desviacion_std": 15.6,
+    "min_dias": 50,
+    "max_dias": 72,
+    "num_registros": 2
+  },
+  "Mormolyca gracilipes": {
+    "promedio_dias": 101.0,
+    "mediana_dias": 101.0,
+    "desviacion_std": 33.9,
+    "min_dias": 77,
+    "max_dias": 125,
+    "num_registros": 2
+  },
+  "Octomeria grandiflora (Autopoli)": {
+    "promedio_dias": 62.5,
+    "mediana_dias": 62.5,
+    "desviacion_std": 7.8,
+    "min_dias": 57,
+    "max_dias": 68,
+    "num_registros": 2
+  },
+  "Odontioda Bomboiza X Odontioda Sally Jane Russell x Oda. Sally Jone ' Monarch' 4N": {
+    "promedio_dias": 34.0,
+    "mediana_dias": 34.0,
+    "desviacion_std": 5.7,
+    "min_dias": 30,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Odontioda Oa-3 Nichirei Sunrise x Oda DurhamPoint x Oda  Ingmar X Oda Gale Gettel rustic Canyon x Oda Petit Port woosley": {
+    "promedio_dias": 49.5,
+    "mediana_dias": 49.5,
+    "desviacion_std": 27.6,
+    "min_dias": 30,
+    "max_dias": 69,
+    "num_registros": 2
+  },
+  "Odontioda Star Trek x Odontoglossum nobile x Oda. Bsnv Nationhood Bossa Nova": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 4.9,
+    "min_dias": 15,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Odontoglossum Cynthia Hill x Cyrtochilum edwardii": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 17.7,
+    "min_dias": 10,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Odontoglossum hallii elegans": {
+    "promedio_dias": 41.7,
+    "mediana_dias": 41.0,
+    "desviacion_std": 21.0,
+    "min_dias": 21,
+    "max_dias": 63,
+    "num_registros": 3
+  },
+  "Odontoglossum praestans x Odm. harryanum white 002795 X Cyrt. volubile x Odm. Sally Jones ' Monarch'": {
+    "promedio_dias": 40.0,
+    "mediana_dias": 40.0,
+    "desviacion_std": 32.5,
+    "min_dias": 17,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Odontonia Yellow Parade 'Alpine' x Odontoglossum Mont Fallu 'Patience' ACC/AOS": {
+    "promedio_dias": 59.0,
+    "mediana_dias": 59.0,
+    "desviacion_std": 19.8,
+    "min_dias": 45,
+    "max_dias": 73,
+    "num_registros": 2
+  },
+  "Oeonia rosea 1123 x self": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 11.3,
+    "min_dias": 24,
+    "max_dias": 40,
+    "num_registros": 2
+  },
+  "Oncidium Bev Debrincat": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 11.5,
+    "min_dias": 16,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Oncidium Camilita Portilla x Oncidium pastasae": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 26.9,
+    "min_dias": 31,
+    "max_dias": 69,
+    "num_registros": 2
+  },
+  "Oncidium Cholita Cuencana x Odontioda Jardin Del Azuay": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 7.8,
+    "min_dias": 20,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Oncidium Cholita Cuencana x Odontoglossum Mont Fallu 'Patience' ACC/AOS": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 0.0,
+    "min_dias": 21,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Oncidium Espiritu Santo x Cyrtochilum Anita De Cordero": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 11.3,
+    "min_dias": 22,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Oncidium Espiritu Santo x Oncidium dracoceps": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 7.8,
+    "min_dias": 13,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Oncidium Frolicked x Odm. Lemon Drop ' Buttermilk'": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 10.6,
+    "min_dias": 20,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Oncidium Guido Deburghgraeve": {
+    "promedio_dias": 39.7,
+    "mediana_dias": 37.0,
+    "desviacion_std": 17.2,
+    "min_dias": 24,
+    "max_dias": 58,
+    "num_registros": 3
+  },
+  "Oncidium Jimmy Moreno": {
+    "promedio_dias": 38.7,
+    "mediana_dias": 42.0,
+    "desviacion_std": 16.3,
+    "min_dias": 21,
+    "max_dias": 53,
+    "num_registros": 3
+  },
+  "Oncidium Kiss Me": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 2.1,
+    "min_dias": 24,
+    "max_dias": 27,
+    "num_registros": 2
+  },
+  "Oncidium Lois Posey": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 0.7,
+    "min_dias": 31,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Oncidium Pepe Portilla": {
+    "promedio_dias": 18.0,
+    "mediana_dias": 18.0,
+    "desviacion_std": 5.7,
+    "min_dias": 14,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Oncidium Tiger Brew x Odontioda Or64 George McMahon 'Fortuna'": {
+    "promedio_dias": 87.5,
+    "mediana_dias": 87.5,
+    "desviacion_std": 14.8,
+    "min_dias": 77,
+    "max_dias": 98,
+    "num_registros": 2
+  },
+  "Oncidium abortivum": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 5.7,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Oncidium alexandrae 'Pachu' 001929": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 21.0,
+    "desviacion_std": 21.8,
+    "min_dias": 17,
+    "max_dias": 63,
+    "num_registros": 4
+  },
+  "Oncidium aspidorhinum": {
+    "promedio_dias": 16.0,
+    "mediana_dias": 16.0,
+    "desviacion_std": 1.4,
+    "min_dias": 15,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Oncidium beyrodtioides": {
+    "promedio_dias": 28.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 14.1,
+    "min_dias": 18,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Oncidium deburghgraeveanum": {
+    "promedio_dias": 19.5,
+    "mediana_dias": 19.5,
+    "desviacion_std": 6.4,
+    "min_dias": 15,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Oncidium noezlianum": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 11.3,
+    "min_dias": 17,
+    "max_dias": 33,
+    "num_registros": 2
+  },
+  "Oncidium roseoides": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 17.5,
+    "min_dias": 17,
+    "max_dias": 58,
+    "num_registros": 4
+  },
+  "Oncidium sp 003002": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 11.3,
+    "min_dias": 29,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Oncidium sphacelatum": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 7.0,
+    "min_dias": 21,
+    "max_dias": 34,
+    "num_registros": 3
+  },
+  "Oncidium tigroides": {
+    "promedio_dias": 38.3,
+    "mediana_dias": 28.0,
+    "desviacion_std": 24.2,
+    "min_dias": 21,
+    "max_dias": 66,
+    "num_registros": 3
+  },
+  "Oncidium tigroides X Oncidium tigroides x Oncidium tipuloides": {
+    "promedio_dias": 45.0,
+    "mediana_dias": 45.0,
+    "desviacion_std": 29.7,
+    "min_dias": 24,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Oncidium wyattianum": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 24.7,
+    "min_dias": 17,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Oncostele Carolina Jijon": {
+    "promedio_dias": 52.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 9.9,
+    "min_dias": 45,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Ornithocephalus bryostachyus": {
+    "promedio_dias": 54.0,
+    "mediana_dias": 54.0,
+    "desviacion_std": 7.1,
+    "min_dias": 49,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Ornithocephalus ecuadorensis (Autopoli)": {
+    "promedio_dias": 46.7,
+    "mediana_dias": 45.0,
+    "desviacion_std": 25.5,
+    "min_dias": 22,
+    "max_dias": 73,
+    "num_registros": 3
+  },
+  "Ornithocephalus falcatus": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.0,
+    "desviacion_std": 10.0,
+    "min_dias": 16,
+    "max_dias": 36,
+    "num_registros": 4
+  },
+  "Ornithocephalus gladiatus": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 7.1,
+    "min_dias": 28,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Ornithocephalus gladiatus (Autopoli)": {
+    "promedio_dias": 33.5,
+    "mediana_dias": 33.5,
+    "desviacion_std": 7.8,
+    "min_dias": 28,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Ornithocephalus sp": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 30.4,
+    "min_dias": 15,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Otoglossum brevifolium": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 5.7,
+    "min_dias": 38,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Paphinia cristata": {
+    "promedio_dias": 95.0,
+    "mediana_dias": 95.0,
+    "desviacion_std": 52.3,
+    "min_dias": 58,
+    "max_dias": 132,
+    "num_registros": 2
+  },
+  "Paphinia rugosa": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 14.1,
+    "min_dias": 32,
+    "max_dias": 52,
+    "num_registros": 2
+  },
+  "Paphiopedilum 09Y110 x Paphiopedilum 09Y111": {
+    "promedio_dias": 58.7,
+    "mediana_dias": 67.0,
+    "desviacion_std": 18.9,
+    "min_dias": 37,
+    "max_dias": 72,
+    "num_registros": 3
+  },
+  "Paphiopedilum Cocoa Festival": {
+    "promedio_dias": 81.0,
+    "mediana_dias": 81.0,
+    "desviacion_std": 33.9,
+    "min_dias": 57,
+    "max_dias": 105,
+    "num_registros": 2
+  },
+  "Paphiopedilum Lippewunder": {
+    "promedio_dias": 60.5,
+    "mediana_dias": 60.5,
+    "desviacion_std": 13.4,
+    "min_dias": 51,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Paphiopedilum Mil Mascaras x Paph. Grand Sangiovese": {
+    "promedio_dias": 64.8,
+    "mediana_dias": 58.0,
+    "desviacion_std": 17.8,
+    "min_dias": 52,
+    "max_dias": 91,
+    "num_registros": 4
+  },
+  "Paphiopedilum Pinocchio var. album x sib 'C.H. #3'": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 1.4,
+    "min_dias": 49,
+    "max_dias": 51,
+    "num_registros": 2
+  },
+  "Paphiopedilum Shun-Fa Golden": {
+    "promedio_dias": 110.5,
+    "mediana_dias": 110.5,
+    "desviacion_std": 12.0,
+    "min_dias": 102,
+    "max_dias": 119,
+    "num_registros": 2
+  },
+  "Paphiopedilum charlesworthii f. alba": {
+    "promedio_dias": 55.7,
+    "mediana_dias": 63.0,
+    "desviacion_std": 12.7,
+    "min_dias": 41,
+    "max_dias": 63,
+    "num_registros": 3
+  },
+  "Paphiopedilum delenatii": {
+    "promedio_dias": 119.3,
+    "mediana_dias": 105.0,
+    "desviacion_std": 37.6,
+    "min_dias": 91,
+    "max_dias": 162,
+    "num_registros": 3
+  },
+  "Paphiopedilum henryanum ('Jumbo' x ' Bengal Tiger')": {
+    "promedio_dias": 126.0,
+    "mediana_dias": 126.0,
+    "desviacion_std": 65.1,
+    "min_dias": 80,
+    "max_dias": 172,
+    "num_registros": 2
+  },
+  "Paphiopedilum lowii": {
+    "promedio_dias": 76.5,
+    "mediana_dias": 76.5,
+    "desviacion_std": 44.5,
+    "min_dias": 45,
+    "max_dias": 108,
+    "num_registros": 2
+  },
+  "Paphiopedilum rothschildianum": {
+    "promedio_dias": 129.5,
+    "mediana_dias": 122.0,
+    "desviacion_std": 48.6,
+    "min_dias": 79,
+    "max_dias": 207,
+    "num_registros": 6
+  },
+  "Paphiopedilum venustum (x sib)": {
+    "promedio_dias": 94.0,
+    "mediana_dias": 88.5,
+    "desviacion_std": 14.3,
+    "min_dias": 84,
+    "max_dias": 115,
+    "num_registros": 4
+  },
+  "Paraphalaenopsis denevei": {
+    "promedio_dias": 30.8,
+    "mediana_dias": 26.0,
+    "desviacion_std": 11.7,
+    "min_dias": 23,
+    "max_dias": 48,
+    "num_registros": 4
+  },
+  "Phalaenopsis Black Berry 'Pink' x Phalaenopsis White Pink Lip Marcelo": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 15.0,
+    "desviacion_std": 3.5,
+    "min_dias": 15,
+    "max_dias": 21,
+    "num_registros": 3
+  },
+  "Phalaenopsis Blanco Grande": {
+    "promedio_dias": 19.7,
+    "mediana_dias": 20.0,
+    "desviacion_std": 10.5,
+    "min_dias": 9,
+    "max_dias": 30,
+    "num_registros": 3
+  },
+  "Phalaenopsis GF-10 x Phalaenopsis HC-71": {
+    "promedio_dias": 20.3,
+    "mediana_dias": 20.0,
+    "desviacion_std": 2.5,
+    "min_dias": 18,
+    "max_dias": 23,
+    "num_registros": 3
+  },
+  "Phalaenopsis Gladys Eljuri x Phalaenopsis Madre Salesia White h00339": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 5.7,
+    "min_dias": 17,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Phalaenopsis Hibrida Dalmata x Madre Salesia White": {
+    "promedio_dias": 21.3,
+    "mediana_dias": 24.0,
+    "desviacion_std": 4.6,
+    "min_dias": 16,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Phalaenopsis Hibrida El Pangui 'M'": {
+    "promedio_dias": 16.0,
+    "mediana_dias": 16.0,
+    "desviacion_std": 0.0,
+    "min_dias": 16,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Phalaenopsis Hibrida Rosada 4N x Phalaenopsis Hibrida": {
+    "promedio_dias": 13.5,
+    "mediana_dias": 13.5,
+    "desviacion_std": 3.5,
+    "min_dias": 11,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Phalaenopsis Hibrida White Big": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 2.8,
+    "min_dias": 24,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Phalaenopsis Hibrida White Pink Lip Big": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 19.1,
+    "min_dias": 24,
+    "max_dias": 51,
+    "num_registros": 2
+  },
+  "Phalaenopsis Hibrida x Phalaenopsis JB-2033": {
+    "promedio_dias": 23.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 17.0,
+    "min_dias": 11,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Phalaenopsis IM-210 x Phalaenopsis HC-71": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 8.5,
+    "min_dias": 11,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Phalaenopsis IM-210 x Phalaenopsis Madre Salesia White h00339": {
+    "promedio_dias": 18.0,
+    "mediana_dias": 18.0,
+    "desviacion_std": 4.2,
+    "min_dias": 15,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Phalaenopsis JB-2033 x Phalaenopsis DSM-885": {
+    "promedio_dias": 13.0,
+    "mediana_dias": 13.0,
+    "desviacion_std": 4.2,
+    "min_dias": 10,
+    "max_dias": 16,
+    "num_registros": 2
+  },
+  "Phalaenopsis Kv Charmer # 505 x Phalaenopsis Happy Dancer": {
+    "promedio_dias": 26.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 7.1,
+    "min_dias": 21,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Phalaenopsis Madre Salesia Pink-Lip x Phal. Madre Salesia Yellow-Lip": {
+    "promedio_dias": 16.0,
+    "mediana_dias": 16.0,
+    "desviacion_std": 2.8,
+    "min_dias": 14,
+    "max_dias": 18,
+    "num_registros": 2
+  },
+  "Phalaenopsis Madre Salesia White h00339 x Doritaenopsis Hibrida": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 31.8,
+    "min_dias": 21,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Phalaenopsis Madre Salesia x Phal. Play Girl Cha-Cha": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 1.4,
+    "min_dias": 18,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Phalaenopsis Maki Watanabe X Phal. Pinlong x Dtps. Taisuco Wonder": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 9.9,
+    "min_dias": 31,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Phalaenopsis Maki Watanabe X Phal. Pinlong x Dtps. Taisuco Wonder X Phalaenopsis Kaoda Davis Preal 'KD9947'": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 25.0,
+    "desviacion_std": 4.2,
+    "min_dias": 22,
+    "max_dias": 28,
+    "num_registros": 2
+  },
+  "Phalaenopsis PLM-233 x Phalaenopsis Hibrida": {
+    "promedio_dias": 18.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 5.3,
+    "min_dias": 11,
+    "max_dias": 23,
+    "num_registros": 4
+  },
+  "Phalaenopsis Pink Spotted x Phal. Ching Hua Magic 4N X Phalaenopsis Estrellita 1": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 15.6,
+    "min_dias": 9,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Phalaenopsis Pink Stripe x Phalaenopsis Pink Spotted": {
+    "promedio_dias": 18.0,
+    "mediana_dias": 18.0,
+    "desviacion_std": 2.8,
+    "min_dias": 16,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Phalaenopsis Play Girl Cha-Cha x Phalaenopsis Blanca": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 28.0,
+    "desviacion_std": 12.1,
+    "min_dias": 19,
+    "max_dias": 43,
+    "num_registros": 3
+  },
+  "Phalaenopsis Queen Beer 'Red Sky'  x Phal. NK-200 Super Spotted.X Doritaenopsis I-Hsin Sun Beauty": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 18.4,
+    "min_dias": 24,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Phalaenopsis Rosadito x Phalaenopsis Gladys Eljuri": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 3.5,
+    "min_dias": 16,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Phalaenopsis Salesia Lllampasay  x Phal. Hibrido Variegadas Luzt Roellke": {
+    "promedio_dias": 18.5,
+    "mediana_dias": 18.5,
+    "desviacion_std": 3.5,
+    "min_dias": 16,
+    "max_dias": 21,
+    "num_registros": 2
+  },
+  "Phalaenopsis Shu Long Topaz X Phalaenopsis Queen Beer 'Red Sky' x Phal. NK-200 Super Spotted": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 10.6,
+    "min_dias": 23,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Phalaenopsis Shu Long Topaz x Phalaenopsis Shu Long banana": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 7.1,
+    "min_dias": 28,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Phalaenopsis Virgen de Guadalupe x Doritaenopsis Chian Xen Compilation": {
+    "promedio_dias": 14.0,
+    "mediana_dias": 14.0,
+    "desviacion_std": 0.0,
+    "min_dias": 14,
+    "max_dias": 14,
+    "num_registros": 3
+  },
+  "Phalaenopsis White Yellow Lip x Phalaenopsis White Pink Lip": {
+    "promedio_dias": 20.5,
+    "mediana_dias": 20.5,
+    "desviacion_std": 6.4,
+    "min_dias": 16,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Phalaenopsis cornu-cervi": {
+    "promedio_dias": 22.5,
+    "mediana_dias": 22.5,
+    "desviacion_std": 2.1,
+    "min_dias": 21,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Phalaenopsis pulchra": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 2.1,
+    "min_dias": 35,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Phalaenopsis schilleriana": {
+    "promedio_dias": 42.0,
+    "mediana_dias": 42.0,
+    "desviacion_std": 33.9,
+    "min_dias": 18,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Phalaenopsis tetraspis": {
+    "promedio_dias": 26.7,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.1,
+    "min_dias": 17,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Phalaenopsis violacea": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 25.5,
+    "min_dias": 20,
+    "max_dias": 56,
+    "num_registros": 2
+  },
+  "Philodendron pulchrum (Autopoli)": {
+    "promedio_dias": 44.5,
+    "mediana_dias": 44.5,
+    "desviacion_std": 20.5,
+    "min_dias": 30,
+    "max_dias": 59,
+    "num_registros": 2
+  },
+  "Philodendron rugosum (Autopoli)": {
+    "promedio_dias": 26.5,
+    "mediana_dias": 26.5,
+    "desviacion_std": 6.4,
+    "min_dias": 22,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Philodendron verrucosum Apolo": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 10.6,
+    "min_dias": 21,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Phragmipedium Acker's Beauty": {
+    "promedio_dias": 57.0,
+    "mediana_dias": 57.0,
+    "desviacion_std": 11.3,
+    "min_dias": 49,
+    "max_dias": 65,
+    "num_registros": 2
+  },
+  "Phragmipedium Acker's Beauty x Phragmipedium kovachii": {
+    "promedio_dias": 87.7,
+    "mediana_dias": 88.0,
+    "desviacion_std": 14.5,
+    "min_dias": 73,
+    "max_dias": 102,
+    "num_registros": 3
+  },
+  "Phragmipedium Acker's Berry": {
+    "promedio_dias": 83.8,
+    "mediana_dias": 66.0,
+    "desviacion_std": 34.5,
+    "min_dias": 57,
+    "max_dias": 141,
+    "num_registros": 5
+  },
+  "Phragmipedium Anahi Carchi": {
+    "promedio_dias": 74.0,
+    "mediana_dias": 73.0,
+    "desviacion_std": 11.6,
+    "min_dias": 63,
+    "max_dias": 92,
+    "num_registros": 5
+  },
+  "Phragmipedium Apollo": {
+    "promedio_dias": 83.8,
+    "mediana_dias": 75.5,
+    "desviacion_std": 41.6,
+    "min_dias": 42,
+    "max_dias": 173,
+    "num_registros": 8
+  },
+  "Phragmipedium Apopka var. dalessandroi": {
+    "promedio_dias": 79.0,
+    "mediana_dias": 70.0,
+    "desviacion_std": 26.7,
+    "min_dias": 58,
+    "max_dias": 109,
+    "num_registros": 3
+  },
+  "Phragmipedium Carlos Fighetti": {
+    "promedio_dias": 53.5,
+    "mediana_dias": 53.5,
+    "desviacion_std": 20.5,
+    "min_dias": 39,
+    "max_dias": 68,
+    "num_registros": 2
+  },
+  "Phragmipedium Cuencano": {
+    "promedio_dias": 107.0,
+    "mediana_dias": 92.5,
+    "desviacion_std": 38.3,
+    "min_dias": 80,
+    "max_dias": 163,
+    "num_registros": 4
+  },
+  "Phragmipedium Ecuagenera Red Sunrise": {
+    "promedio_dias": 121.0,
+    "mediana_dias": 121.0,
+    "desviacion_std": 31.1,
+    "min_dias": 99,
+    "max_dias": 143,
+    "num_registros": 2
+  },
+  "Phragmipedium Haley Decker": {
+    "promedio_dias": 102.5,
+    "mediana_dias": 99.5,
+    "desviacion_std": 30.0,
+    "min_dias": 70,
+    "max_dias": 141,
+    "num_registros": 4
+  },
+  "Phragmipedium Incan Treasure": {
+    "promedio_dias": 74.2,
+    "mediana_dias": 73.5,
+    "desviacion_std": 22.7,
+    "min_dias": 48,
+    "max_dias": 102,
+    "num_registros": 4
+  },
+  "Phragmipedium Ingrid Portilla (warszewiczianum var wallisii x kovachii)": {
+    "promedio_dias": 88.0,
+    "mediana_dias": 80.0,
+    "desviacion_std": 26.9,
+    "min_dias": 66,
+    "max_dias": 118,
+    "num_registros": 3
+  },
+  "Phragmipedium Ingrid Suarez Ecuagenera (humboldtii 'Fortuna' x kovachii)": {
+    "promedio_dias": 115.5,
+    "mediana_dias": 115.5,
+    "desviacion_std": 40.3,
+    "min_dias": 87,
+    "max_dias": 144,
+    "num_registros": 2
+  },
+  "Phragmipedium Juanito Cordero": {
+    "promedio_dias": 77.0,
+    "mediana_dias": 77.0,
+    "desviacion_std": 14.1,
+    "min_dias": 67,
+    "max_dias": 87,
+    "num_registros": 2
+  },
+  "Phragmipedium La Vingtaine": {
+    "promedio_dias": 154.0,
+    "mediana_dias": 154.0,
+    "desviacion_std": 24.0,
+    "min_dias": 137,
+    "max_dias": 171,
+    "num_registros": 2
+  },
+  "Phragmipedium Les Varines": {
+    "promedio_dias": 77.3,
+    "mediana_dias": 77.0,
+    "desviacion_std": 7.5,
+    "min_dias": 70,
+    "max_dias": 85,
+    "num_registros": 3
+  },
+  "Phragmipedium Martina": {
+    "promedio_dias": 66.0,
+    "mediana_dias": 66.0,
+    "desviacion_std": 18.4,
+    "min_dias": 53,
+    "max_dias": 79,
+    "num_registros": 2
+  },
+  "Phragmipedium Memoria Mariza Rolando": {
+    "promedio_dias": 76.7,
+    "mediana_dias": 77.0,
+    "desviacion_std": 24.5,
+    "min_dias": 52,
+    "max_dias": 101,
+    "num_registros": 3
+  },
+  "Phragmipedium Paz en Colombia": {
+    "promedio_dias": 82.0,
+    "mediana_dias": 83.5,
+    "desviacion_std": 27.2,
+    "min_dias": 45,
+    "max_dias": 110,
+    "num_registros": 6
+  },
+  "Phragmipedium Pepe Portilla": {
+    "promedio_dias": 149.0,
+    "mediana_dias": 149.0,
+    "desviacion_std": 49.5,
+    "min_dias": 114,
+    "max_dias": 184,
+    "num_registros": 2
+  },
+  "Phragmipedium Prissy (Saint Ouen x besseae var dalessandroi)": {
+    "promedio_dias": 110.5,
+    "mediana_dias": 110.5,
+    "desviacion_std": 55.9,
+    "min_dias": 71,
+    "max_dias": 150,
+    "num_registros": 2
+  },
+  "Phragmipedium Professor Braem": {
+    "promedio_dias": 67.0,
+    "mediana_dias": 51.0,
+    "desviacion_std": 42.3,
+    "min_dias": 35,
+    "max_dias": 115,
+    "num_registros": 3
+  },
+  "Phragmipedium Rina Soto": {
+    "promedio_dias": 58.5,
+    "mediana_dias": 58.5,
+    "desviacion_std": 16.3,
+    "min_dias": 47,
+    "max_dias": 70,
+    "num_registros": 2
+  },
+  "Phragmipedium Robert-Jan Quene": {
+    "promedio_dias": 143.0,
+    "mediana_dias": 143.0,
+    "desviacion_std": 9.9,
+    "min_dias": 136,
+    "max_dias": 150,
+    "num_registros": 2
+  },
+  "Phragmipedium Robert-Jan Quene (Fritz Schomburg x besseae var dalessandroi)": {
+    "promedio_dias": 90.7,
+    "mediana_dias": 84.0,
+    "desviacion_std": 27.6,
+    "min_dias": 67,
+    "max_dias": 121,
+    "num_registros": 3
+  },
+  "Phragmipedium Ross Otto": {
+    "promedio_dias": 109.0,
+    "mediana_dias": 109.0,
+    "desviacion_std": 18.5,
+    "min_dias": 83,
+    "max_dias": 127,
+    "num_registros": 5
+  },
+  "Phragmipedium Samuel Crothers": {
+    "promedio_dias": 139.7,
+    "mediana_dias": 144.0,
+    "desviacion_std": 13.1,
+    "min_dias": 125,
+    "max_dias": 150,
+    "num_registros": 3
+  },
+  "Phragmipedium Sorel Point": {
+    "promedio_dias": 162.5,
+    "mediana_dias": 162.5,
+    "desviacion_std": 37.5,
+    "min_dias": 136,
+    "max_dias": 189,
+    "num_registros": 2
+  },
+  "Phragmipedium Tupac Amaru": {
+    "promedio_dias": 74.0,
+    "mediana_dias": 74.0,
+    "desviacion_std": 19.8,
+    "min_dias": 60,
+    "max_dias": 88,
+    "num_registros": 2
+  },
+  "Phragmipedium Uzhupud Garden": {
+    "promedio_dias": 107.5,
+    "mediana_dias": 107.5,
+    "desviacion_std": 50.2,
+    "min_dias": 72,
+    "max_dias": 143,
+    "num_registros": 2
+  },
+  "Phragmipedium Veitch": {
+    "promedio_dias": 57.5,
+    "mediana_dias": 57.5,
+    "desviacion_std": 0.7,
+    "min_dias": 57,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Phragmipedium Vingtaine des Augres": {
+    "promedio_dias": 125.4,
+    "mediana_dias": 140.0,
+    "desviacion_std": 26.3,
+    "min_dias": 93,
+    "max_dias": 150,
+    "num_registros": 5
+  },
+  "Phragmipedium Zapatilla de la Virgen x Phragmipedium kovachii": {
+    "promedio_dias": 59.2,
+    "mediana_dias": 65.0,
+    "desviacion_std": 13.4,
+    "min_dias": 45,
+    "max_dias": 74,
+    "num_registros": 5
+  },
+  "Phragmipedium boissierianum": {
+    "promedio_dias": 87.5,
+    "mediana_dias": 82.0,
+    "desviacion_std": 31.0,
+    "min_dias": 57,
+    "max_dias": 129,
+    "num_registros": 4
+  },
+  "Phragmipedium caudatum 'Giganteum'": {
+    "promedio_dias": 90.8,
+    "mediana_dias": 88.0,
+    "desviacion_std": 31.2,
+    "min_dias": 60,
+    "max_dias": 127,
+    "num_registros": 4
+  },
+  "Phragmipedium fischeri (Autopoli)": {
+    "promedio_dias": 92.3,
+    "mediana_dias": 91.0,
+    "desviacion_std": 13.1,
+    "min_dias": 80,
+    "max_dias": 106,
+    "num_registros": 3
+  },
+  "Phragmipedium humboldtii 'Fortuna' special": {
+    "promedio_dias": 57.0,
+    "mediana_dias": 57.0,
+    "desviacion_std": 1.4,
+    "min_dias": 56,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Phragmipedium humboldtii 'Fortuna' var 'Guatemala'": {
+    "promedio_dias": 92.0,
+    "mediana_dias": 92.0,
+    "desviacion_std": 25.5,
+    "min_dias": 74,
+    "max_dias": 110,
+    "num_registros": 2
+  },
+  "Phragmipedium kovachii": {
+    "promedio_dias": 71.3,
+    "mediana_dias": 71.0,
+    "desviacion_std": 22.4,
+    "min_dias": 42,
+    "max_dias": 102,
+    "num_registros": 7
+  },
+  "Phragmipedium kovachii 'Green'": {
+    "promedio_dias": 78.7,
+    "mediana_dias": 65.0,
+    "desviacion_std": 38.4,
+    "min_dias": 49,
+    "max_dias": 122,
+    "num_registros": 3
+  },
+  "Phragmipedium kovachii Nicoles x Phragmipedium caudatum giganteum": {
+    "promedio_dias": 111.5,
+    "mediana_dias": 111.5,
+    "desviacion_std": 38.9,
+    "min_dias": 84,
+    "max_dias": 139,
+    "num_registros": 2
+  },
+  "Phragmipedium kovachii Peru (Autopoli)": {
+    "promedio_dias": 124.0,
+    "mediana_dias": 124.0,
+    "desviacion_std": 76.4,
+    "min_dias": 70,
+    "max_dias": 178,
+    "num_registros": 2
+  },
+  "Phragmipedium kovachii x Phragmipedium Yelva Myhre": {
+    "promedio_dias": 104.0,
+    "mediana_dias": 104.0,
+    "desviacion_std": 33.9,
+    "min_dias": 80,
+    "max_dias": 128,
+    "num_registros": 2
+  },
+  "Phragmipedium lindenii": {
+    "promedio_dias": 95.5,
+    "mediana_dias": 95.0,
+    "desviacion_std": 15.9,
+    "min_dias": 80,
+    "max_dias": 112,
+    "num_registros": 4
+  },
+  "Phragmipedium longifolium x Phargmipedium besseae": {
+    "promedio_dias": 68.5,
+    "mediana_dias": 68.5,
+    "desviacion_std": 13.4,
+    "min_dias": 59,
+    "max_dias": 78,
+    "num_registros": 2
+  },
+  "Platystele ornata": {
+    "promedio_dias": 108.3,
+    "mediana_dias": 122.0,
+    "desviacion_std": 30.9,
+    "min_dias": 73,
+    "max_dias": 130,
+    "num_registros": 3
+  },
+  "Platystele sp Chical #2": {
+    "promedio_dias": 105.0,
+    "mediana_dias": 105.0,
+    "desviacion_std": 43.8,
+    "min_dias": 74,
+    "max_dias": 136,
+    "num_registros": 2
+  },
+  "Platystele stenostachya": {
+    "promedio_dias": 74.3,
+    "mediana_dias": 80.0,
+    "desviacion_std": 16.3,
+    "min_dias": 56,
+    "max_dias": 87,
+    "num_registros": 3
+  },
+  "Platystele stenostachya xanthina (Autopoli)": {
+    "promedio_dias": 121.0,
+    "mediana_dias": 121.0,
+    "desviacion_std": 56.6,
+    "min_dias": 81,
+    "max_dias": 161,
+    "num_registros": 2
+  },
+  "Plectrelminthus caudatus": {
+    "promedio_dias": 32.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 3.5,
+    "min_dias": 30,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Plectrophora alata": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 13.4,
+    "min_dias": 19,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Pleione sp": {
+    "promedio_dias": 36.0,
+    "mediana_dias": 36.0,
+    "desviacion_std": 2.8,
+    "min_dias": 34,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Pleurothallis acestrophylla": {
+    "promedio_dias": 59.5,
+    "mediana_dias": 59.5,
+    "desviacion_std": 30.4,
+    "min_dias": 38,
+    "max_dias": 81,
+    "num_registros": 2
+  },
+  "Pleurothallis adeleae": {
+    "promedio_dias": 51.0,
+    "mediana_dias": 51.0,
+    "desviacion_std": 28.3,
+    "min_dias": 31,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Pleurothallis colossus": {
+    "promedio_dias": 119.5,
+    "mediana_dias": 119.5,
+    "desviacion_std": 48.8,
+    "min_dias": 85,
+    "max_dias": 154,
+    "num_registros": 2
+  },
+  "Pleurothallis dodsonii": {
+    "promedio_dias": 45.5,
+    "mediana_dias": 45.5,
+    "desviacion_std": 6.4,
+    "min_dias": 41,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Pleurothallis dunstervillei 002151": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 7.1,
+    "min_dias": 28,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Pleurothallis gargantua": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 0.7,
+    "min_dias": 21,
+    "max_dias": 22,
+    "num_registros": 2
+  },
+  "Pleurothallis imperialis": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 0.0,
+    "min_dias": 35,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Pleurothallis lanceana": {
+    "promedio_dias": 57.0,
+    "mediana_dias": 57.0,
+    "desviacion_std": 1.4,
+    "min_dias": 56,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Pleurothallis lunaris": {
+    "promedio_dias": 49.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 45.7,
+    "min_dias": 15,
+    "max_dias": 101,
+    "num_registros": 3
+  },
+  "Pleurothallis nossax": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 0.0,
+    "min_dias": 31,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Pleurothallis punctulata": {
+    "promedio_dias": 57.3,
+    "mediana_dias": 56.0,
+    "desviacion_std": 7.1,
+    "min_dias": 51,
+    "max_dias": 65,
+    "num_registros": 3
+  },
+  "Pleurothallis renieana": {
+    "promedio_dias": 85.5,
+    "mediana_dias": 85.5,
+    "desviacion_std": 12.0,
+    "min_dias": 77,
+    "max_dias": 94,
+    "num_registros": 2
+  },
+  "Pleurothallis sp": {
+    "promedio_dias": 136.5,
+    "mediana_dias": 136.5,
+    "desviacion_std": 38.9,
+    "min_dias": 109,
+    "max_dias": 164,
+    "num_registros": 2
+  },
+  "Pleurothallis tentaculifera": {
+    "promedio_dias": 71.0,
+    "mediana_dias": 71.0,
+    "desviacion_std": 50.9,
+    "min_dias": 35,
+    "max_dias": 107,
+    "num_registros": 2
+  },
+  "Pleurothallis truncata": {
+    "promedio_dias": 41.0,
+    "mediana_dias": 41.0,
+    "desviacion_std": 5.7,
+    "min_dias": 37,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Polystachya bella ´Kenia´ 1414": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 2.8,
+    "min_dias": 30,
+    "max_dias": 34,
+    "num_registros": 2
+  },
+  "Ponthieva parvilabris": {
+    "promedio_dias": 87.7,
+    "mediana_dias": 94.0,
+    "desviacion_std": 14.6,
+    "min_dias": 71,
+    "max_dias": 98,
+    "num_registros": 3
+  },
+  "Ponthieva villosa": {
+    "promedio_dias": 110.5,
+    "mediana_dias": 110.5,
+    "desviacion_std": 21.9,
+    "min_dias": 95,
+    "max_dias": 126,
+    "num_registros": 2
+  },
+  "Potinara Mc-475 Golden Squire spring x Cattleya Siam 80": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 13.0,
+    "min_dias": 25,
+    "max_dias": 51,
+    "num_registros": 3
+  },
+  "Prosthechea hartwegii": {
+    "promedio_dias": 25.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 5.7,
+    "min_dias": 21,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Prosthechea pulchra": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 16.3,
+    "min_dias": 25,
+    "max_dias": 48,
+    "num_registros": 2
+  },
+  "Prosthechea sp Baeza Big": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 0.7,
+    "min_dias": 34,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Prosthechea sp Baños": {
+    "promedio_dias": 48.0,
+    "mediana_dias": 48.0,
+    "desviacion_std": 32.5,
+    "min_dias": 25,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Prosthechea vespa": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 7.1,
+    "min_dias": 25,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Psychopsis versteegiana": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 4.9,
+    "min_dias": 28,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Restrepia condorensis": {
+    "promedio_dias": 43.5,
+    "mediana_dias": 43.5,
+    "desviacion_std": 9.2,
+    "min_dias": 37,
+    "max_dias": 50,
+    "num_registros": 2
+  },
+  "Restrepia fritillina 000655": {
+    "promedio_dias": 133.0,
+    "mediana_dias": 133.0,
+    "desviacion_std": 94.8,
+    "min_dias": 66,
+    "max_dias": 200,
+    "num_registros": 2
+  },
+  "Rhyncatlaelia Don Cuni": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 4.9,
+    "min_dias": 25,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Rhyncattleanthe La Perla de Guayaquil": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 1.4,
+    "min_dias": 29,
+    "max_dias": 31,
+    "num_registros": 2
+  },
+  "Rhyncattleanthe Machalena": {
+    "promedio_dias": 20.3,
+    "mediana_dias": 19.0,
+    "desviacion_std": 3.2,
+    "min_dias": 18,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Rhyncattleanthe Pangui Sunset": {
+    "promedio_dias": 25.5,
+    "mediana_dias": 25.5,
+    "desviacion_std": 4.9,
+    "min_dias": 22,
+    "max_dias": 29,
+    "num_registros": 2
+  },
+  "Rhynchobrassoleya Purple Cricket": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 2.8,
+    "min_dias": 20,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Rhyncholaelia glauca": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 32.5,
+    "desviacion_std": 13.4,
+    "min_dias": 21,
+    "max_dias": 52,
+    "num_registros": 4
+  },
+  "Rhyncholaelia glauca 'Mexico'": {
+    "promedio_dias": 35.3,
+    "mediana_dias": 24.0,
+    "desviacion_std": 20.5,
+    "min_dias": 23,
+    "max_dias": 59,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Amazone Baby": {
+    "promedio_dias": 32.3,
+    "mediana_dias": 30.0,
+    "desviacion_std": 4.0,
+    "min_dias": 30,
+    "max_dias": 37,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Andacocha": {
+    "promedio_dias": 28.5,
+    "mediana_dias": 28.5,
+    "desviacion_std": 4.9,
+    "min_dias": 25,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Andean Clouds": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 7.1,
+    "min_dias": 26,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Arcadio Arosemena": {
+    "promedio_dias": 47.5,
+    "mediana_dias": 47.5,
+    "desviacion_std": 37.5,
+    "min_dias": 21,
+    "max_dias": 74,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Bob Crowder x Rlc. Ilha Santa Maria": {
+    "promedio_dias": 23.8,
+    "mediana_dias": 23.0,
+    "desviacion_std": 6.2,
+    "min_dias": 17,
+    "max_dias": 32,
+    "num_registros": 4
+  },
+  "Rhyncholaeliocattleya Bomberos Cuenca": {
+    "promedio_dias": 46.0,
+    "mediana_dias": 46.0,
+    "desviacion_std": 15.6,
+    "min_dias": 35,
+    "max_dias": 57,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Cholita Cuencana": {
+    "promedio_dias": 36.7,
+    "mediana_dias": 37.0,
+    "desviacion_std": 11.5,
+    "min_dias": 25,
+    "max_dias": 48,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Ecuagenera Delight": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 20.5,
+    "min_dias": 15,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Ecuagenera Elegant Pamela": {
+    "promedio_dias": 54.5,
+    "mediana_dias": 54.5,
+    "desviacion_std": 4.9,
+    "min_dias": 51,
+    "max_dias": 58,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya El Cisne": {
+    "promedio_dias": 27.7,
+    "mediana_dias": 21.0,
+    "desviacion_std": 16.1,
+    "min_dias": 16,
+    "max_dias": 46,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Fong Cing": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 7.8,
+    "min_dias": 35,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Goldernell Burdekin x Rlc. Haw Yuan Gold Golden Star": {
+    "promedio_dias": 20.5,
+    "mediana_dias": 20.5,
+    "desviacion_std": 4.9,
+    "min_dias": 17,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Guillermo Lasso": {
+    "promedio_dias": 35.3,
+    "mediana_dias": 35.0,
+    "desviacion_std": 13.5,
+    "min_dias": 22,
+    "max_dias": 49,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Hawaiian Prominence 'America' AM/AOS x Cattleya Burana Angel 'Hsinying' BM/TOGA": {
+    "promedio_dias": 40.5,
+    "mediana_dias": 40.5,
+    "desviacion_std": 7.8,
+    "min_dias": 35,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Kakemizu Kenichi": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 19.1,
+    "min_dias": 24,
+    "max_dias": 51,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Mirian Suzuki": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 0.7,
+    "min_dias": 23,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Nikole Portilla": {
+    "promedio_dias": 37.0,
+    "mediana_dias": 37.0,
+    "desviacion_std": 0.0,
+    "min_dias": 37,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Odom's Amethyst Leopard": {
+    "promedio_dias": 20.0,
+    "mediana_dias": 20.0,
+    "desviacion_std": 4.2,
+    "min_dias": 17,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Pauwela Charm": {
+    "promedio_dias": 22.7,
+    "mediana_dias": 25.0,
+    "desviacion_std": 6.8,
+    "min_dias": 15,
+    "max_dias": 28,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Pietro Tosi X Blc. Louis Joyana West x Blc. Pamela": {
+    "promedio_dias": 54.5,
+    "mediana_dias": 54.5,
+    "desviacion_std": 7.8,
+    "min_dias": 49,
+    "max_dias": 60,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Pietro Tosi x Catt. Sierra Blanca 'Mount Whitney' Am.aos": {
+    "promedio_dias": 20.5,
+    "mediana_dias": 20.5,
+    "desviacion_std": 6.4,
+    "min_dias": 16,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Qinti": {
+    "promedio_dias": 35.0,
+    "mediana_dias": 35.0,
+    "desviacion_std": 5.7,
+    "min_dias": 31,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Rocio Vazquez": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 21.0,
+    "desviacion_std": 4.2,
+    "min_dias": 18,
+    "max_dias": 24,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Talan Lambert": {
+    "promedio_dias": 23.7,
+    "mediana_dias": 24.0,
+    "desviacion_std": 1.5,
+    "min_dias": 22,
+    "max_dias": 25,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Vida Andina": {
+    "promedio_dias": 24.0,
+    "mediana_dias": 23.0,
+    "desviacion_std": 3.6,
+    "min_dias": 21,
+    "max_dias": 28,
+    "num_registros": 3
+  },
+  "Rhyncholaeliocattleya Ximenita Vintimilla": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 18.4,
+    "min_dias": 37,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Rhyncholaeliocattleya Zamora": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 11.3,
+    "min_dias": 23,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Rhynchostele majalis": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 7.1,
+    "min_dias": 25,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Rhynchostele rossii": {
+    "promedio_dias": 26.7,
+    "mediana_dias": 28.0,
+    "desviacion_std": 9.1,
+    "min_dias": 17,
+    "max_dias": 35,
+    "num_registros": 3
+  },
+  "Rhynchostele stellata": {
+    "promedio_dias": 72.0,
+    "mediana_dias": 52.0,
+    "desviacion_std": 37.3,
+    "min_dias": 49,
+    "max_dias": 115,
+    "num_registros": 3
+  },
+  "Rhynchostylis gigantea": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 7.8,
+    "min_dias": 31,
+    "max_dias": 42,
+    "num_registros": 2
+  },
+  "Rhynchostylis retusa": {
+    "promedio_dias": 34.5,
+    "mediana_dias": 34.5,
+    "desviacion_std": 16.3,
+    "min_dias": 23,
+    "max_dias": 46,
+    "num_registros": 2
+  },
+  "Rodriguezia sp ec": {
+    "promedio_dias": 17.0,
+    "mediana_dias": 17.0,
+    "desviacion_std": 0.0,
+    "min_dias": 17,
+    "max_dias": 17,
+    "num_registros": 2
+  },
+  "Rossioglossum ampliatum": {
+    "promedio_dias": 38.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 0.0,
+    "min_dias": 38,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Sarcochilus Cholita Cuencana": {
+    "promedio_dias": 72.0,
+    "mediana_dias": 38.0,
+    "desviacion_std": 71.4,
+    "min_dias": 24,
+    "max_dias": 154,
+    "num_registros": 3
+  },
+  "Sarcochilus Kulnura Dazzel x Sarcochilus harmanni X Sarcochilus Rosella 'Spotty' x kulnura Sweetie 'Purple Spot'": {
+    "promedio_dias": 44.3,
+    "mediana_dias": 41.0,
+    "desviacion_std": 6.7,
+    "min_dias": 40,
+    "max_dias": 52,
+    "num_registros": 3
+  },
+  "Sarcochilus Kulnura Warmer X Sarcochilus Madge 'Free' x 'One'": {
+    "promedio_dias": 34.7,
+    "mediana_dias": 36.0,
+    "desviacion_std": 3.2,
+    "min_dias": 31,
+    "max_dias": 37,
+    "num_registros": 3
+  },
+  "Sarcochilus Madge 'Free' x 'One' X Sarcochilus Rosella 'Spotty' x Sarcochilus Kulnura Sweetie 'Purple Spot'": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 2.1,
+    "min_dias": 35,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Sarcochilus Newbold Alta": {
+    "promedio_dias": 31.8,
+    "mediana_dias": 34.5,
+    "desviacion_std": 7.3,
+    "min_dias": 21,
+    "max_dias": 37,
+    "num_registros": 4
+  },
+  "Schomburgkia splendida": {
+    "promedio_dias": 21.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 3.6,
+    "min_dias": 17,
+    "max_dias": 24,
+    "num_registros": 3
+  },
+  "Sievekingia sp ec iricolor": {
+    "promedio_dias": 30.5,
+    "mediana_dias": 30.5,
+    "desviacion_std": 9.2,
+    "min_dias": 24,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Sigmatostalix amazonica": {
+    "promedio_dias": 39.5,
+    "mediana_dias": 39.5,
+    "desviacion_std": 16.3,
+    "min_dias": 28,
+    "max_dias": 51,
+    "num_registros": 2
+  },
+  "Sobralia Deb Boersma": {
+    "promedio_dias": 36.7,
+    "mediana_dias": 37.0,
+    "desviacion_std": 1.5,
+    "min_dias": 35,
+    "max_dias": 38,
+    "num_registros": 3
+  },
+  "Sobralia Guatemala": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 5.7,
+    "min_dias": 29,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Sobralia crocea": {
+    "promedio_dias": 19.0,
+    "mediana_dias": 19.0,
+    "desviacion_std": 1.4,
+    "min_dias": 18,
+    "max_dias": 20,
+    "num_registros": 2
+  },
+  "Sobralia dichotoma": {
+    "promedio_dias": 66.7,
+    "mediana_dias": 50.0,
+    "desviacion_std": 54.0,
+    "min_dias": 23,
+    "max_dias": 127,
+    "num_registros": 3
+  },
+  "Sobralia dorbignyana": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 21.2,
+    "min_dias": 35,
+    "max_dias": 65,
+    "num_registros": 2
+  },
+  "Sobralia hirtzii": {
+    "promedio_dias": 29.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 6.1,
+    "min_dias": 21,
+    "max_dias": 35,
+    "num_registros": 4
+  },
+  "Sobralia macrantha": {
+    "promedio_dias": 37.5,
+    "mediana_dias": 37.5,
+    "desviacion_std": 0.7,
+    "min_dias": 37,
+    "max_dias": 38,
+    "num_registros": 2
+  },
+  "Sobralia macrophylla": {
+    "promedio_dias": 30.2,
+    "mediana_dias": 29.0,
+    "desviacion_std": 7.1,
+    "min_dias": 23,
+    "max_dias": 40,
+    "num_registros": 4
+  },
+  "Sobralia macrophylla (Autopoli)": {
+    "promedio_dias": 50.0,
+    "mediana_dias": 50.0,
+    "desviacion_std": 29.7,
+    "min_dias": 29,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Sobralia portillae": {
+    "promedio_dias": 28.7,
+    "mediana_dias": 32.0,
+    "desviacion_std": 5.8,
+    "min_dias": 22,
+    "max_dias": 32,
+    "num_registros": 3
+  },
+  "Sobralia pulcherrima": {
+    "promedio_dias": 34.7,
+    "mediana_dias": 33.0,
+    "desviacion_std": 3.8,
+    "min_dias": 32,
+    "max_dias": 39,
+    "num_registros": 3
+  },
+  "Sobralia turkeliae": {
+    "promedio_dias": 29.5,
+    "mediana_dias": 29.5,
+    "desviacion_std": 0.7,
+    "min_dias": 29,
+    "max_dias": 30,
+    "num_registros": 2
+  },
+  "Sobralia warszewiczii": {
+    "promedio_dias": 31.3,
+    "mediana_dias": 24.0,
+    "desviacion_std": 20.0,
+    "min_dias": 16,
+    "max_dias": 54,
+    "num_registros": 3
+  },
+  "Sophrolaeliocattleya Fire Magic": {
+    "promedio_dias": 85.5,
+    "mediana_dias": 85.5,
+    "desviacion_std": 0.7,
+    "min_dias": 85,
+    "max_dias": 86,
+    "num_registros": 2
+  },
+  "Sophronitis coccinea round form": {
+    "promedio_dias": 27.5,
+    "mediana_dias": 27.5,
+    "desviacion_std": 9.2,
+    "min_dias": 21,
+    "max_dias": 34,
+    "num_registros": 2
+  },
+  "Sophronitis coccinea x 'Pepe'": {
+    "promedio_dias": 56.0,
+    "mediana_dias": 56.0,
+    "desviacion_std": 33.9,
+    "min_dias": 32,
+    "max_dias": 80,
+    "num_registros": 2
+  },
+  "Stanhopea connata": {
+    "promedio_dias": 31.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 5.7,
+    "min_dias": 27,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Stanhopea florida": {
+    "promedio_dias": 30.0,
+    "mediana_dias": 30.0,
+    "desviacion_std": 9.9,
+    "min_dias": 23,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Stanhopea grandiflora": {
+    "promedio_dias": 31.7,
+    "mediana_dias": 29.0,
+    "desviacion_std": 12.2,
+    "min_dias": 21,
+    "max_dias": 45,
+    "num_registros": 3
+  },
+  "Stanhopea lietzei": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 31.0,
+    "desviacion_std": 5.7,
+    "min_dias": 24,
+    "max_dias": 38,
+    "num_registros": 5
+  },
+  "Stanhopea nigroviolacea": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 5.7,
+    "min_dias": 28,
+    "max_dias": 36,
+    "num_registros": 2
+  },
+  "Stanhopea reichenbachiana": {
+    "promedio_dias": 46.5,
+    "mediana_dias": 46.5,
+    "desviacion_std": 34.6,
+    "min_dias": 22,
+    "max_dias": 71,
+    "num_registros": 2
+  },
+  "Stanhopea shuttleworthii": {
+    "promedio_dias": 31.7,
+    "mediana_dias": 29.0,
+    "desviacion_std": 12.2,
+    "min_dias": 21,
+    "max_dias": 45,
+    "num_registros": 3
+  },
+  "Stanhopea sp Anagracia #1": {
+    "promedio_dias": 22.3,
+    "mediana_dias": 21.0,
+    "desviacion_std": 13.1,
+    "min_dias": 10,
+    "max_dias": 36,
+    "num_registros": 3
+  },
+  "Stanhopea tigrina": {
+    "promedio_dias": 23.5,
+    "mediana_dias": 23.5,
+    "desviacion_std": 4.9,
+    "min_dias": 20,
+    "max_dias": 27,
+    "num_registros": 2
+  },
+  "Stelis kefersteiniana": {
+    "promedio_dias": 52.5,
+    "mediana_dias": 52.5,
+    "desviacion_std": 14.8,
+    "min_dias": 42,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Stelis kefersteiniana 'Ecuagenera'": {
+    "promedio_dias": 55.0,
+    "mediana_dias": 55.0,
+    "desviacion_std": 15.6,
+    "min_dias": 44,
+    "max_dias": 66,
+    "num_registros": 2
+  },
+  "Stelis ornata (Autopoli)": {
+    "promedio_dias": 89.0,
+    "mediana_dias": 88.0,
+    "desviacion_std": 15.5,
+    "min_dias": 74,
+    "max_dias": 105,
+    "num_registros": 3
+  },
+  "Stelis tarantula 002820": {
+    "promedio_dias": 104.5,
+    "mediana_dias": 104.5,
+    "desviacion_std": 34.6,
+    "min_dias": 80,
+    "max_dias": 129,
+    "num_registros": 2
+  },
+  "Stenorrhynchos speciosum": {
+    "promedio_dias": 48.0,
+    "mediana_dias": 48.0,
+    "desviacion_std": 24.0,
+    "min_dias": 31,
+    "max_dias": 65,
+    "num_registros": 2
+  },
+  "Telipogon portillae 3": {
+    "promedio_dias": 32.0,
+    "mediana_dias": 32.0,
+    "desviacion_std": 9.9,
+    "min_dias": 25,
+    "max_dias": 39,
+    "num_registros": 2
+  },
+  "Telipogon venustus (Autopoli)": {
+    "promedio_dias": 92.5,
+    "mediana_dias": 92.5,
+    "desviacion_std": 4.9,
+    "min_dias": 89,
+    "max_dias": 96,
+    "num_registros": 2
+  },
+  "Tillandsia petraea aff (Autopoli)": {
+    "promedio_dias": 45.0,
+    "mediana_dias": 45.0,
+    "desviacion_std": 0.0,
+    "min_dias": 45,
+    "max_dias": 45,
+    "num_registros": 2
+  },
+  "Trichocentrum Pepe Portilla": {
+    "promedio_dias": 91.0,
+    "mediana_dias": 91.0,
+    "desviacion_std": 63.6,
+    "min_dias": 46,
+    "max_dias": 136,
+    "num_registros": 2
+  },
+  "Trichocentrum carthagenense": {
+    "promedio_dias": 22.0,
+    "mediana_dias": 22.0,
+    "desviacion_std": 1.4,
+    "min_dias": 21,
+    "max_dias": 23,
+    "num_registros": 2
+  },
+  "Trichocentrum lanceanum": {
+    "promedio_dias": 53.5,
+    "mediana_dias": 53.5,
+    "desviacion_std": 13.4,
+    "min_dias": 44,
+    "max_dias": 63,
+    "num_registros": 2
+  },
+  "Trichocentrum loyolicum": {
+    "promedio_dias": 41.7,
+    "mediana_dias": 38.0,
+    "desviacion_std": 13.9,
+    "min_dias": 30,
+    "max_dias": 57,
+    "num_registros": 3
+  },
+  "Trichocentrum microchilum": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 2.8,
+    "min_dias": 31,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Trichocentrum nanum": {
+    "promedio_dias": 25.0,
+    "mediana_dias": 26.0,
+    "desviacion_std": 6.1,
+    "min_dias": 17,
+    "max_dias": 31,
+    "num_registros": 4
+  },
+  "Trichocentrum pfavii": {
+    "promedio_dias": 85.0,
+    "mediana_dias": 85.0,
+    "desviacion_std": 67.9,
+    "min_dias": 37,
+    "max_dias": 133,
+    "num_registros": 2
+  },
+  "Trichoceros antennifer (Autopoli)": {
+    "promedio_dias": 21.5,
+    "mediana_dias": 21.5,
+    "desviacion_std": 4.9,
+    "min_dias": 18,
+    "max_dias": 25,
+    "num_registros": 2
+  },
+  "Trichopilia concepcionis": {
+    "promedio_dias": 41.5,
+    "mediana_dias": 41.5,
+    "desviacion_std": 3.5,
+    "min_dias": 39,
+    "max_dias": 44,
+    "num_registros": 2
+  },
+  "Trichopilia tortilis": {
+    "promedio_dias": 39.3,
+    "mediana_dias": 40.0,
+    "desviacion_std": 18.0,
+    "min_dias": 21,
+    "max_dias": 57,
+    "num_registros": 3
+  },
+  "Trichosalpinx sp 'Nambija' #1": {
+    "promedio_dias": 79.0,
+    "mediana_dias": 79.0,
+    "desviacion_std": 7.1,
+    "min_dias": 74,
+    "max_dias": 84,
+    "num_registros": 2
+  },
+  "Trizeuxis falcata": {
+    "promedio_dias": 44.0,
+    "mediana_dias": 44.0,
+    "desviacion_std": 15.6,
+    "min_dias": 33,
+    "max_dias": 55,
+    "num_registros": 2
+  },
+  "Vanda Hibrida": {
+    "promedio_dias": 36.5,
+    "mediana_dias": 36.5,
+    "desviacion_std": 0.7,
+    "min_dias": 36,
+    "max_dias": 37,
+    "num_registros": 2
+  },
+  "Vanda ampullacea": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 4.9,
+    "min_dias": 28,
+    "max_dias": 35,
+    "num_registros": 2
+  },
+  "Vanda christensoniana": {
+    "promedio_dias": 31.5,
+    "mediana_dias": 31.5,
+    "desviacion_std": 0.7,
+    "min_dias": 31,
+    "max_dias": 32,
+    "num_registros": 2
+  },
+  "Vanda cristata": {
+    "promedio_dias": 32.7,
+    "mediana_dias": 34.0,
+    "desviacion_std": 4.2,
+    "min_dias": 28,
+    "max_dias": 36,
+    "num_registros": 3
+  },
+  "Vanda nana": {
+    "promedio_dias": 53.7,
+    "mediana_dias": 45.0,
+    "desviacion_std": 15.9,
+    "min_dias": 44,
+    "max_dias": 72,
+    "num_registros": 3
+  },
+  "Vietnam #5 (18-12-2015)": {
+    "promedio_dias": 33.0,
+    "mediana_dias": 33.0,
+    "desviacion_std": 11.3,
+    "min_dias": 25,
+    "max_dias": 41,
+    "num_registros": 2
+  },
+  "Vietnam #6 (18-12-2015)": {
+    "promedio_dias": 45.0,
+    "mediana_dias": 45.0,
+    "desviacion_std": 5.7,
+    "min_dias": 41,
+    "max_dias": 49,
+    "num_registros": 2
+  },
+  "Warczewiczella timbiensis": {
+    "promedio_dias": 90.0,
+    "mediana_dias": 90.0,
+    "desviacion_std": 4.2,
+    "min_dias": 87,
+    "max_dias": 93,
+    "num_registros": 2
+  }
+}

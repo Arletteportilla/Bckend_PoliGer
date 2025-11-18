@@ -1,0 +1,29 @@
+{
+  "modelo": "Gradient Boosting",
+  "fecha_entrenamiento": "2025-11-04 18:45:43",
+  "registros_entrenamiento": 3122,
+  "registros_prueba": 781,
+  "metricas": {
+    "mae_train": 13.649956662366524,
+    "mae_test": 23.89060391700159,
+    "rmse_test": 34.52310569592629,
+    "r2_test": 0.24661634686908485
+  },
+  "caracteristicas": [
+    "ESPECIE_encoded",
+    "CLIMA_encoded",
+    "genero_encoded",
+    "mes_siembra",
+    "estacion_encoded"
+  ],
+  "dias_promedio": 53.58852165001281,
+  "dias_mediana": 39.0,
+  "especies_unicas": 2673,
+  "climas_unicos": [
+    "IC",
+    "Warm",
+    "Intermedio",
+    "IW",
+    "Cool"
+  ]
+}
