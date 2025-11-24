@@ -52,7 +52,12 @@ class PolinizacionSerializer(serializers.ModelSerializer):
             'genero', 'especie', 'ubicacion', 'cantidad', 'archivo_origen', 'observaciones',
             # Campos de ubicación detallada
             'vivero', 'mesa', 'pared',
-            # Campos de predicción
+            # Campo Tipo para predicción ML
+            'Tipo',
+            # Campos de predicción ML
+            'dias_maduracion_predichos', 'fecha_maduracion_predicha', 
+            'metodo_prediccion', 'confianza_prediccion',
+            # Campos de predicción legacy
             'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
             'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
             'prediccion_parametros_usados'

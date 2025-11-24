@@ -4,13 +4,14 @@ Servicio de negocio para Polinizaciones
 from typing import Dict, Any, List, Optional
 from django.contrib.auth.models import User
 from django.db.models import Q
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from django.core.exceptions import ValidationError
 import logging
 
 from ..models import Polinizacion
 from .base_service import BaseService, PaginatedService, CacheableService
 from ..utils.validation_utils import ValidationHelper, validate_codigo, validate_date_field, validate_positive_integer, validate_text_field
+from .ml_polinizacion_service import ml_polinizacion_service
 
 logger = logging.getLogger(__name__)
 
@@ -291,6 +292,61 @@ class PolinizacionService(PaginatedService, CacheableService):
         if not data.get('codigo'):
             data['codigo'] = self._generate_codigo()
         
+        # Calcular predicción de maduración si no se proporciona fechamad
+        if not data.get('fechamad') and data.get('fechapol'):
+            # DEBUG: Ver todos los datos recibidos
+            logger.info(f"DEBUG - Datos recibidos para predicción: {list(data.keys())}")
+            logger.info(f"DEBUG - genero: {data.get('genero')}")
+            logger.info(f"DEBUG - madre_genero: {data.get('madre_genero')}")
+            logger.info(f"DEBUG - nueva_genero: {data.get('nueva_genero')}")
+            logger.info(f"DEBUG - padre_genero: {data.get('padre_genero')}")
+            logger.info(f"DEBUG - Tipo: {data.get('Tipo')}")
+            logger.info(f"DEBUG - tipo_polinizacion: {data.get('tipo_polinizacion')}")
+            
+            # Obtener género y especie de cualquier campo disponible
+            genero = (data.get('genero') or 
+                     data.get('madre_genero') or 
+                     data.get('nueva_genero') or 
+                     data.get('padre_genero') or '')
+            
+            especie = (data.get('especie') or 
+                      data.get('madre_especie') or 
+                      data.get('nueva_especie') or 
+                      data.get('padre_especie') or '')
+            
+            tipo = data.get('Tipo') or data.get('tipo_polinizacion') or 'SELF'
+            
+            logger.info(f"DEBUG - Género seleccionado: '{genero}'")
+            logger.info(f"DEBUG - Especie seleccionada: '{especie}'")
+            logger.info(f"DEBUG - Tipo seleccionado: '{tipo}'")
+            
+            # Solo predecir si tenemos género y especie
+            if genero and especie:
+                logger.info(f"Llamando a predecir_maduracion con: genero={genero}, especie={especie}, tipo={tipo}")
+                prediccion = self.predecir_maduracion(
+                    genero=genero,
+                    especie=especie,
+                    tipo=tipo,
+                    fecha_pol=data['fechapol'],
+                    cantidad=data.get('cantidad', 1)
+                )
+                
+                if prediccion:
+                    data['dias_maduracion_predichos'] = prediccion['dias_estimados']
+                    data['fecha_maduracion_predicha'] = prediccion['fecha_estimada']
+                    data['metodo_prediccion'] = prediccion['metodo']
+                    data['confianza_prediccion'] = prediccion['confianza']
+                    
+                    # También guardar en campos legacy para compatibilidad
+                    data['genero'] = genero
+                    data['especie'] = especie
+                    
+                    logger.info(f"✅ Predicción aplicada: {prediccion['dias_estimados']} días, método: {prediccion['metodo']}, especie: {genero} {especie}")
+                else:
+                    logger.warning(f"⚠️ predecir_maduracion retornó None")
+            else:
+                logger.warning(f"❌ No se pudo calcular predicción: género='{genero}', especie='{especie}'")
+        
         return super().create(data, user)
     
     def _generate_codigo(self) -> str:
@@ -298,6 +354,65 @@ class PolinizacionService(PaginatedService, CacheableService):
         from django.utils import timezone
         timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
         return f"POL-{timestamp}"
+    
+    def predecir_maduracion(self, genero: str, especie: str, tipo: str, fecha_pol, cantidad: int = 1) -> Optional[Dict[str, Any]]:
+        """
+        Predice los días de maduración usando ML o heurística
+        
+        Args:
+            genero: Género de la planta
+            especie: Especie de la planta
+            tipo: Tipo de polinización (SELF, SIBBLING, HYBRID)
+            fecha_pol: Fecha de polinización
+            cantidad: Cantidad de polinizaciones
+            
+        Returns:
+            dict con predicción o None
+        """
+        # Intentar predicción con ML
+        prediccion_ml = ml_polinizacion_service.predecir_dias_maduracion(
+            genero=genero,
+            especie=especie,
+            tipo=tipo,
+            fecha_pol=fecha_pol,
+            cantidad=cantidad
+        )
+        
+        if prediccion_ml:
+            return prediccion_ml
+        
+        # Fallback: predicción heurística
+        logger.info("Usando predicción heurística para maduración")
+        return self._predecir_heuristico(genero, especie, tipo, fecha_pol)
+    
+    def _predecir_heuristico(self, genero: str, especie: str, tipo: str, fecha_pol) -> Dict[str, Any]:
+        """Predicción heurística basada en promedios generales"""
+        # Convertir fecha si es string
+        if isinstance(fecha_pol, str):
+            fecha_pol = datetime.strptime(fecha_pol, '%Y-%m-%d').date()
+        
+        # Promedios generales por tipo
+        dias_base = {
+            'SELF': 180,
+            'SIBBLING': 190,
+            'HYBRID': 200
+        }
+        
+        dias_estimados = dias_base.get(tipo, 190)
+        fecha_estimada = fecha_pol + timedelta(days=dias_estimados)
+        
+        return {
+            'dias_estimados': dias_estimados,
+            'fecha_estimada': fecha_estimada.strftime('%Y-%m-%d'),
+            'metodo': 'heuristica',
+            'modelo': 'Promedio general',
+            'confianza': 50.0,
+            'nivel_confianza': 'baja',
+            'rango_probable': {
+                'min': dias_estimados - 30,
+                'max': dias_estimados + 30
+            }
+        }
     
     def invalidate_related_caches(self):
         """Invalida caches relacionados cuando se modifica una polinización"""

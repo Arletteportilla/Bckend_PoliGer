@@ -745,3 +745,74 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 status=500,
                 content_type='text/plain'
             )
+    
+    @action(detail=False, methods=['post'], url_path='predecir-maduracion')
+    def predecir_maduracion(self, request):
+        """
+        Predice los días de maduración para una polinización
+        
+        POST /api/polinizaciones/predecir-maduracion/
+        Body: {
+            "genero": "Cattleya",
+            "especie": "maxima",
+            "tipo": "SELF",
+            "fecha_pol": "2025-01-15",
+            "cantidad": 1
+        }
+        """
+        try:
+            # Validar datos requeridos
+            genero = request.data.get('genero', '')
+            especie = request.data.get('especie', '')
+            tipo = request.data.get('tipo', 'SELF')
+            fecha_pol = request.data.get('fecha_pol')
+            cantidad = request.data.get('cantidad', 1)
+            
+            if not genero or not especie or not fecha_pol:
+                return Response({
+                    'error': 'Se requieren género, especie y fecha de polinización'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Hacer predicción
+            prediccion = self.service.predecir_maduracion(
+                genero=genero,
+                especie=especie,
+                tipo=tipo,
+                fecha_pol=fecha_pol,
+                cantidad=cantidad
+            )
+            
+            if prediccion:
+                return Response({
+                    'success': True,
+                    'prediccion': prediccion
+                })
+            else:
+                return Response({
+                    'error': 'No se pudo generar predicción'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+        except Exception as e:
+            logger.error(f"Error en predicción de maduración: {e}")
+            return self.handle_error(e, "Error generando predicción")
+    
+    @action(detail=False, methods=['get'], url_path='info-modelo-ml')
+    def info_modelo_ml(self, request):
+        """
+        Obtiene información sobre el modelo de ML cargado
+        
+        GET /api/polinizaciones/info-modelo-ml/
+        """
+        try:
+            from ..services.ml_polinizacion_service import ml_polinizacion_service
+            
+            model_info = ml_polinizacion_service.get_model_info()
+            
+            return Response({
+                'success': True,
+                'modelo': model_info
+            })
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo info del modelo: {e}")
+            return self.handle_error(e, "Error obteniendo información del modelo")

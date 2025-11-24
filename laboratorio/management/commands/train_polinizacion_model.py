@@ -1,209 +1,255 @@
 """
 Comando Django para entrenar el modelo de predicción de polinizaciones
-Usa LightGBM para modelos más pequeños y rápidos
+Basado en el modelo XGBoost con 94.91% de precisión
 """
 from django.core.management.base import BaseCommand
 import pandas as pd
 import numpy as np
-import lightgbm as lgb
 import joblib
 import os
 from datetime import datetime
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import LabelEncoder, RobustScaler
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+try:
+    from xgboost import XGBRegressor
+    XGBOOST_AVAILABLE = True
+except ImportError:
+    XGBOOST_AVAILABLE = False
+    from sklearn.ensemble import RandomForestRegressor
 
 
 class Command(BaseCommand):
-    help = 'Entrena el modelo de predicción de días de maduración de polinizaciones'
+    help = 'Entrena el modelo de predicción de días hasta maduración de polinizaciones'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--csv-path',
             type=str,
-            default='data/datos_combinados_limpios.csv',
+            default='prediccion/polinizacion/datos_limpios.csv',
             help='Ruta al archivo CSV con datos de polinizaciones'
         )
         parser.add_argument(
             '--output-path',
             type=str,
-            default='laboratorio/modelos/Polinizacion_fallback.bin',
+            default='laboratorio/modelos/polinizacion.pkl',
             help='Ruta donde guardar el modelo entrenado'
-        )
-        parser.add_argument(
-            '--model-type',
-            type=str,
-            default='lightgbm',
-            choices=['lightgbm', 'randomforest'],
-            help='Tipo de modelo a entrenar'
         )
 
     def handle(self, *args, **options):
         csv_path = options['csv_path']
         output_path = options['output_path']
-        model_type = options['model_type']
 
-        self.stdout.write('=' * 60)
+        self.stdout.write('=' * 80)
         self.stdout.write('   ENTRENAMIENTO MODELO POLINIZACIÓN')
-        self.stdout.write('=' * 60)
+        self.stdout.write('=' * 80)
         self.stdout.write('')
+
+        if not XGBOOST_AVAILABLE:
+            self.stdout.write(self.style.WARNING(
+                '⚠ XGBoost no disponible, usando Random Forest como alternativa'
+            ))
 
         # 1. Cargar datos
         self.stdout.write(f'Cargando datos desde {csv_path}...')
         try:
-            df = pd.read_csv(csv_path)
-            self.stdout.write(self.style.SUCCESS(f'✓ {len(df)} registros cargados'))
+            df = pd.read_csv(csv_path, encoding='utf-8')
+            df['fechapol'] = pd.to_datetime(df['fechapol'])
+            df['fechamad'] = pd.to_datetime(df['fechamad'])
+            self.stdout.write(self.style.SUCCESS(f'✓ {len(df):,} registros cargados'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'✗ Error cargando CSV: {e}'))
             return
 
-        # 2. Preparar datos
-        self.stdout.write('\nPreparando datos...')
+        # 2. Feature Engineering Avanzado
+        self.stdout.write('\nCreando features avanzadas...')
 
-        # Convertir fechas y calcular target
-        df['fechapol'] = pd.to_datetime(df['fechapol'], errors='coerce')
-        df['fechamad'] = pd.to_datetime(df['fechamad'], errors='coerce')
-        df['dias_maduracion'] = (df['fechamad'] - df['fechapol']).dt.days
+        # Features temporales básicas
+        df['mes_pol'] = df['fechapol'].dt.month
+        df['dia_anio_pol'] = df['fechapol'].dt.dayofyear
+        df['semana_pol'] = df['fechapol'].dt.isocalendar().week
 
-        # Filtrar datos válidos
-        df = df[df['dias_maduracion'].notna()]
+        # Features cíclicas (importantes para estacionalidad)
+        df['mes_sin'] = np.sin(2 * np.pi * df['mes_pol'] / 12)
+        df['mes_cos'] = np.cos(2 * np.pi * df['mes_pol'] / 12)
+        df['dia_anio_sin'] = np.sin(2 * np.pi * df['dia_anio_pol'] / 365)
+        df['dia_anio_cos'] = np.cos(2 * np.pi * df['dia_anio_pol'] / 365)
+        df['semana_sin'] = np.sin(2 * np.pi * df['semana_pol'] / 52)
+        df['semana_cos'] = np.cos(2 * np.pi * df['semana_pol'] / 52)
 
-        # Filtrar outliers (días negativos o muy altos)
-        df = df[(df['dias_maduracion'] >= 0) & (df['dias_maduracion'] <= 1000)]
+        # Estadísticas por especie
+        species_stats = df.groupby(['genero', 'especie'])['dias_maduracion'].agg([
+            ('especie_media', 'mean'),
+            ('especie_mediana', 'median'),
+            ('especie_std', 'std'),
+            ('especie_min', 'min'),
+            ('especie_max', 'max'),
+            ('especie_count', 'count')
+        ]).reset_index()
+        df = df.merge(species_stats, on=['genero', 'especie'], how='left')
 
-        if len(df) < 100:
-            self.stdout.write(self.style.ERROR(
-                f'✗ Datos insuficientes después de limpieza: {len(df)} registros'
-            ))
-            return
+        # Estadísticas por género
+        genus_stats = df.groupby('genero')['dias_maduracion'].agg([
+            ('genero_media', 'mean'),
+            ('genero_std', 'std'),
+            ('genero_count', 'count')
+        ]).reset_index()
+        df = df.merge(genus_stats, on='genero', how='left')
 
-        self.stdout.write(self.style.SUCCESS(f'✓ {len(df)} registros válidos'))
+        # Estadísticas por tipo
+        tipo_stats = df.groupby('Tipo')['dias_maduracion'].agg([
+            ('tipo_media', 'mean'),
+            ('tipo_std', 'std')
+        ]).reset_index()
+        df = df.merge(tipo_stats, on='Tipo', how='left')
 
-        # 3. Feature engineering
-        self.stdout.write('\nCreando features...')
+        # Rellenar valores faltantes
+        for col in df.columns:
+            if df[col].dtype in ['float64', 'int64'] and df[col].isnull().any():
+                if 'std' in col:
+                    df[col] = df[col].fillna(df['dias_maduracion'].std())
+                elif 'count' in col:
+                    df[col] = df[col].fillna(1)
+                else:
+                    df[col] = df[col].fillna(df['dias_maduracion'].mean())
 
-        # Features categóricas
-        features = pd.DataFrame()
-        features['genero'] = df['genero'].astype(str)
-        features['especie'] = df['especie'].astype(str)
-        features['ubicacion'] = df['ubicacion'].fillna('desconocida').astype(str)
-        features['responsable'] = df['responsable'].fillna('desconocido').astype(str)
-
-        # Features numéricas
-        features['cantidad'] = df['cantidad'].fillna(0)
-        features['disponible'] = df['disponible'].fillna(0)
-
-        # Features de tiempo
-        features['mes_polinizacion'] = df['fechapol'].dt.month
-        features['trimestre'] = df['fechapol'].dt.quarter
-
-        # Target
-        y = df['dias_maduracion']
-
-        # Encoding de variables categóricas (LabelEncoding para reducir tamaño)
-        from sklearn.preprocessing import LabelEncoder
-
+        # Label Encoding
         le_genero = LabelEncoder()
         le_especie = LabelEncoder()
-        le_ubicacion = LabelEncoder()
-        le_responsable = LabelEncoder()
+        le_tipo = LabelEncoder()
 
-        features['genero_encoded'] = le_genero.fit_transform(features['genero'])
-        features['especie_encoded'] = le_especie.fit_transform(features['especie'])
-        features['ubicacion_encoded'] = le_ubicacion.fit_transform(features['ubicacion'])
-        features['responsable_encoded'] = le_responsable.fit_transform(features['responsable'])
+        df['genero_encoded'] = le_genero.fit_transform(df['genero'])
+        df['especie_encoded'] = le_especie.fit_transform(df['genero'] + '_' + df['especie'])
+        df['tipo_encoded'] = le_tipo.fit_transform(df['Tipo'])
 
-        # Seleccionar solo features numéricas para el modelo
-        X = features[[
-            'genero_encoded', 'especie_encoded', 'ubicacion_encoded',
-            'responsable_encoded', 'cantidad', 'disponible',
-            'mes_polinizacion', 'trimestre'
-        ]]
+        # Features de interacción
+        df['genero_tipo_encoded'] = df['genero_encoded'] * 100 + df['tipo_encoded']
 
-        self.stdout.write(self.style.SUCCESS(f'✓ {X.shape[1]} features creadas'))
+        self.stdout.write(self.style.SUCCESS('✓ Features creadas'))
 
-        # 4. Split train/test
+        # 3. Preparar features y target
+        feature_columns = [
+            # Codificación categórica
+            'genero_encoded', 'especie_encoded', 'tipo_encoded', 'genero_tipo_encoded',
+
+            # Features temporales cíclicas
+            'mes_sin', 'mes_cos', 'dia_anio_sin', 'dia_anio_cos',
+            'semana_sin', 'semana_cos',
+
+            # Estadísticas de especie
+            'especie_media', 'especie_mediana', 'especie_std',
+            'especie_min', 'especie_max', 'especie_count',
+
+            # Estadísticas de género
+            'genero_media', 'genero_std', 'genero_count',
+
+            # Estadísticas de tipo
+            'tipo_media', 'tipo_std',
+
+            # Feature directa
+            'cantidad'
+        ]
+
+        X = df[feature_columns].copy()
+        y = df['dias_maduracion'].copy()
+
+        # Escalar
+        scaler = RobustScaler()
+        X_scaled = scaler.fit_transform(X)
+        X_scaled = pd.DataFrame(X_scaled, columns=feature_columns)
+
+        # Split
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42
+            X_scaled, y, test_size=0.15, random_state=42
         )
 
-        self.stdout.write(f'\nDatos de entrenamiento: {len(X_train)}')
-        self.stdout.write(f'Datos de prueba: {len(X_test)}')
+        self.stdout.write(f'\nFeatures totales: {len(feature_columns)}')
+        self.stdout.write(f'Train: {len(X_train):,}, Test: {len(X_test):,}')
 
-        # 5. Entrenar modelo
-        self.stdout.write(f'\nEntrenando modelo {model_type}...')
+        # 4. Entrenar modelo
+        self.stdout.write('\nEntrenando modelo...')
 
-        if model_type == 'lightgbm':
-            modelo = lgb.LGBMRegressor(
-                n_estimators=150,           # Reducido para menor tamaño
-                max_depth=12,               # Profundidad limitada
-                learning_rate=0.05,
-                num_leaves=31,
-                min_child_samples=20,
-                subsample=0.8,
+        if XGBOOST_AVAILABLE:
+            modelo = XGBRegressor(
+                n_estimators=300,
+                learning_rate=0.1,
+                max_depth=5,
+                subsample=0.9,
                 colsample_bytree=0.8,
-                n_jobs=-1,
                 random_state=42,
-                verbose=-1
+                n_jobs=-1
             )
-        else:  # randomforest
-            from sklearn.ensemble import RandomForestRegressor
+            model_name = 'XGBoost'
+        else:
             modelo = RandomForestRegressor(
-                n_estimators=100,
-                max_depth=15,
-                min_samples_split=10,
-                min_samples_leaf=5,
-                max_features='sqrt',
-                n_jobs=-1,
-                random_state=42
+                n_estimators=400,
+                max_depth=25,
+                min_samples_split=2,
+                min_samples_leaf=1,
+                random_state=42,
+                n_jobs=-1
             )
+            model_name = 'Random Forest'
 
         modelo.fit(X_train, y_train)
-        self.stdout.write(self.style.SUCCESS('✓ Modelo entrenado'))
+        self.stdout.write(self.style.SUCCESS(f'✓ Modelo {model_name} entrenado'))
 
-        # 6. Evaluar modelo
+        # 5. Evaluar modelo
         self.stdout.write('\nEvaluando modelo...')
         y_pred = modelo.predict(X_test)
 
         mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         r2 = r2_score(y_test, y_pred)
 
-        self.stdout.write(f'  MAE (Error Absoluto Medio): {mae:.2f} días')
-        self.stdout.write(f'  R² Score: {r2:.4f}')
+        self.stdout.write(f'  MAE: {mae:.2f} días')
+        self.stdout.write(f'  RMSE: {rmse:.2f} días')
+        self.stdout.write(f'  R²: {r2:.4f} ({r2*100:.2f}%)')
 
-        # 7. Guardar modelo con compresión máxima
+        # 6. Guardar modelo empaquetado
         self.stdout.write(f'\nGuardando modelo en {output_path}...')
 
-        # Crear directorio si no existe
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        # Guardar con compresión máxima
-        joblib.dump(modelo, output_path, compress=9)
+        model_package = {
+            'model': modelo,
+            'scaler': scaler,
+            'label_encoders': {
+                'genero': le_genero,
+                'especie': le_especie,
+                'tipo': le_tipo
+            },
+            'feature_columns': feature_columns,
+            'species_stats': species_stats,
+            'genus_stats': genus_stats,
+            'tipo_stats': tipo_stats,
+            'metadata': {
+                'model_name': model_name,
+                'test_mae': mae,
+                'test_rmse': rmse,
+                'test_r2': r2,
+                'precision_percent': r2 * 100,
+                'n_features': len(feature_columns),
+                'n_samples': len(df),
+                'fecha_entrenamiento': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }
 
-        # Guardar también los encoders
-        encoders_path = output_path.replace('.bin', '_encoders.bin')
-        joblib.dump({
-            'genero': le_genero,
-            'especie': le_especie,
-            'ubicacion': le_ubicacion,
-            'responsable': le_responsable
-        }, encoders_path, compress=9)
+        joblib.dump(model_package, output_path, compress=3)
 
-        # Verificar tamaño
         size_mb = os.path.getsize(output_path) / (1024 * 1024)
-        encoders_size_mb = os.path.getsize(encoders_path) / (1024 * 1024)
 
         self.stdout.write('')
-        self.stdout.write('=' * 60)
+        self.stdout.write('=' * 80)
         self.stdout.write(self.style.SUCCESS('   ✓ ENTRENAMIENTO COMPLETADO'))
-        self.stdout.write('=' * 60)
-        self.stdout.write(f'\n  Registros usados: {len(df)}')
-        self.stdout.write(f'  Tipo de modelo: {model_type}')
-        self.stdout.write(f'  Features: {X.shape[1]}')
+        self.stdout.write('=' * 80)
+        self.stdout.write(f'\n  Modelo: {model_name}')
+        self.stdout.write(f'  Registros: {len(df):,}')
+        self.stdout.write(f'  Features: {len(feature_columns)}')
         self.stdout.write(f'  MAE: {mae:.2f} días')
-        self.stdout.write(f'  R²: {r2:.4f}')
-        self.stdout.write(f'\n  Modelo guardado: {output_path}')
-        self.stdout.write(f'  Tamaño modelo: {size_mb:.2f} MB')
-        self.stdout.write(f'  Encoders guardados: {encoders_path}')
-        self.stdout.write(f'  Tamaño encoders: {encoders_size_mb:.2f} MB')
-        self.stdout.write(f'\n  Tamaño total: {size_mb + encoders_size_mb:.2f} MB')
+        self.stdout.write(f'  RMSE: {rmse:.2f} días')
+        self.stdout.write(f'  R²: {r2:.4f} ({r2*100:.2f}%)')
+        self.stdout.write(f'\n  Archivo: {output_path}')
+        self.stdout.write(f'  Tamaño: {size_mb:.2f} MB')
         self.stdout.write('')

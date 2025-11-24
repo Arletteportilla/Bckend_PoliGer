@@ -483,7 +483,8 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             respuesta_estructurada = {
                 'prediccion': {
                     'dias_estimados': dias_estimados,
-                    'fecha_estimada_formatted': fecha_estimada_formatted,
+                    'fecha_estimada': fecha_estimada,  # Formato ISO para guardar en BD
+                    'fecha_estimada_formatted': fecha_estimada_formatted,  # Formato para mostrar
                     'confianza': confianza,
                     'nivel_confianza': nivel_confianza,
                     'modelo_usado': metodo,

@@ -119,7 +119,16 @@ class Polinizacion(models.Model):
     archivo_origen = models.CharField(max_length=255, blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', blank=True)
     
-    # Campos de predicción
+    # Campo Tipo para predicción ML (SELF, SIBBLING, HYBRID)
+    Tipo = models.CharField(max_length=20, verbose_name='Tipo', default='SELF', blank=True)
+    
+    # Campos de predicción ML
+    dias_maduracion_predichos = models.PositiveIntegerField(verbose_name='Días de maduración predichos', null=True, blank=True)
+    fecha_maduracion_predicha = models.DateField(verbose_name='Fecha de maduración predicha', null=True, blank=True)
+    metodo_prediccion = models.CharField(max_length=50, verbose_name='Método de predicción', blank=True)
+    confianza_prediccion = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Confianza de predicción (%)', null=True, blank=True)
+    
+    # Campos de predicción legacy (mantener para compatibilidad)
     prediccion_dias_estimados = models.PositiveIntegerField(verbose_name='Días estimados de predicción', null=True, blank=True)
     prediccion_confianza = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Confianza de predicción (%)', null=True, blank=True)
     prediccion_fecha_estimada = models.DateField(verbose_name='Fecha estimada de semillas', null=True, blank=True)
