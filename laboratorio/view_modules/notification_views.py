@@ -172,3 +172,23 @@ class NotificationViewSet(viewsets.ModelViewSet):
                 {'error': 'Error obteniendo alertas'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    
+    @action(detail=False, methods=['get'], url_path='registros-pendientes')
+    def registros_pendientes(self, request):
+        """Obtiene registros en estado INICIAL que requieren revisión"""
+        try:
+            dias_limite = int(request.GET.get('dias', 5))
+            
+            registros = notification_service.obtener_registros_pendientes_revision(
+                usuario=request.user,
+                dias_limite=dias_limite
+            )
+            
+            return Response(registros)
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo registros pendientes: {e}")
+            return Response(
+                {'error': 'Error obteniendo registros pendientes'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

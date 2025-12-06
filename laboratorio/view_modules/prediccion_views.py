@@ -286,3 +286,393 @@ def especies_promedios_germinacion(request):
     except Exception as e:
         logger.error(f"Error obteniendo promedios de especies: {e}")
         return Response({'error': str(e)}, status=500)
+
+
+# =============================================================================
+# PREDICCIÓN CON ML (XGBoost)
+# =============================================================================
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@require_polinizacion_access('view')
+def prediccion_polinizacion_ml(request):
+    """
+    Predicción de DIAS_MADURACION usando XGBoost
+    Endpoint mejorado que usa el modelo de Machine Learning entrenado
+
+    Requiere acceso a polinizaciones
+
+    Request body:
+        {
+            "fechapol": "2024-01-15",
+            "genero": "Cattleya",
+            "especie": "Cattleya maxima",
+            "ubicacion": "Vivero 1",
+            "responsable": "Usuario Ejemplo",
+            "Tipo": "SELF",
+            "cantidad": 3,
+            "disponible": 1
+        }
+
+    Response:
+        {
+            "dias_estimados": 120,
+            "fecha_polinizacion": "2024-01-15",
+            "fecha_estimada_maduracion": "2024-05-14",
+            "confianza": 85.0,
+            "nivel_confianza": "alta",
+            "metodo": "XGBoost",
+            "modelo": "polinizacion.joblib",
+            ...
+        }
+    """
+    try:
+        # USAR NUEVO PREDICTOR XGBOOST
+        from ..ml.predictors import get_predictor
+
+        logger.info(f"🔮 Usuario {request.user.username} solicitando predicción de polinización (XGBoost)")
+        logger.info(f"Datos recibidos: {request.data}")
+
+        # Validar campos requeridos
+        required_fields = ['fechapol', 'genero', 'especie', 'ubicacion', 'responsable', 'Tipo', 'cantidad', 'disponible']
+        missing_fields = [field for field in required_fields if field not in request.data]
+
+        if missing_fields:
+            logger.warning(f"Campos faltantes: {missing_fields}")
+            return Response({
+                'error': 'Datos de entrada inválidos',
+                'details': {field: ['Este campo es requerido'] for field in missing_fields}
+            }, status=400)
+
+        # Obtener predictor (singleton)
+        predictor = get_predictor()
+
+        # Verificar que el modelo esté cargado
+        if not predictor.model_loaded:
+            logger.error("Modelo XGBoost no está cargado")
+            return Response({
+                'error': 'Modelo de predicción no disponible',
+                'details': 'El modelo XGBoost no pudo ser cargado. Verifique los archivos del modelo.',
+                'codigo': 'MODEL_NOT_LOADED'
+            }, status=503)
+
+        try:
+            # Realizar predicción usando el nuevo predictor XGBoost
+            logger.info("🎯 Llamando a XGBoostPolinizacionPredictor.predecir()...")
+
+            resultado = predictor.predecir(
+                fechapol=request.data['fechapol'],
+                genero=request.data['genero'],
+                especie=request.data['especie'],
+                ubicacion=request.data['ubicacion'],
+                responsable=request.data['responsable'],
+                tipo=request.data['Tipo'],
+                cantidad=request.data.get('cantidad', 1),
+                disponible=request.data.get('disponible', 1)
+            )
+
+            logger.info("=" * 80)
+            logger.info("✅ PREDICCIÓN EXITOSA - XGBOOST")
+            logger.info("=" * 80)
+            logger.info(f"📊 Días estimados: {resultado['dias_estimados']} días")
+            logger.info(f"📅 Fecha estimada: {resultado['fecha_estimada_maduracion']}")
+            logger.info(f"💯 Confianza: {resultado['confianza']}%")
+            logger.info(f"🔢 Features usadas: {resultado['features_count']}")
+            logger.info(f"⚠️  Categorías nuevas: {resultado.get('categorias_nuevas', 0)}")
+            logger.info("=" * 80)
+
+            return Response(resultado, status=200)
+
+        except ValueError as e:
+            logger.error("=" * 80)
+            logger.error("❌ ERROR: VALOR INVÁLIDO (ValueError)")
+            logger.error("=" * 80)
+            logger.error(f"Mensaje: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error de valor en predicción',
+                'details': str(e),
+                'codigo': 'INVALID_VALUE',
+                'tipo': 'ValueError'
+            }, status=400)
+
+        except KeyError as e:
+            logger.error("=" * 80)
+            logger.error("❌ ERROR: CLAVE FALTANTE (KeyError)")
+            logger.error("=" * 80)
+            logger.error(f"Clave faltante: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error de datos faltantes',
+                'details': f'Campo requerido faltante: {str(e)}',
+                'codigo': 'MISSING_FIELD',
+                'tipo': 'KeyError'
+            }, status=400)
+
+        except Exception as e:
+            logger.error("=" * 80)
+            logger.error("❌ ERROR INESPERADO EN PREDICCIÓN")
+            logger.error("=" * 80)
+            logger.error(f"Tipo: {type(e).__name__}")
+            logger.error(f"Mensaje: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error inesperado durante la predicción',
+                'details': str(e),
+                'error_type': type(e).__name__,
+                'codigo': 'UNEXPECTED_ERROR'
+            }, status=500)
+
+    except Exception as e:
+        logger.error(f"❌ Error inesperado en predicción ML: {e}")
+        logger.exception(e)
+        return Response({
+            'error': 'Error inesperado en la predicción',
+            'details': str(e),
+            'codigo': 'INTERNAL_ERROR'
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def model_info(request):
+    """
+    Obtiene información sobre el modelo de predicción de polinización
+
+    Response:
+        {
+            "loaded": true,
+            "model_type": "XGBRegressor",
+            "n_features": 17,
+            "features": [...],
+            "categorical_columns": [...],
+            ...
+        }
+    """
+    try:
+        from ..ml.predictors.pollination_predictor import pollination_predictor
+
+        logger.info(f"Usuario {request.user.username} consultando información del modelo")
+
+        info = pollination_predictor.get_model_info()
+
+        return Response(info, status=200)
+
+    except Exception as e:
+        logger.error(f"Error obteniendo información del modelo: {e}")
+        return Response({
+            'error': 'Error obteniendo información del modelo',
+            'details': str(e)
+        }, status=500)
+
+
+# =============================================================================
+# PREDICCIÓN DE GERMINACIÓN CON ML (Random Forest)
+# =============================================================================
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@require_germinacion_access('view')
+def prediccion_germinacion_ml(request):
+    """
+    Predicción de DIAS_GERMINACION usando Random Forest
+    Endpoint que usa el modelo Random Forest entrenado con pipeline estructurado
+
+    Requiere acceso a germinaciones
+
+    Request body:
+        {
+            "fecha_siembra": "2024-12-04",
+            "especie": "Phragmipedium kovachii",
+            "clima": "IC",
+            "estado_capsula": "Cerrada",
+            "s_stock": 10,
+            "c_solic": 2,
+            "dispone": 1
+        }
+
+    Response:
+        {
+            "dias_estimados": 87,
+            "fecha_estimada_germinacion": "2025-03-01",
+            "confianza": 85,
+            "nivel_confianza": "alta",
+            "modelo": "Random Forest",
+            "detalles": {
+                "especie_agrupada": "Phragmipedium kovachii",
+                "especie_original": "Phragmipedium kovachii",
+                "clima": "IC",
+                "estado_capsula": "Cerrada",
+                "features_usadas": 129
+            }
+        }
+    """
+    try:
+        # USAR PREDICTOR RANDOM FOREST
+        from ..ml.predictors import get_germinacion_predictor
+
+        logger.info(f"Usuario {request.user.username} solicitando prediccion de germinacion (Random Forest)")
+        logger.info(f"Datos recibidos: {request.data}")
+
+        # Validar campos requeridos
+        required_fields = ['fecha_siembra', 'especie', 'clima', 'estado_capsula']
+        missing_fields = [field for field in required_fields if field not in request.data]
+
+        if missing_fields:
+            logger.warning(f"Campos faltantes: {missing_fields}")
+            return Response({
+                'error': 'Datos de entrada invalidos',
+                'details': {field: ['Este campo es requerido'] for field in missing_fields}
+            }, status=400)
+
+        # Obtener predictor (singleton)
+        predictor = get_germinacion_predictor()
+
+        # Verificar que el modelo esté cargado
+        if not predictor.model_loaded:
+            logger.error("Modelo Random Forest de germinacion no esta cargado")
+            return Response({
+                'error': 'Modelo de prediccion no disponible',
+                'details': 'El modelo Random Forest no pudo ser cargado. Verifique los archivos del modelo.',
+                'codigo': 'MODEL_NOT_LOADED'
+            }, status=503)
+
+        try:
+            # Realizar predicción usando el predictor Random Forest
+            logger.info("Llamando a GerminacionPredictor.predict_dias_germinacion()...")
+
+            resultado = predictor.predict_dias_germinacion(
+                fecha_siembra=request.data['fecha_siembra'],
+                especie=request.data['especie'],
+                clima=request.data['clima'],
+                estado_capsula=request.data['estado_capsula'],
+                s_stock=request.data.get('s_stock', 0),
+                c_solic=request.data.get('c_solic', 0),
+                dispone=request.data.get('dispone', 0)
+            )
+
+            logger.info("=" * 80)
+            logger.info("PREDICCION EXITOSA - RANDOM FOREST GERMINACION")
+            logger.info("=" * 80)
+            logger.info(f"Dias estimados: {resultado['dias_estimados']} dias")
+            logger.info(f"Fecha estimada: {resultado['fecha_estimada_germinacion']}")
+            logger.info(f"Confianza: {resultado['confianza']}%")
+            logger.info(f"Features usadas: {resultado['detalles']['features_usadas']}")
+            logger.info(f"Especie agrupada: {resultado['detalles']['especie_agrupada']}")
+            logger.info("=" * 80)
+
+            return Response(resultado, status=200)
+
+        except ValueError as e:
+            logger.error("=" * 80)
+            logger.error("ERROR: VALOR INVALIDO (ValueError)")
+            logger.error("=" * 80)
+            logger.error(f"Mensaje: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error de valor en prediccion',
+                'details': str(e),
+                'codigo': 'INVALID_VALUE',
+                'tipo': 'ValueError'
+            }, status=400)
+
+        except KeyError as e:
+            logger.error("=" * 80)
+            logger.error("ERROR: CLAVE FALTANTE (KeyError)")
+            logger.error("=" * 80)
+            logger.error(f"Clave faltante: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error de datos faltantes',
+                'details': f'Campo requerido faltante: {str(e)}',
+                'codigo': 'MISSING_FIELD',
+                'tipo': 'KeyError'
+            }, status=400)
+
+        except Exception as e:
+            # Error en el pipeline del modelo (alineación, procesamiento, etc.)
+            logger.error("=" * 80)
+            logger.error("ERROR EN PIPELINE DEL MODELO")
+            logger.error("=" * 80)
+            logger.error(f"Tipo: {type(e).__name__}")
+            logger.error(f"Mensaje: {e}")
+            logger.exception(e)
+            return Response({
+                'error': 'Error en el pipeline de prediccion',
+                'details': str(e),
+                'error_type': type(e).__name__,
+                'codigo': 'PIPELINE_ERROR',
+                'mensaje': 'Ocurrio un error durante el procesamiento de los datos o la alineacion de features'
+            }, status=500)
+
+    except Exception as e:
+        logger.error(f"Error inesperado en prediccion ML de germinacion: {e}")
+        logger.exception(e)
+        return Response({
+            'error': 'Error inesperado en la prediccion',
+            'details': str(e),
+            'codigo': 'INTERNAL_ERROR'
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def germinacion_model_info(request):
+    """
+    Obtiene información sobre el modelo de predicción de germinación
+
+    Response:
+        {
+            "loaded": true,
+            "model_type": "RandomForestRegressor",
+            "n_features": 129,
+            "top_especies": 100,
+            "encoding": "One-Hot",
+            "scaler": "RobustScaler",
+            ...
+        }
+    """
+    try:
+        from ..ml.predictors import get_germinacion_predictor
+
+        logger.info(f"Usuario {request.user.username} consultando informacion del modelo de germinacion")
+
+        predictor = get_germinacion_predictor()
+
+        if not predictor.model_loaded:
+            return Response({
+                'loaded': False,
+                'error': 'Modelo no cargado'
+            }, status=503)
+
+        info = {
+            'loaded': True,
+            'model_type': 'RandomForestRegressor',
+            'n_features': len(predictor.feature_order) if predictor.feature_order else 0,
+            'n_numeric_features': len(predictor.numeric_cols) if predictor.numeric_cols else 0,
+            'top_especies': len(predictor.top_especies) if predictor.top_especies else 0,
+            'categorical_features': predictor.categorical_features if predictor.categorical_features else [],
+            'numerical_features': predictor.numerical_features if predictor.numerical_features else [],
+            'encoding': 'One-Hot',
+            'scaler': 'RobustScaler',
+            'pipeline_steps': [
+                '1. Feature Engineering (temporales, ciclicas, derivadas)',
+                '2. One-Hot Encoding',
+                '3. Feature Alignment',
+                '4. Normalization + Prediction'
+            ],
+            'metricas': {
+                'RMSE': '~52 dias',
+                'MAE': '~37 dias',
+                'R2': '~0.85'
+            }
+        }
+
+        return Response(info, status=200)
+
+    except Exception as e:
+        logger.error(f"Error obteniendo informacion del modelo de germinacion: {e}")
+        return Response({
+            'error': 'Error obteniendo informacion del modelo',
+            'details': str(e)
+        }, status=500)

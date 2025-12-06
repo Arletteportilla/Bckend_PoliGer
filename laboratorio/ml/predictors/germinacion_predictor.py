@@ -1,164 +1,429 @@
+# -*- coding: utf-8 -*-
+"""
+Predictor Random Forest para Germinación
+=========================================
+Usa el modelo Random Forest entrenado con validación cruzada
+
+Métricas del modelo (5-fold CV):
+- RMSE: ~52 días
+- MAE: ~37 días
+- R²: ~0.85
+
+Este predictor implementa el mismo preprocessing que se usó en entrenamiento:
+- 129 features totales (20 numéricas + 109 one-hot encoded)
+- RobustScaler para normalización de features numéricas
+- One-Hot Encoding para variables categóricas (CLIMA, ESPECIE_AGRUPADA, E.CAPSU)
+- Estadísticas por especie y clima
+"""
+
 import joblib
 import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta
 import os
+import json
+import logging
+import pickle
 
-# Configurar NumExpr para usar núcleos optimizados (18 en lugar de 20 para mejor rendimiento)
-os.environ['NUMEXPR_MAX_THREADS'] = '18'
+logger = logging.getLogger(__name__)
 
-# aqui se carga el metodo de prediccion para retornar la fecha y debe cargar con el model .bin
-def cargar_modelo():
-    try:
-        # Obtener la ruta absoluta del directorio actual del archivo
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        # Subir dos niveles para llegar a laboratorio/
-        laboratorio_dir = os.path.dirname(os.path.dirname(current_dir))
-        # El modelo está en laboratorio/modelos/germinacion.pkl
-        modelo_path = os.path.join(laboratorio_dir, 'modelos', 'germinacion.pkl')
-        modelo_path = os.path.abspath(modelo_path)
-        
-        print(f"🔍 Buscando modelo en: {modelo_path}")
-        
-        if not os.path.exists(modelo_path):
-            raise FileNotFoundError(f"Modelo no encontrado en {modelo_path}")
-        
-        print(f"✅ Modelo encontrado, cargando...")
-        modelo = joblib.load(modelo_path)
-        print(f"✅ Modelo cargado exitosamente")
-        return modelo
-    except Exception as e:
-        print(f"❌ Error cargando modelo: {str(e)}")
-        raise Exception(f"Error al cargar el modelo: {str(e)}")
 
-def calcular_tiempo_germinacion(f_siembra, f_germi, fecha_ingreso, fecha_polinizacion):
-    """
-    Calcula el tiempo de germinación usando fechas alternativas
-    Prioridad: f_germi y f_siembra > fecha_ingreso y fecha_polinizacion
-    """
-    def procesar_fecha(fecha):
-        if isinstance(fecha, str):
-            try:
-                return datetime.strptime(fecha, '%Y-%m-%d')
-            except:
-                try:
-                    return datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S')
-                except:
-                    return None
-        elif isinstance(fecha, datetime):
-            return fecha
-        return None
-    
-    # Procesar todas las fechas
-    fecha_siembra = procesar_fecha(f_siembra)
-    fecha_germinacion = procesar_fecha(f_germi)
-    fecha_ing = procesar_fecha(fecha_ingreso)
-    fecha_pol = procesar_fecha(fecha_polinizacion)
-    
-    # Intentar calcular tiempo_germinacion con diferentes combinaciones
-    tiempo_germinacion = None
-    
-    # Opción 1: f_germi - f_siembra (más preciso)
-    if fecha_germinacion and fecha_siembra:
-        tiempo_germinacion = (fecha_germinacion - fecha_siembra).days
-    
-    # Opción 2: fecha_ingreso - fecha_polinizacion
-    elif fecha_ing and fecha_pol:
-        tiempo_germinacion = (fecha_ing - fecha_pol).days
-    
-    # Opción 3: f_germi - fecha_polinizacion
-    elif fecha_germinacion and fecha_pol:
-        tiempo_germinacion = (fecha_germinacion - fecha_pol).days
-    
-    # Opción 4: fecha_ingreso - f_siembra
-    elif fecha_ing and fecha_siembra:
-        tiempo_germinacion = (fecha_ing - fecha_siembra).days
-    
-    return max(0, tiempo_germinacion) if tiempo_germinacion is not None else None
+class GerminacionPredictor:
+    """Predictor usando modelo Random Forest para Germinación (Singleton)"""
 
-def obtener_parametros_especie_genero(especie, genero):
-    """
-    Retorna parámetros específicos de germinación según la especie y género
-    Incluye días promedio, factores de ajuste y características específicas
-    """
-    # Diccionario de especies/géneros con sus características de germinación
-    parametros_especies = {
-        # Orquídeas
-        'cattleya': {'dias_base': 180, 'factor_clima': 1.2, 'factor_temp': 'calido'},
-        'phalaenopsis': {'dias_base': 150, 'factor_clima': 1.1, 'factor_temp': 'templado'},
-        'dendrobium': {'dias_base': 120, 'factor_clima': 1.0, 'factor_temp': 'templado'},
-        'oncidium': {'dias_base': 140, 'factor_clima': 1.1, 'factor_temp': 'templado'},
-        'vanda': {'dias_base': 200, 'factor_clima': 1.3, 'factor_temp': 'calido'},
-        
-        # Géneros por defecto
-        'orchidaceae': {'dias_base': 160, 'factor_clima': 1.1, 'factor_temp': 'templado'},
-        'solanaceae': {'dias_base': 15, 'factor_clima': 0.7, 'factor_temp': 'calido'},
-        'leguminosae': {'dias_base': 12, 'factor_clima': 0.8, 'factor_temp': 'templado'},
-    }
-    
-    # Buscar primero por especie específica
-    especie_lower = especie.lower() if especie else ''
-    genero_lower = genero.lower() if genero else ''
-    
-    if especie_lower in parametros_especies:
-        return parametros_especies[especie_lower]
-    elif genero_lower in parametros_especies:
-        return parametros_especies[genero_lower]
-    else:
-        # Parámetros por defecto
-        return {'dias_base': 30, 'factor_clima': 1.0, 'factor_temp': 'templado'}
+    _instance = None
 
-def ajustar_prediccion_por_especie(dias_predichos, especie, genero, clima, ubicacion, tipo_polinizacion):
-    """
-    Ajusta la predicción base usando conocimiento específico de la especie/género
-    """
-    parametros = obtener_parametros_especie_genero(especie, genero)
-    
-    # Usar días base específicos de la especie si la predicción del modelo es muy diferente
-    dias_base_especie = parametros['dias_base']
-    factor_clima_especie = parametros['factor_clima']
-    
-    # Ajuste por clima
-    ajuste_clima = 1.0
-    if clima:
-        clima_lower = clima.lower()
-        if 'frio' in clima_lower or 'fría' in clima_lower:
-            ajuste_clima = 1.3
-        elif 'calido' in clima_lower or 'cálido' in clima_lower or 'calor' in clima_lower:
-            ajuste_clima = 0.8
-        elif 'templado' in clima_lower:
-            ajuste_clima = 1.0
-    
-    # Ajuste por ubicación
-    ajuste_ubicacion = 1.0
-    if ubicacion:
-        ubicacion_lower = ubicacion.lower()
-        if 'invernadero' in ubicacion_lower:
-            ajuste_ubicacion = 0.9
-        elif 'exterior' in ubicacion_lower or 'campo' in ubicacion_lower:
-            ajuste_ubicacion = 1.2
-        elif 'laboratorio' in ubicacion_lower:
-            ajuste_ubicacion = 0.8
-    
-    # Ajuste por tipo de polinización
-    ajuste_polinizacion = 1.0
-    if tipo_polinizacion:
-        tipo_lower = tipo_polinizacion.lower()
-        if 'artificial' in tipo_lower or 'manual' in tipo_lower:
-            ajuste_polinizacion = 0.9
-        elif 'natural' in tipo_lower:
-            ajuste_polinizacion = 1.1
-        elif 'cruzada' in tipo_lower:
-            ajuste_polinizacion = 1.0
-    
-    # Combinar predicción del modelo con conocimiento específico de especie
-    peso_modelo = 0.7
-    peso_especie = 0.3
-    
-    dias_ajustados = (
-        (dias_predichos * peso_modelo) + 
-        (dias_base_especie * factor_clima_especie * peso_especie)
-    ) * ajuste_clima * ajuste_ubicacion * ajuste_polinizacion
-    
-    return int(max(1, dias_ajustados))
+    def __new__(cls):
+        """Implementación del patrón Singleton"""
+        if cls._instance is None:
+            cls._instance = super(GerminacionPredictor, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
-# Función de predicción de germinación eliminada
+    def __init__(self):
+        """Inicializa el predictor (solo una vez)"""
+        if self._initialized:
+            return
+
+        self.model = None
+        self.scaler = None
+        self.numeric_cols = None
+        self.top_especies = None
+        self.categorical_features = None
+        self.numerical_features = None
+        self.feature_order = None
+        self.model_loaded = False
+        self._load_model()
+        self._initialized = True
+
+    def _load_model(self):
+        """Carga el modelo Random Forest, scaler y configuración"""
+        try:
+            # Ruta al modelo usando ruta relativa desde este archivo
+            base_path = os.path.join(
+                os.path.dirname(__file__),
+                '..',
+                '..',
+                'modelos',
+                'Germinacion'
+            )
+
+            model_path = os.path.join(base_path, 'random_forest_germinacion.joblib')
+            transformador_path = os.path.join(base_path, 'germinacion_transformador.pkl')
+            feature_order_path = os.path.join(base_path, 'feature_order_germinacion.json')
+
+            # Cargar modelo Random Forest
+            if not os.path.exists(model_path):
+                logger.error(f"Modelo no encontrado: {model_path}")
+                return
+
+            logger.info(f"Cargando modelo Random Forest desde: {model_path}")
+            self.model = joblib.load(model_path)
+            logger.info(f"OK - Modelo Random Forest cargado correctamente")
+
+            # Cargar transformador (scaler + metadatos)
+            if os.path.exists(transformador_path):
+                with open(transformador_path, 'rb') as f:
+                    transformador = pickle.load(f)
+
+                self.scaler = transformador['scaler']
+                self.numeric_cols = transformador['numeric_cols']
+                self.top_especies = transformador['top_especies']
+                self.categorical_features = transformador['categorical_features']
+                self.numerical_features = transformador['numerical_features']
+
+                logger.info(f"OK - Transformador cargado correctamente")
+                logger.info(f"  - Numeric cols: {len(self.numeric_cols)}")
+                logger.info(f"  - Top especies: {len(self.top_especies)}")
+            else:
+                logger.error(f"Transformador no encontrado: {transformador_path}")
+                return
+
+            # Cargar orden de features
+            if os.path.exists(feature_order_path):
+                with open(feature_order_path, 'r', encoding='utf-8') as f:
+                    self.feature_order = json.load(f)
+                logger.info(f"OK - Feature order cargado: {len(self.feature_order)} features")
+            else:
+                logger.error(f"Feature order no encontrado: {feature_order_path}")
+                return
+
+            self.model_loaded = True
+            logger.info("="*60)
+            logger.info("MODELO RANDOM FOREST GERMINACION CARGADO EXITOSAMENTE")
+            logger.info(f"  - Tipo: Random Forest Regressor")
+            logger.info(f"  - Features totales: {len(self.feature_order)}")
+            logger.info(f"  - Scaler: RobustScaler")
+            logger.info(f"  - Encoding: One-Hot para categoricas")
+            logger.info("="*60)
+
+        except Exception as e:
+            logger.error(f"Error cargando modelo Random Forest: {e}", exc_info=True)
+            self.model_loaded = False
+
+    # =========================================================================
+    # PIPELINE PASO 1: INGENIERÍA DE CARACTERÍSTICAS
+    # =========================================================================
+
+    def _create_features(self, df_input):
+        """
+        Crea todas las features necesarias a partir de los datos de entrada
+
+        Esto incluye:
+        - Features temporales (mes, día del año, trimestre, semana)
+        - Features cíclicas (seno/coseno de mes y día)
+        - Features derivadas numéricas (logaritmos, ratios)
+        - Estadísticas por especie y clima
+        - Agrupación de especies (Top 100 o OTRAS)
+
+        Args:
+            df_input (DataFrame): DataFrame con columnas crudas
+                - F.SIEMBRA (datetime)
+                - ESPECIE (str)
+                - CLIMA (str)
+                - E.CAPSU (str)
+                - S.STOCK (float)
+                - C.SOLIC (float)
+                - DISPONE (float)
+
+        Returns:
+            DataFrame: DataFrame con todas las features generadas
+        """
+        df = df_input.copy()
+
+        # 1. FEATURES TEMPORALES
+        df['MES_SIEMBRA'] = df['F.SIEMBRA'].dt.month
+        df['DIA_AÑO_SIEMBRA'] = df['F.SIEMBRA'].dt.dayofyear
+        df['TRIMESTRE_SIEMBRA'] = df['F.SIEMBRA'].dt.quarter
+        df['SEMANA_AÑO'] = df['F.SIEMBRA'].dt.isocalendar().week
+
+        # 2. FEATURES CÍCLICAS (para capturar estacionalidad)
+        df['MES_SIN'] = np.sin(2 * np.pi * df['MES_SIEMBRA'] / 12)
+        df['MES_COS'] = np.cos(2 * np.pi * df['MES_SIEMBRA'] / 12)
+        df['DIA_AÑO_SIN'] = np.sin(2 * np.pi * df['DIA_AÑO_SIEMBRA'] / 365)
+        df['DIA_AÑO_COS'] = np.cos(2 * np.pi * df['DIA_AÑO_SIEMBRA'] / 365)
+
+        # 3. FEATURES DERIVADAS NUMÉRICAS
+        df['C.SOLIC_LOG'] = np.log1p(df['C.SOLIC'])
+        df['S.STOCK_LOG'] = np.log1p(df['S.STOCK'])
+        df['RATIO_STOCK_SOLIC'] = np.where(
+            df['C.SOLIC'] > 0,
+            df['S.STOCK'] / (df['C.SOLIC'] + 1),
+            0
+        )
+
+        # 4. ESTADÍSTICAS POR ESPECIE
+        # NOTA: En producción ideal, estas deberían calcularse de la BD
+        # Por ahora usamos valores por defecto razonables
+        df['ESP_MEAN'] = 90      # Promedio de días de germinación
+        df['ESP_MEDIAN'] = 85
+        df['ESP_STD'] = 50
+        df['ESP_COUNT'] = 1      # Frecuencia de la especie
+
+        # 5. ESTADÍSTICAS POR CLIMA
+        df['CLIMA_MEAN'] = 90
+        df['CLIMA_STD'] = 50
+
+        # 6. AGRUPAR ESPECIE (Top 100 o OTRAS)
+        df['ESPECIE_AGRUPADA'] = df['ESPECIE'].apply(
+            lambda x: x if x in self.top_especies else 'OTRAS'
+        )
+
+        logger.info(f"  [1/4] Features creadas: {len(df.columns)} columnas")
+
+        return df
+
+    # =========================================================================
+    # PIPELINE PASO 2: ONE-HOT ENCODING CON MANEJO ROBUSTO
+    # =========================================================================
+
+    def _apply_ohe_encoding(self, df):
+        """
+        Aplica One-Hot Encoding a las variables categóricas
+
+        IMPORTANTE: Implementa manejo robusto de nuevas categorías:
+        - Si una categoría no fue vista en entrenamiento, se asigna vector cero
+        - Esto evita errores y mantiene estabilidad del servicio
+
+        Args:
+            df (DataFrame): DataFrame con features creadas
+
+        Returns:
+            DataFrame: DataFrame con columnas OHE añadidas
+        """
+        # Seleccionar solo las columnas necesarias para OHE
+        df_for_encoding = df[self.categorical_features + self.numerical_features].copy()
+
+        # Aplicar pd.get_dummies con drop_first=True (igual que en entrenamiento)
+        df_encoded = pd.get_dummies(
+            df_for_encoding,
+            columns=self.categorical_features,
+            drop_first=True,
+            dtype=int
+        )
+
+        logger.info(f"  [2/4] One-Hot Encoding aplicado: {len(df_encoded.columns)} columnas")
+
+        return df_encoded
+
+    # =========================================================================
+    # PIPELINE PASO 3: ALINEACIÓN CON FEATURE ORDER
+    # =========================================================================
+
+    def _align_features(self, df_encoded):
+        """
+        Alinea las features con el orden exacto esperado por el modelo
+
+        CRÍTICO: Este paso es ESENCIAL para que el modelo funcione correctamente
+        - Agrega columnas faltantes con valor 0 (nuevas categorías)
+        - Reordena columnas según feature_order_germinacion.json
+        - Elimina columnas extras
+
+        Args:
+            df_encoded (DataFrame): DataFrame con OHE aplicado
+
+        Returns:
+            DataFrame: DataFrame alineado con feature_order
+        """
+        # Crear DataFrame con todas las columnas del feature_order inicializadas en 0
+        df_aligned = pd.DataFrame(0, index=df_encoded.index, columns=self.feature_order)
+
+        # Copiar valores de las columnas que existen
+        for col in df_encoded.columns:
+            if col in df_aligned.columns:
+                df_aligned[col] = df_encoded[col].values
+
+        logger.info(f"  [3/4] Features alineadas: {len(df_aligned.columns)} columnas en orden correcto")
+
+        return df_aligned
+
+    # =========================================================================
+    # PIPELINE PASO 4: NORMALIZACIÓN Y PREDICCIÓN
+    # =========================================================================
+
+    def _normalize_and_predict(self, df_aligned):
+        """
+        Normaliza las features numéricas y realiza la predicción
+
+        Args:
+            df_aligned (DataFrame): DataFrame con features alineadas
+
+        Returns:
+            int: Días de germinación predichos (entero positivo >= 1)
+        """
+        # Normalizar solo las columnas numéricas usando el scaler entrenado
+        df_final = df_aligned.copy()
+        df_final[self.numeric_cols] = self.scaler.transform(df_final[self.numeric_cols])
+
+        logger.info(f"  [4/4] Normalizacion aplicada a {len(self.numeric_cols)} columnas numericas")
+
+        # Predicción
+        dias_predichos = self.model.predict(df_final)[0]
+
+        # Asegurar que sea un entero positivo >= 1
+        dias_predichos = max(1, int(np.round(dias_predichos)))
+
+        return dias_predichos
+
+    # =========================================================================
+    # MÉTODO PRINCIPAL: PREDICT_DIAS_GERMINACION
+    # =========================================================================
+
+    def predict_dias_germinacion(self, fecha_siembra, especie, clima, estado_capsula,
+                                  s_stock=0, c_solic=0, dispone=0):
+        """
+        Método principal que ejecuta el pipeline completo de predicción
+
+        Pipeline:
+        1. Crear features (temporales, cíclicas, derivadas, estadísticas)
+        2. Aplicar One-Hot Encoding con manejo robusto de nuevas categorías
+        3. Alinear features con el orden exacto del modelo
+        4. Normalizar y predecir
+
+        Args:
+            fecha_siembra (str): Fecha de siembra 'YYYY-MM-DD'
+            especie (str): Nombre de la especie
+            clima (str): Tipo de clima (Cool, IC, IW, Intermedio, Warm)
+            estado_capsula (str): Estado de la cápsula (Abierta, Cerrada, Semiabiert)
+            s_stock (int/float): Stock disponible
+            c_solic (int/float): Cantidad solicitada
+            dispone (int/float): Disponibilidad
+
+        Returns:
+            dict: Resultado con dias_estimados, fecha_estimada_germinacion, confianza, etc.
+        """
+        if not self.model_loaded:
+            raise ValueError("Modelo Random Forest no esta cargado")
+
+        try:
+            logger.info("="*60)
+            logger.info("PIPELINE DE PREDICCION - Random Forest Germinacion")
+            logger.info("="*60)
+
+            # Parsear y validar fecha
+            fecha = datetime.strptime(fecha_siembra, '%Y-%m-%d')
+
+            # Crear DataFrame de entrada con datos crudos
+            df_input = pd.DataFrame([{
+                'F.SIEMBRA': fecha,
+                'ESPECIE': str(especie).strip(),
+                'CLIMA': str(clima).strip(),
+                'E.CAPSU': str(estado_capsula).strip(),
+                'S.STOCK': float(s_stock) if s_stock is not None else 0,
+                'C.SOLIC': float(c_solic) if c_solic is not None else 0,
+                'DISPONE': float(dispone) if dispone is not None else 0
+            }])
+
+            logger.info(f"Entrada: {fecha_siembra} | {especie} | {clima} | {estado_capsula}")
+
+            # PASO 1: Ingeniería de características
+            df_features = self._create_features(df_input)
+
+            # PASO 2: One-Hot Encoding
+            df_encoded = self._apply_ohe_encoding(df_features)
+
+            # PASO 3: Alineación de features
+            df_aligned = self._align_features(df_encoded)
+
+            # PASO 4: Normalización y predicción
+            dias_predichos = self._normalize_and_predict(df_aligned)
+
+            logger.info(f"\nDias predichos: {dias_predichos}")
+
+            # Calcular fecha estimada de germinación
+            fecha_estimada = fecha + timedelta(days=dias_predichos)
+
+            # Calcular confianza
+            base_confianza = 70
+            if df_features['ESPECIE_AGRUPADA'].iloc[0] != 'OTRAS':
+                base_confianza += 10  # +10% si especie está en top 100
+            if clima in ['Cool', 'IC', 'IW', 'Intermedio', 'Warm']:
+                base_confianza += 5   # +5% si clima es conocido
+
+            confianza = min(85, base_confianza)
+
+            # Determinar nivel de confianza
+            if confianza >= 80:
+                nivel_confianza = 'alta'
+            elif confianza >= 70:
+                nivel_confianza = 'media'
+            else:
+                nivel_confianza = 'baja'
+
+            logger.info(f"Fecha estimada: {fecha_estimada.strftime('%Y-%m-%d')}")
+            logger.info(f"Confianza: {confianza}% ({nivel_confianza})")
+            logger.info("="*60)
+
+            # Retornar resultado completo
+            return {
+                'dias_estimados': dias_predichos,
+                'fecha_estimada_germinacion': fecha_estimada.strftime('%Y-%m-%d'),
+                'confianza': confianza,
+                'nivel_confianza': nivel_confianza,
+                'modelo': 'Random Forest',
+                'detalles': {
+                    'especie_agrupada': df_features['ESPECIE_AGRUPADA'].iloc[0],
+                    'especie_original': especie,
+                    'clima': clima,
+                    'estado_capsula': estado_capsula,
+                    'features_usadas': len(self.feature_order)
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error en prediccion: {e}", exc_info=True)
+            raise
+
+    # =========================================================================
+    # MÉTODO LEGACY (para compatibilidad)
+    # =========================================================================
+
+    def predecir(self, fecha_siembra, especie, clima, estado_capsula,
+                 s_stock=0, c_solic=0, dispone=0):
+        """
+        Método legacy para compatibilidad con código existente
+        Delega al método principal predict_dias_germinacion
+        """
+        return self.predict_dias_germinacion(
+            fecha_siembra=fecha_siembra,
+            especie=especie,
+            clima=clima,
+            estado_capsula=estado_capsula,
+            s_stock=s_stock,
+            c_solic=c_solic,
+            dispone=dispone
+        )
+
+
+# =============================================================================
+# FUNCIÓN HELPER PARA OBTENER INSTANCIA SINGLETON
+# =============================================================================
+
+_predictor_instance = None
+
+def get_germinacion_predictor():
+    """Retorna la instancia única del predictor de germinación"""
+    global _predictor_instance
+    if _predictor_instance is None:
+        _predictor_instance = GerminacionPredictor()
+    return _predictor_instance

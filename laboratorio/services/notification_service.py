@@ -270,6 +270,61 @@ class NotificationService:
             'favoritas': favoritas,
             'archivadas': archivadas
         }
+    
+    def obtener_registros_pendientes_revision(self, usuario: User, dias_limite: int = 5) -> Dict[str, Any]:
+        """
+        Obtiene registros en estado INICIAL que requieren revisión
+        (más de X días sin cambiar de estado)
+        """
+        from datetime import date, timedelta
+        
+        fecha_limite = date.today() - timedelta(days=dias_limite)
+        
+        # Germinaciones pendientes
+        germinaciones_pendientes = Germinacion.objects.filter(
+            creado_por=usuario,
+            estado_germinacion='INICIAL',
+            fecha_siembra__lte=fecha_limite
+        ).values(
+            'id', 'codigo', 'nombre', 'genero', 'especie_variedad',
+            'fecha_siembra', 'prediccion_fecha_estimada'
+        )
+        
+        # Calcular días transcurridos para cada germinación
+        germinaciones_list = []
+        for germ in germinaciones_pendientes:
+            if germ['fecha_siembra']:
+                dias_transcurridos = (date.today() - germ['fecha_siembra']).days
+                germ['dias_transcurridos'] = dias_transcurridos
+                germinaciones_list.append(germ)
+        
+        # Polinizaciones pendientes
+        polinizaciones_pendientes = Polinizacion.objects.filter(
+            creado_por=usuario,
+            estado_polinizacion='INICIAL',
+            fechapol__lte=fecha_limite
+        ).values(
+            'numero', 'codigo', 'tipo_polinizacion',
+            'madre_genero', 'madre_especie', 'padre_genero', 'padre_especie',
+            'fechapol', 'prediccion_fecha_estimada'
+        )
+        
+        # Calcular días transcurridos para cada polinización
+        polinizaciones_list = []
+        for pol in polinizaciones_pendientes:
+            if pol['fechapol']:
+                dias_transcurridos = (date.today() - pol['fechapol']).days
+                pol['dias_transcurridos'] = dias_transcurridos
+                polinizaciones_list.append(pol)
+        
+        return {
+            'germinaciones': germinaciones_list,
+            'polinizaciones': polinizaciones_list,
+            'total_germinaciones': len(germinaciones_list),
+            'total_polinizaciones': len(polinizaciones_list),
+            'total': len(germinaciones_list) + len(polinizaciones_list),
+            'dias_limite': dias_limite
+        }
 
 
 # Instancia global del servicio

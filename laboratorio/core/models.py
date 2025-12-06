@@ -136,8 +136,49 @@ class Polinizacion(models.Model):
     prediccion_condiciones_climaticas = models.TextField(verbose_name='Condiciones climáticas de predicción', blank=True)
     prediccion_especie_info = models.TextField(verbose_name='Información de especie de predicción', blank=True)
     prediccion_parametros_usados = models.TextField(verbose_name='Parámetros usados en predicción', blank=True)
+    
+    # Estado del proceso de polinización
+    ESTADOS_POLINIZACION_PROCESO = [
+        ('INICIAL', 'Inicial'),
+        ('EN_PROCESO', 'En Proceso'),
+        ('FINALIZADO', 'Finalizado'),
+    ]
+    
+    estado_polinizacion = models.CharField(
+        max_length=20, 
+        choices=ESTADOS_POLINIZACION_PROCESO, 
+        default='INICIAL', 
+        verbose_name='Estado de Polinización',
+        help_text='Estado del proceso de polinización'
+    )
+    
+    # Progreso de polinización (0-100%)
+    progreso_polinizacion = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Progreso de Polinización (%)',
+        help_text='Porcentaje de progreso de la polinización (0-100%)'
+    )
+
+    def actualizar_estado_por_progreso(self):
+        """Actualiza el estado de polinización basado en el progreso"""
+        if self.progreso_polinizacion == 0:
+            self.estado_polinizacion = 'INICIAL'
+        elif self.progreso_polinizacion >= 100:
+            self.estado_polinizacion = 'FINALIZADO'
+            # Registrar fecha de maduración si no existe
+            if not self.fechamad:
+                from django.utils import timezone
+                self.fechamad = timezone.now().date()
+        else:
+            self.estado_polinizacion = 'EN_PROCESO'
 
     def save(self, *args, **kwargs):
+        # Validar que el progreso esté entre 0 y 100
+        if self.progreso_polinizacion < 0:
+            self.progreso_polinizacion = 0
+        elif self.progreso_polinizacion > 100:
+            self.progreso_polinizacion = 100
+        
         # Guarda primero para tener ID
         super().save(*args, **kwargs)
         # Ya no ejecuta predicción
@@ -267,6 +308,29 @@ class Germinacion(models.Model):
     finca = models.CharField(max_length=100, null=True, blank=True)
     numero_vivero = models.CharField(max_length=50, verbose_name='Número de vivero', null=True, blank=True)
     numero_capsulas = models.PositiveIntegerField(verbose_name='Número de cápsulas', null=True, blank=True)
+    # Estado del proceso de germinación
+    ESTADOS_GERMINACION = [
+        ('INICIAL', 'Inicial'),
+        ('EN_PROCESO', 'En Proceso'),
+        ('FINALIZADO', 'Finalizado'),
+    ]
+    
+    estado_germinacion = models.CharField(
+        max_length=20, 
+        choices=ESTADOS_GERMINACION, 
+        default='INICIAL', 
+        verbose_name='Estado de Germinación',
+        help_text='Estado del proceso de germinación'
+    )
+    
+    # Progreso de germinación (0-100%)
+    progreso_germinacion = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Progreso de Germinación (%)',
+        help_text='Porcentaje de progreso de la germinación (0-100%)'
+    )
+    
+    # Campo legacy para compatibilidad
     etapa_actual = models.CharField(max_length=100, choices=[
         ('INGRESADO', 'Ingresado'),
         ('EN_PROCESO', 'En proceso'),
@@ -285,11 +349,31 @@ class Germinacion(models.Model):
     prediccion_especie_info = models.TextField(verbose_name='Información de especie de predicción', blank=True)
     prediccion_parametros_usados = models.TextField(verbose_name='Parámetros usados en predicción', blank=True)
 
+    def actualizar_estado_por_progreso(self):
+        """Actualiza el estado de germinación basado en el progreso"""
+        if self.progreso_germinacion == 0:
+            self.estado_germinacion = 'INICIAL'
+        elif self.progreso_germinacion >= 100:
+            self.estado_germinacion = 'FINALIZADO'
+            # Registrar fecha de germinación si no existe
+            if not self.fecha_germinacion:
+                from django.utils import timezone
+                self.fecha_germinacion = timezone.now().date()
+        else:
+            self.estado_germinacion = 'EN_PROCESO'
+    
     def save(self, *args, **kwargs):
         # Calcular días de polinización automáticamente si no se proporciona
         if not self.dias_polinizacion and self.fecha_ingreso and self.fecha_polinizacion:
             from datetime import date
             self.dias_polinizacion = (self.fecha_ingreso - self.fecha_polinizacion).days
+        
+        # Validar que el progreso esté entre 0 y 100
+        if self.progreso_germinacion < 0:
+            self.progreso_germinacion = 0
+        elif self.progreso_germinacion > 100:
+            self.progreso_germinacion = 100
+        
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -60,7 +60,9 @@ class PolinizacionSerializer(serializers.ModelSerializer):
             # Campos de predicción legacy
             'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
             'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
-            'prediccion_parametros_usados'
+            'prediccion_parametros_usados',
+            # Estado y progreso de polinización
+            'estado_polinizacion', 'progreso_polinizacion'
         ]
         extra_kwargs = {
             'fechamad': {'required': False, 'allow_null': True},
@@ -201,6 +203,8 @@ class GerminacionSerializer(serializers.ModelSerializer):
             'cantidad_solicitada', 'no_capsulas', 'estado_capsula', 'estado_semilla',
             'cantidad_semilla', 'semilla_en_stock', 'observaciones', 'responsable',
             'fecha_creacion', 'fecha_actualizacion', 'creado_por',
+            # Estado de germinación (INICIAL, EN_PROCESO, FINALIZADO)
+            'estado_germinacion', 'progreso_germinacion',
             # Campos de predicción
             'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
             'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
@@ -848,3 +852,130 @@ class NotificationSerializer(serializers.ModelSerializer):
         if obj.polinizacion:
             return obj.polinizacion.codigo
         return None
+
+
+# =============================================================================
+# SERIALIZERS PARA PREDICCIÓN CON ML (XGBoost)
+# =============================================================================
+
+class PollinationPredictionInputSerializer(serializers.Serializer):
+    """
+    Serializer para validar input de predicción de polinización usando XGBoost
+
+    Campos requeridos por el modelo:
+    - fechapol: Fecha de polinización
+    - genero: Género de la planta
+    - especie: Especie de la planta
+    - ubicacion: Ubicación de la planta
+    - responsable: Responsable del registro
+    - Tipo: Tipo de polinización (SELF, SIBLING, HÍBRIDA, etc.)
+    - cantidad: Cantidad de cápsulas
+    - disponible: Disponibilidad (1=disponible, 0=no disponible)
+    """
+
+    fechapol = serializers.DateField(
+        required=True,
+        help_text="Fecha de polinización (formato YYYY-MM-DD)"
+    )
+
+    genero = serializers.CharField(
+        required=True,
+        max_length=200,
+        help_text="Género de la planta"
+    )
+
+    especie = serializers.CharField(
+        required=True,
+        max_length=200,
+        help_text="Especie de la planta"
+    )
+
+    ubicacion = serializers.CharField(
+        required=True,
+        max_length=200,
+        help_text="Ubicación de la planta (ej: Vivero 1, Laboratorio, etc.)"
+    )
+
+    responsable = serializers.CharField(
+        required=True,
+        max_length=200,
+        help_text="Responsable del registro"
+    )
+
+    Tipo = serializers.CharField(
+        required=True,
+        max_length=50,
+        help_text="Tipo de polinización (SELF, SIBLING, HÍBRIDA, etc.)"
+    )
+
+    cantidad = serializers.IntegerField(
+        required=True,
+        min_value=0,
+        help_text="Cantidad de cápsulas"
+    )
+
+    disponible = serializers.IntegerField(
+        required=True,
+        min_value=0,
+        max_value=1,
+        help_text="Disponibilidad: 1=disponible, 0=no disponible"
+    )
+
+    def validate_fechapol(self, value):
+        """Validar que la fecha no sea futura"""
+        from datetime import date
+        if value > date.today():
+            raise serializers.ValidationError("La fecha de polinización no puede ser futura")
+        return value
+
+    def validate_cantidad(self, value):
+        """Validar cantidad razonable de cápsulas"""
+        if value > 1000:
+            raise serializers.ValidationError("Cantidad de cápsulas parece excesiva (máx 1000)")
+        return value
+
+
+class PollinationPredictionOutputSerializer(serializers.Serializer):
+    """
+    Serializer para la salida de predicción de polinización
+    """
+
+    dias_estimados = serializers.IntegerField(
+        help_text="Días estimados hasta maduración"
+    )
+
+    fecha_polinizacion = serializers.DateField(
+        help_text="Fecha de polinización usada en la predicción"
+    )
+
+    fecha_estimada_maduracion = serializers.DateField(
+        help_text="Fecha estimada de maduración"
+    )
+
+    confianza = serializers.FloatField(
+        help_text="Nivel de confianza de la predicción (0-100)"
+    )
+
+    nivel_confianza = serializers.CharField(
+        help_text="Nivel de confianza textual (alta, media, baja)"
+    )
+
+    metodo = serializers.CharField(
+        help_text="Método usado para la predicción"
+    )
+
+    modelo = serializers.CharField(
+        help_text="Nombre del modelo usado"
+    )
+
+    input_data = serializers.DictField(
+        help_text="Datos de entrada usados"
+    )
+
+    features_count = serializers.IntegerField(
+        help_text="Número de features usadas"
+    )
+
+    timestamp = serializers.DateTimeField(
+        help_text="Timestamp de la predicción"
+    )

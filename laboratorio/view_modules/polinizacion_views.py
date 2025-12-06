@@ -816,3 +816,101 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         except Exception as e:
             logger.error(f"Error obteniendo info del modelo: {e}")
             return self.handle_error(e, "Error obteniendo información del modelo")
+    
+    @action(detail=True, methods=['post'], url_path='cambiar-estado')
+    def cambiar_estado(self, request, pk=None):
+        """
+        Cambia el estado o progreso de una polinización
+        
+        POST /api/polinizaciones/{id}/cambiar-estado/
+        Body: {
+            "estado": "EN_PROCESO",  // Opcional
+            "progreso": 50,          // Opcional
+            "fecha_maduracion": "2025-01-15"  // Opcional, para cuando se finaliza
+        }
+        """
+        try:
+            polinizacion = self.get_object()
+            estado = request.data.get('estado')
+            progreso = request.data.get('progreso')
+            fecha_maduracion = request.data.get('fecha_maduracion')
+            
+            # Validar que al menos uno de los campos esté presente
+            if estado is None and progreso is None:
+                return Response({
+                    'error': 'Debe proporcionar estado o progreso'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Actualizar progreso si se proporciona
+            if progreso is not None:
+                try:
+                    progreso = int(progreso)
+                    if progreso < 0 or progreso > 100:
+                        return Response({
+                            'error': 'El progreso debe estar entre 0 y 100'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    polinizacion.progreso_polinizacion = progreso
+                    polinizacion.actualizar_estado_por_progreso()
+                    
+                except ValueError:
+                    return Response({
+                        'error': 'El progreso debe ser un número entero'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Actualizar estado si se proporciona
+            if estado:
+                if estado not in ['INICIAL', 'EN_PROCESO', 'FINALIZADO']:
+                    return Response({
+                        'error': 'Estado inválido. Debe ser INICIAL, EN_PROCESO o FINALIZADO'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                polinizacion.estado_polinizacion = estado
+                
+                # Sincronizar progreso con estado
+                if estado == 'INICIAL':
+                    polinizacion.progreso_polinizacion = 0
+                elif estado == 'FINALIZADO':
+                    polinizacion.progreso_polinizacion = 100
+                elif estado == 'EN_PROCESO' and polinizacion.progreso_polinizacion == 0:
+                    polinizacion.progreso_polinizacion = 50
+            
+            # Actualizar fecha de maduración si se proporciona
+            if fecha_maduracion:
+                from django.utils.dateparse import parse_date
+                fecha_obj = parse_date(fecha_maduracion)
+                if fecha_obj:
+                    polinizacion.fechamad = fecha_obj
+                else:
+                    return Response({
+                        'error': 'Formato de fecha inválido. Use YYYY-MM-DD'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Si se finaliza, asegurar que tenga fecha de maduración
+            if polinizacion.estado_polinizacion == 'FINALIZADO' and not polinizacion.fechamad:
+                from django.utils import timezone
+                polinizacion.fechamad = timezone.now().date()
+            
+            polinizacion.save()
+            
+            # Crear notificación
+            try:
+                from ..services.notification_service import notification_service
+                notification_service.crear_notificacion_polinizacion(
+                    usuario=request.user,
+                    polinizacion=polinizacion,
+                    tipo='ESTADO_POLINIZACION_ACTUALIZADO'
+                )
+            except Exception as e:
+                logger.warning(f"No se pudo crear notificación: {e}")
+            
+            serializer = self.get_serializer(polinizacion)
+            return Response({
+                'success': True,
+                'message': 'Estado actualizado correctamente',
+                'polinizacion': serializer.data
+            })
+            
+        except Exception as e:
+            logger.error(f"Error cambiando estado de polinización: {e}")
+            return self.handle_error(e, "Error cambiando estado")

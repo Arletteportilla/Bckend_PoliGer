@@ -1,0 +1,58 @@
+{
+    "feature_list": [
+        "mes_pol",
+        "dia_año_pol",
+        "trimestre_pol",
+        "año_pol",
+        "semana_año",
+        "mes_sin",
+        "mes_cos",
+        "dia_año_sin",
+        "dia_año_cos",
+        "genero_encoded",
+        "especie_encoded",
+        "ubicacion_encoded",
+        "responsable_encoded",
+        "Tipo_encoded",
+        "cantidad",
+        "disponible"
+    ],
+    "categorical_columns": [
+        "genero",
+        "especie",
+        "ubicacion",
+        "responsable",
+        "Tipo"
+    ],
+    "feature_info": {
+        "total_features": 16,
+        "temporales_basicas": 5,
+        "temporales_ciclicas": 4,
+        "categoricas_encoded": 5,
+        "numericas": 2,
+        "preprocessing": {
+            "scaling": false,
+            "target_encoding": false,
+            "frequency_encoding": false,
+            "label_encoding": true
+        },
+        "input_columns_required": [
+            "fechapol",
+            "genero",
+            "especie",
+            "ubicacion",
+            "responsable",
+            "Tipo",
+            "cantidad",
+            "disponible"
+        ],
+        "feature_creation_steps": [
+            "1. Convertir fechapol a datetime",
+            "2. Extraer mes_pol, dia_año_pol, trimestre_pol, año_pol, semana_año",
+            "3. Crear features cíclicas: mes_sin/cos, dia_año_sin/cos",
+            "4. Aplicar LabelEncoder a variables categóricas",
+            "5. Agregar cantidad y disponible",
+            "6. Seleccionar features en orden exacto de FEATURE_LIST"
+        ]
+    }
+}

@@ -18,7 +18,8 @@ from ..view_modules.utils_views import (
 from ..view_modules.prediccion_views import (
     prediccion_germinacion, prediccion_polinizacion, prediccion_completa,
     predicciones_alertas, cambiar_estado_polinizacion, estadisticas_modelos,
-    especies_promedios_germinacion
+    especies_promedios_germinacion, prediccion_polinizacion_ml, model_info,
+    prediccion_germinacion_ml, germinacion_model_info
 )
 
 # Configurar el router para los ViewSets
@@ -101,5 +102,25 @@ urlpatterns = [
     # Rutas para reportes PDF de usuario (usando funciones de vista directas para evitar problemas de content negotiation)
     path('api/polinizaciones/mis-polinizaciones-pdf/', PolinizacionViewSet.as_view({'get': 'mis_polinizaciones_pdf'}), name='mis_polinizaciones_pdf'),
     path('api/germinaciones/mis-germinaciones-pdf/', GerminacionViewSet.as_view({'get': 'mis_germinaciones_pdf'}), name='mis_germinaciones_pdf'),
+
+    # =============================================================================
+    # PREDICCIONES CON MACHINE LEARNING (XGBoost)
+    # =============================================================================
+
+    # Predicción de polinización con XGBoost
+    path('api/predicciones/polinizacion/ml/', prediccion_polinizacion_ml, name='prediccion_polinizacion_ml'),
+
+    # Información del modelo ML de polinización
+    path('api/ml/model-info/', model_info, name='model_info'),
+
+    # =============================================================================
+    # PREDICCIONES DE GERMINACIÓN CON MACHINE LEARNING (Random Forest)
+    # =============================================================================
+
+    # Predicción de germinación con Random Forest
+    path('api/predicciones/germinacion/ml/', prediccion_germinacion_ml, name='prediccion_germinacion_ml'),
+
+    # Información del modelo ML de germinación
+    path('api/ml/germinacion/model-info/', germinacion_model_info, name='germinacion_model_info'),
 
 ]

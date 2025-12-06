@@ -75,10 +75,23 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 # Database Configuration
 # Soporta SQLite (desarrollo) y PostgreSQL (producción) según variables de entorno
-DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3').lower()
+# Detecta automáticamente GitHub Codespaces y usa SQLite por defecto
+
+# Detectar si estamos en GitHub Codespaces
+IS_CODESPACES = os.environ.get('CODESPACES', 'false') == 'true'
+IS_GITHUB_WORKSPACE = 'GITHUB_WORKSPACE' in os.environ
+
+# Configurar engine según entorno
+if IS_CODESPACES or IS_GITHUB_WORKSPACE:
+    # En Codespaces, usar SQLite por defecto (más fácil)
+    DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3').lower()
+    print(f"🔵 Entorno detectado: GitHub Codespaces - Usando {DB_ENGINE.upper()}")
+else:
+    # En desarrollo local, usar lo que esté en .env
+    DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3').lower()
 
 if DB_ENGINE == 'postgresql':
-    # Configuración para PostgreSQL (Producción)
+    # Configuración para PostgreSQL (Producción o Local)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -94,7 +107,7 @@ if DB_ENGINE == 'postgresql':
         }
     }
 else:
-    # Configuración para SQLite (Desarrollo por defecto)
+    # Configuración para SQLite (Desarrollo por defecto y Codespaces)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
