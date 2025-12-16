@@ -202,7 +202,7 @@ class GerminacionSerializer(serializers.ModelSerializer):
             'genero', 'especie_variedad', 'clima', 'percha', 'nivel', 'clima_lab',
             'cantidad_solicitada', 'no_capsulas', 'estado_capsula', 'estado_semilla',
             'cantidad_semilla', 'semilla_en_stock', 'observaciones', 'responsable',
-            'fecha_creacion', 'fecha_actualizacion', 'creado_por',
+            'archivo_origen', 'estado_validacion', 'fecha_creacion', 'fecha_actualizacion', 'creado_por',
             # Estado de germinación (INICIAL, EN_PROCESO, FINALIZADO)
             'estado_germinacion', 'progreso_germinacion',
             # Campos de predicción

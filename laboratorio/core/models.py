@@ -284,7 +284,13 @@ class Germinacion(models.Model):
     # Observaciones y responsable
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     responsable = models.CharField(max_length=100, verbose_name='Responsable', null=True, blank=True)
-    
+
+    # Archivo de origen (para datos importados de CSV)
+    archivo_origen = models.CharField(max_length=255, blank=True, default='', verbose_name='Archivo de origen')
+
+    # Estado de validación de datos
+    estado_validacion = models.CharField(max_length=50, blank=True, default='', verbose_name='Estado de validación')
+
     # Campos del sistema
     fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True, null=True, blank=True)
