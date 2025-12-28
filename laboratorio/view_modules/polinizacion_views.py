@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 import logging
 
 from ..models import Polinizacion
@@ -15,6 +16,7 @@ from ..serializers import PolinizacionSerializer
 from ..services.polinizacion_service import polinizacion_service
 from ..permissions import CanViewPolinizaciones, CanCreatePolinizaciones, CanEditPolinizaciones
 from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
+from ..renderers import BinaryFileRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -316,46 +318,339 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             logger.error(f"Error buscando información de planta: {e}")
             return self.handle_error(e, "Error buscando información de planta")
     
-    @action(detail=False, methods=['get'], url_path='mis-polinizaciones-pdf')
-    def mis_polinizaciones_pdf(self, request):
-        """Genera PDF de las polinizaciones del usuario
-
-        Este endpoint retorna directamente un HttpResponse para evitar
-        el procesamiento de content negotiation de DRF.
-        """
+    @action(detail=False, methods=['get'], url_path='polinizaciones-pdf', renderer_classes=[BinaryFileRenderer])
+    def polinizaciones_pdf(self, request):
+        """Genera PDF de TODAS las polinizaciones del sistema"""
         try:
-            # Log de headers para debugging
-            logger.info(f"Headers recibidos: {dict(request.headers)}")
-            logger.info(f"Accept header: {request.headers.get('Accept', 'No Accept header')}")
-
             search = request.GET.get('search', '').strip()
 
-            # Obtener polinizaciones del usuario
-            polinizaciones = self.service.get_mis_polinizaciones(
-                user=request.user,
-                search=search
+            # Obtener todas las polinizaciones del sistema
+            queryset = Polinizacion.objects.select_related(
+                'creado_por'
+            ).order_by('-fecha_creacion')
+
+            # Aplicar búsqueda si existe
+            if search:
+                queryset = queryset.filter(
+                    Q(codigo__icontains=search) |
+                    Q(nueva_codigo__icontains=search) |
+                    Q(genero__icontains=search) |
+                    Q(madre_genero__icontains=search) |
+                    Q(padre_genero__icontains=search) |
+                    Q(nueva_genero__icontains=search) |
+                    Q(especie__icontains=search) |
+                    Q(madre_especie__icontains=search) |
+                    Q(padre_especie__icontains=search) |
+                    Q(nueva_especie__icontains=search)
+                )
+
+            polinizaciones = list(queryset)
+
+            # Generar PDF directamente usando HttpResponse
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter, landscape
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib.enums import TA_CENTER
+            import io
+            from datetime import datetime
+            from django.http import HttpResponse
+
+            # Crear respuesta HTTP para PDF
+            response = HttpResponse(content_type='application/pdf')
+            search_text = f"_busqueda_{search}" if search else ""
+            filename = f"polinizaciones_todas_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            response['Cache-Control'] = 'no-cache'
+
+            # Crear PDF en modo landscape para más columnas
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), topMargin=0.5*inch, bottomMargin=0.5*inch)
+
+            # Contenedor de elementos
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Estilo personalizado para el título
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=18,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
             )
 
-            # Generar PDF directamente
-            pdf_response = self._generate_simple_pdf(request.user, polinizaciones, search)
+            # Estilo para subtítulos
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#475569'),
+                spaceAfter=6,
+                alignment=TA_CENTER
+            )
 
-            # Marcar la respuesta para que DRF no la procese
-            pdf_response.accepted_renderer = None
-            pdf_response.accepted_media_type = None
-            pdf_response.renderer_context = {}
+            # Título
+            title = Paragraph(f"<b>Reporte de Todas las Polinizaciones del Sistema</b>", title_style)
+            elements.append(title)
 
-            return pdf_response
+            # Subtítulo
+            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            subtitle = Paragraph(f"Generado por: {user_name}", subtitle_style)
+            elements.append(subtitle)
+
+            # Información adicional
+            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
+            info_text = f"Fecha de generación: {fecha_generacion}"
+            if search:
+                info_text += f" | Búsqueda: {search}"
+            info_text += f" | Total: {len(polinizaciones)} registros"
+
+            info = Paragraph(info_text, subtitle_style)
+            elements.append(info)
+            elements.append(Spacer(1, 20))
+
+            # Crear tabla de datos
+            data = [['Código', 'Tipo', 'Fecha\nPolini.', 'Madre\nGénero', 'Madre\nEspecie', 'Padre\nGénero', 'Padre\nEspecie', 'Nueva\nGénero', 'Nueva\nEspecie', 'Ubicación']]
+
+            for pol in polinizaciones:
+                data.append([
+                    str(pol.codigo or pol.nueva_codigo or '')[:12],
+                    str(pol.tipo_polinizacion or pol.Tipo or '')[:6],
+                    pol.fechapol.strftime('%d/%m/%Y') if pol.fechapol else '',
+                    str(pol.madre_genero or pol.genero or '')[:10],
+                    str(pol.madre_especie or pol.especie or '')[:15],
+                    str(pol.padre_genero or '')[:10],
+                    str(pol.padre_especie or '')[:15],
+                    str(pol.nueva_genero or '')[:10],
+                    str(pol.nueva_especie or '')[:15],
+                    str(pol.ubicacion_nombre or pol.vivero or pol.ubicacion or '')[:10]
+                ])
+
+            # Crear tabla
+            table = Table(data, colWidths=[0.9*inch, 0.6*inch, 0.75*inch, 0.9*inch, 1.2*inch, 0.9*inch, 1.2*inch, 0.9*inch, 1.2*inch, 0.8*inch])
+
+            # Estilo de la tabla
+            table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Datos
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+                ('ALIGN', (2, 1), (2, -1), 'CENTER'),  # Fecha
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ]))
+
+            elements.append(table)
+
+            # Pie de página
+            elements.append(Spacer(1, 20))
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontSize=8,
+                textColor=colors.grey,
+                alignment=TA_CENTER
+            )
+            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
+            elements.append(footer)
+
+            # Generar PDF
+            doc.build(elements)
+
+            # Escribir el buffer al response
+            pdf = buffer.getvalue()
+            buffer.close()
+            response.write(pdf)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generando PDF de polinizaciones: {e}")
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['get'], url_path='mis-polinizaciones-pdf', renderer_classes=[BinaryFileRenderer])
+    def mis_polinizaciones_pdf(self, request):
+        """Genera PDF de las polinizaciones del usuario"""
+        try:
+            search = request.GET.get('search', '').strip()
+
+            # Obtener polinizaciones del usuario (excluyendo importadas por defecto)
+            polinizaciones = self.service.get_mis_polinizaciones(
+                user=request.user,
+                search=search,
+                excluir_importadas=True  # Por defecto excluir importaciones
+            )
+
+            # Generar PDF directamente usando HttpResponse
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter, landscape
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib.enums import TA_CENTER
+            import io
+            from datetime import datetime
+            from django.http import HttpResponse
+
+            # Crear respuesta HTTP para PDF
+            response = HttpResponse(content_type='application/pdf')
+            search_text = f"_busqueda_{search}" if search else ""
+            filename = f"polinizaciones_{request.user.username}_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            response['Cache-Control'] = 'no-cache'
+
+            # Crear PDF en modo landscape para más columnas
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), topMargin=0.5*inch, bottomMargin=0.5*inch)
+
+            # Contenedor de elementos
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Estilo personalizado para el título
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=18,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
+
+            # Estilo para subtítulos
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#475569'),
+                spaceAfter=6,
+                alignment=TA_CENTER
+            )
+
+            # Título
+            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            title = Paragraph(f"<b>Reporte de Polinizaciones</b>", title_style)
+            elements.append(title)
+
+            # Subtítulo con información del usuario
+            subtitle = Paragraph(f"Usuario: {user_name} ({request.user.username})", subtitle_style)
+            elements.append(subtitle)
+
+            # Información adicional
+            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
+            info_text = f"Fecha de generación: {fecha_generacion}"
+            if search:
+                info_text += f" | Búsqueda: {search}"
+            info_text += f" | Total: {len(polinizaciones)} registros"
+
+            info = Paragraph(info_text, subtitle_style)
+            elements.append(info)
+            elements.append(Spacer(1, 20))
+
+            # Crear tabla de datos
+            data = [['Código', 'Tipo', 'Fecha\nPolini.', 'Madre\nGénero', 'Madre\nEspecie', 'Padre\nGénero', 'Padre\nEspecie', 'Nueva\nGénero', 'Nueva\nEspecie', 'Ubicación']]
+
+            for pol in polinizaciones:
+                data.append([
+                    str(pol.codigo or pol.nueva_codigo or '')[:12],
+                    str(pol.tipo_polinizacion or pol.Tipo or '')[:6],
+                    pol.fechapol.strftime('%d/%m/%Y') if pol.fechapol else '',
+                    str(pol.madre_genero or pol.genero or '')[:10],
+                    str(pol.madre_especie or pol.especie or '')[:15],
+                    str(pol.padre_genero or '')[:10],
+                    str(pol.padre_especie or '')[:15],
+                    str(pol.nueva_genero or '')[:10],
+                    str(pol.nueva_especie or '')[:15],
+                    str(pol.ubicacion_nombre or pol.vivero or pol.ubicacion or '')[:10]
+                ])
+
+            # Crear tabla
+            table = Table(data, colWidths=[0.9*inch, 0.6*inch, 0.75*inch, 0.9*inch, 1.2*inch, 0.9*inch, 1.2*inch, 0.9*inch, 1.2*inch, 0.8*inch])
+
+            # Estilo de la tabla
+            table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Datos
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+                ('ALIGN', (2, 1), (2, -1), 'CENTER'),  # Fecha
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ]))
+
+            elements.append(table)
+
+            # Pie de página
+            elements.append(Spacer(1, 20))
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontSize=8,
+                textColor=colors.grey,
+                alignment=TA_CENTER
+            )
+            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
+            elements.append(footer)
+
+            # Generar PDF
+            doc.build(elements)
+
+            # Obtener PDF del buffer
+            pdf_data = buffer.getvalue()
+            buffer.close()
+
+            response.write(pdf_data)
+            logger.info(f"PDF generado exitosamente para {request.user.username}: {len(polinizaciones)} registros")
+            return response
 
         except Exception as e:
             logger.error(f"Error generando PDF: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             response = HttpResponse(
                 f'Error generando PDF: {str(e)}',
                 status=500,
                 content_type='text/plain'
             )
-            response.accepted_renderer = None
-            response.accepted_media_type = None
-            response.renderer_context = {}
             return response
     
     @action(detail=False, methods=['get'], url_path='debug-headers')
@@ -537,6 +832,104 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             })
         except Exception as e:
             return self.handle_error(e, "Error obteniendo mesas")
+
+    @action(detail=True, methods=['post'], url_path='marcar-revisado')
+    def marcar_revisado(self, request, pk=None):
+        """Marca una polinización como revisada y programa la próxima revisión"""
+        try:
+            polinizacion = self.get_object()
+            
+            # Obtener datos del request
+            nuevo_estado = request.data.get('estado')
+            progreso = request.data.get('progreso')
+            dias_proxima_revision = request.data.get('dias_proxima_revision', 10)  # Por defecto 10 días
+            
+            from django.utils import timezone
+            from datetime import timedelta
+            
+            # Actualizar fecha de última revisión
+            polinizacion.fecha_ultima_revision = timezone.now().date()
+            
+            # Actualizar estado si se proporciona
+            if nuevo_estado:
+                estados_validos = ['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO', 'FINALIZADO']
+                if nuevo_estado in estados_validos:
+                    polinizacion.estado_polinizacion = nuevo_estado
+                    
+                    # Actualizar progreso según el estado
+                    if nuevo_estado == 'INICIAL':
+                        polinizacion.progreso_polinizacion = 10
+                    elif nuevo_estado == 'EN_PROCESO_TEMPRANO':
+                        polinizacion.progreso_polinizacion = 35
+                    elif nuevo_estado == 'EN_PROCESO_AVANZADO':
+                        polinizacion.progreso_polinizacion = 75
+                    elif nuevo_estado == 'FINALIZADO':
+                        polinizacion.progreso_polinizacion = 100
+                        if not polinizacion.fechamad:
+                            polinizacion.fechamad = timezone.now().date()
+            
+            # Actualizar progreso si se proporciona explícitamente
+            if progreso is not None:
+                try:
+                    progreso = int(progreso)
+                    if 0 <= progreso <= 100:
+                        polinizacion.progreso_polinizacion = progreso
+                        polinizacion.actualizar_estado_por_progreso()
+                except ValueError:
+                    pass
+            
+            # Programar próxima revisión solo si no está finalizada
+            if polinizacion.estado_polinizacion != 'FINALIZADO':
+                polinizacion.fecha_proxima_revision = timezone.now().date() + timedelta(days=dias_proxima_revision)
+                polinizacion.alerta_revision_enviada = False
+            else:
+                # Si está finalizada, no programar más revisiones
+                polinizacion.fecha_proxima_revision = None
+                polinizacion.alerta_revision_enviada = True
+            
+            polinizacion.save()
+            
+            # Serializar y retornar
+            serializer = self.get_serializer(polinizacion)
+            
+            return Response({
+                'message': 'Polinización marcada como revisada exitosamente',
+                'polinizacion': serializer.data,
+                'proxima_revision': polinizacion.fecha_proxima_revision.isoformat() if polinizacion.fecha_proxima_revision else None
+            })
+            
+        except Exception as e:
+            logger.error(f"Error marcando polinización como revisada: {e}")
+            return Response(
+                {'error': f'Error al marcar como revisada: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'], url_path='pendientes-revision')
+    def pendientes_revision(self, request):
+        """Obtiene polinizaciones pendientes de revisión para el usuario actual"""
+        try:
+            from django.utils import timezone
+            hoy = timezone.now().date()
+            
+            # Filtrar por usuario
+            queryset = self.get_queryset().filter(creado_por=request.user)
+            
+            # Buscar pendientes de revisión
+            pendientes = queryset.filter(
+                fecha_proxima_revision__lte=hoy,
+                estado_polinizacion__in=['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO']
+            ).order_by('fecha_proxima_revision')
+            
+            serializer = self.get_serializer(pendientes, many=True)
+            
+            return Response({
+                'count': len(serializer.data),
+                'results': serializer.data
+            })
+            
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo polinizaciones pendientes de revisión")
 
     @action(detail=False, methods=['get'], url_path='paredes')
     def paredes(self, request):

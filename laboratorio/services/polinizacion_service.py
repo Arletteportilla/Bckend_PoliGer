@@ -115,28 +115,29 @@ class PolinizacionService(PaginatedService, CacheableService):
         # Otros usuarios solo ven sus propias polinizaciones
         return queryset.filter(creado_por=user)
     
-    def get_mis_polinizaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None) -> List[Polinizacion]:
+    def get_mis_polinizaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True) -> List[Polinizacion]:
         """Obtiene las polinizaciones del usuario actual
-        
+
         Args:
             user: Usuario actual
             search: Término de búsqueda opcional
             dias_recientes: Si se proporciona, filtra solo polinizaciones de los últimos N días
+            excluir_importadas: Si es True (por defecto), excluye las polinizaciones importadas desde archivos CSV/Excel
         """
         # SOLO filtrar por creado_por (no por responsable)
-        # Excluir datos importados del CSV (archivo_origen no vacío)
-        queryset = Polinizacion.objects.filter(
-            creado_por=user,
-            archivo_origen=''
-        )
-        
+        queryset = Polinizacion.objects.filter(creado_por=user)
+
+        # Excluir datos importados del CSV si se especifica (por defecto True para mantener compatibilidad)
+        if excluir_importadas:
+            queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+
         # Filtrar por fecha si se especifica
         if dias_recientes:
             from datetime import timedelta
             from django.utils import timezone
             fecha_limite = timezone.now() - timedelta(days=dias_recientes)
             queryset = queryset.filter(fecha_creacion__gte=fecha_limite)
-        
+
         # Aplicar búsqueda si se proporciona
         if search:
             queryset = queryset.filter(
@@ -152,35 +153,36 @@ class PolinizacionService(PaginatedService, CacheableService):
                 Q(ubicacion_nombre__icontains=search) |
                 Q(observaciones__icontains=search)
             )
-        
+
         return list(queryset.order_by('-fecha_creacion', '-fechapol'))
     
-    def get_mis_polinizaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None):
+    def get_mis_polinizaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True):
         """Obtiene las polinizaciones del usuario actual con paginación
-        
+
         Args:
             user: Usuario actual
             page: Número de página
             page_size: Tamaño de página
             search: Término de búsqueda opcional
             dias_recientes: Si se proporciona, filtra solo polinizaciones de los últimos N días
+            excluir_importadas: Si es True (por defecto), excluye las polinizaciones importadas desde archivos CSV/Excel
         """
         from django.core.paginator import Paginator
-        
+
         # SOLO filtrar por creado_por (no por responsable)
-        # Excluir datos importados del CSV (archivo_origen no vacío)
-        queryset = Polinizacion.objects.filter(
-            creado_por=user,
-            archivo_origen=''
-        )
-        
+        queryset = Polinizacion.objects.filter(creado_por=user)
+
+        # Excluir datos importados del CSV si se especifica (por defecto True para mantener compatibilidad)
+        if excluir_importadas:
+            queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+
         # Filtrar por fecha si se especifica
         if dias_recientes:
             from datetime import timedelta
             from django.utils import timezone
             fecha_limite = timezone.now() - timedelta(days=dias_recientes)
             queryset = queryset.filter(fecha_creacion__gte=fecha_limite)
-        
+
         # Aplicar búsqueda si se proporciona
         if search:
             queryset = queryset.filter(
@@ -196,7 +198,7 @@ class PolinizacionService(PaginatedService, CacheableService):
                 Q(ubicacion_nombre__icontains=search) |
                 Q(observaciones__icontains=search)
             )
-        
+
         # Ordenar por fecha de creación descendente
         queryset = queryset.order_by('-fecha_creacion', '-fechapol')
         

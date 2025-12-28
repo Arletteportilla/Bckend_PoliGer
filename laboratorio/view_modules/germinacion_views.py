@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from django.db.models import Q
 import logging
 
 from ..models import Germinacion
@@ -18,6 +19,7 @@ from ..permissions import CanViewGerminaciones, CanCreateGerminaciones, CanEditG
 from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
 from ..api.pagination import StandardResultsSetPagination
 from ..api.filters import GerminacionFilter
+from ..renderers import BinaryFileRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -172,21 +174,31 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             dias_recientes = request.GET.get('dias_recientes', None)
             if dias_recientes:
                 dias_recientes = int(dias_recientes)
-            
-            logger.info(f"Obteniendo mis germinaciones para usuario: {request.user.username}, página: {page}, días recientes: {dias_recientes}")
-            
+            excluir_importadas = request.GET.get('excluir_importadas', 'false').lower() == 'true'
+
+            logger.info(f"🔍 ENDPOINT mis-germinaciones - Usuario autenticado: {request.user.username} (ID: {request.user.id})")
+            logger.info(f"🔍 Parámetros recibidos: page={page}, page_size={page_size}, search='{search}', dias_recientes={dias_recientes}, excluir_importadas={excluir_importadas}")
+            logger.info(f"🔍 Usuario autenticado: {request.user.is_authenticated}, Usuario staff: {request.user.is_staff}")
+
             # Si se solicita paginación, usar método paginado
             if request.GET.get('paginated', 'false').lower() == 'true' or page_size < 1000:
+                logger.info(f"📋 Usando método paginado para usuario {request.user.username}")
+
                 result = self.service.get_mis_germinaciones_paginated(
                     user=request.user,
                     page=page,
                     page_size=page_size,
                     search=search,
-                    dias_recientes=dias_recientes
+                    dias_recientes=dias_recientes,
+                    excluir_importadas=excluir_importadas
                 )
-                
+
+                logger.info(f"📊 Resultado del servicio: {result['count']} germinaciones totales, página {result['current_page']}/{result['total_pages']}")
+
                 serializer = self.get_serializer(result['results'], many=True)
-                
+
+                logger.info(f"✅ Retornando {len(serializer.data)} germinaciones serializadas al frontend")
+
                 return Response({
                     'results': serializer.data,
                     'count': result['count'],
@@ -563,28 +575,333 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 'precision_esperada': '±10-15 días'
             }
     
-    @action(detail=False, methods=['get'], url_path='mis-germinaciones-pdf',
-            renderer_classes=[])  # Desactivar renderers de DRF
-    def mis_germinaciones_pdf(self, request):
-        """Genera PDF de las germinaciones del usuario
+    @action(detail=False, methods=['get'], url_path='germinaciones-pdf', renderer_classes=[BinaryFileRenderer])
+    def germinaciones_pdf(self, request):
+        """Genera PDF de TODAS las germinaciones del sistema"""
+        try:
+            search = request.GET.get('search', '').strip()
 
-        Este endpoint retorna directamente un HttpResponse para evitar
-        el procesamiento de content negotiation de DRF.
-        """
+            # Obtener todas las germinaciones del sistema
+            queryset = Germinacion.objects.select_related(
+                'polinizacion', 'creado_por'
+            ).prefetch_related(
+                'seguimientos', 'capsulas', 'siembras'
+            ).order_by('-fecha_creacion')
+
+            # Aplicar búsqueda si existe
+            if search:
+                queryset = queryset.filter(
+                    Q(codigo__icontains=search) |
+                    Q(genero__icontains=search) |
+                    Q(especie_variedad__icontains=search) |
+                    Q(responsable__icontains=search)
+                )
+
+            germinaciones = list(queryset)
+
+            # Generar PDF directamente usando HttpResponse
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib.enums import TA_CENTER
+            import io
+            from datetime import datetime
+
+            # Crear respuesta HTTP para PDF
+            response = HttpResponse(content_type='application/pdf')
+            search_text = f"_busqueda_{search}" if search else ""
+            filename = f"germinaciones_todas_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            response['Cache-Control'] = 'no-cache'
+
+            # Crear PDF
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+
+            # Contenedor de elementos
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Estilo personalizado para el título
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=18,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
+
+            # Estilo para subtítulos
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#475569'),
+                spaceAfter=6,
+                alignment=TA_CENTER
+            )
+
+            # Título
+            title = Paragraph(f"<b>Reporte de Todas las Germinaciones del Sistema</b>", title_style)
+            elements.append(title)
+
+            # Subtítulo
+            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            subtitle = Paragraph(f"Generado por: {user_name}", subtitle_style)
+            elements.append(subtitle)
+
+            # Información adicional
+            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
+            info_text = f"Fecha de generación: {fecha_generacion}"
+            if search:
+                info_text += f" | Búsqueda: {search}"
+            info_text += f" | Total: {len(germinaciones)} registros"
+
+            info = Paragraph(info_text, subtitle_style)
+            elements.append(info)
+            elements.append(Spacer(1, 20))
+
+            # Crear tabla de datos
+            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
+
+            for germ in germinaciones:
+                data.append([
+                    str(germ.codigo or '')[:15],
+                    str(germ.genero or '')[:10],
+                    str(germ.especie_variedad or '')[:20],
+                    germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
+                    str(germ.no_capsulas or '0'),
+                    str(germ.estado_capsula or '')[:10],
+                    str(germ.clima or '')[:4],
+                    str(germ.responsable or '')[:15]
+                ])
+
+            # Crear tabla
+            table = Table(data, colWidths=[1*inch, 0.8*inch, 1.5*inch, 0.9*inch, 0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch])
+
+            # Estilo de la tabla
+            table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Datos
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
+                ('ALIGN', (2, 1), (2, -1), 'LEFT'),
+                ('ALIGN', (3, 1), (3, -1), 'CENTER'),
+                ('ALIGN', (4, 1), (4, -1), 'CENTER'),
+                ('ALIGN', (5, 1), (5, -1), 'CENTER'),
+                ('ALIGN', (6, 1), (6, -1), 'CENTER'),
+                ('ALIGN', (7, 1), (7, -1), 'LEFT'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ]))
+
+            elements.append(table)
+
+            # Pie de página
+            elements.append(Spacer(1, 20))
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontSize=8,
+                textColor=colors.grey,
+                alignment=TA_CENTER
+            )
+            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
+            elements.append(footer)
+
+            # Generar PDF
+            doc.build(elements)
+
+            # Escribir el buffer al response
+            pdf = buffer.getvalue()
+            buffer.close()
+            response.write(pdf)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generando PDF de germinaciones: {e}")
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['get'], url_path='mis-germinaciones-pdf', renderer_classes=[BinaryFileRenderer])
+    def mis_germinaciones_pdf(self, request):
+        """Genera PDF de las germinaciones del usuario"""
         try:
             search = request.GET.get('search', '').strip()
 
             # Obtener germinaciones del usuario (sin filtro de días para PDF completo)
+            # EXCLUIR las germinaciones importadas desde Excel/CSV
             germinaciones = self.service.get_mis_germinaciones(
                 user=request.user,
                 search=search,
-                dias_recientes=0  # 0 = todos los registros
+                dias_recientes=0,  # 0 = todos los registros
+                excluir_importadas=True  # Excluir importaciones desde archivos
             )
 
-            # Generar PDF directamente
-            pdf_response = self._generate_simple_pdf(request.user, germinaciones, search)
+            # Generar PDF directamente usando HttpResponse
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib.enums import TA_CENTER
+            import io
+            from datetime import datetime
 
-            return pdf_response
+            # Crear respuesta HTTP para PDF
+            response = HttpResponse(content_type='application/pdf')
+            search_text = f"_busqueda_{search}" if search else ""
+            filename = f"germinaciones_{request.user.username}_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            response['Cache-Control'] = 'no-cache'
+
+            # Crear PDF
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+
+            # Contenedor de elementos
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Estilo personalizado para el título
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=18,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
+
+            # Estilo para subtítulos
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#475569'),
+                spaceAfter=6,
+                alignment=TA_CENTER
+            )
+
+            # Título
+            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            title = Paragraph(f"<b>Reporte de Germinaciones</b>", title_style)
+            elements.append(title)
+
+            # Subtítulo con información del usuario
+            subtitle = Paragraph(f"Usuario: {user_name} ({request.user.username})", subtitle_style)
+            elements.append(subtitle)
+
+            # Información adicional
+            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
+            info_text = f"Fecha de generación: {fecha_generacion}"
+            if search:
+                info_text += f" | Búsqueda: {search}"
+            info_text += f" | Total: {len(germinaciones)} registros"
+
+            info = Paragraph(info_text, subtitle_style)
+            elements.append(info)
+            elements.append(Spacer(1, 20))
+
+            # Crear tabla de datos
+            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
+
+            for germ in germinaciones:
+                data.append([
+                    str(germ.codigo or '')[:15],
+                    str(germ.genero or '')[:10],
+                    str(germ.especie_variedad or '')[:20],
+                    germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
+                    str(germ.no_capsulas or '0'),
+                    str(germ.estado_capsula or '')[:10],
+                    str(germ.clima or '')[:4],
+                    str(germ.responsable or '')[:15]
+                ])
+
+            # Crear tabla
+            table = Table(data, colWidths=[1*inch, 0.8*inch, 1.5*inch, 0.9*inch, 0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch])
+
+            # Estilo de la tabla
+            table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Datos
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
+                ('ALIGN', (2, 1), (2, -1), 'LEFT'),
+                ('ALIGN', (3, 1), (3, -1), 'CENTER'),
+                ('ALIGN', (4, 1), (4, -1), 'CENTER'),
+                ('ALIGN', (5, 1), (5, -1), 'CENTER'),
+                ('ALIGN', (6, 1), (6, -1), 'CENTER'),
+                ('ALIGN', (7, 1), (7, -1), 'LEFT'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ]))
+
+            elements.append(table)
+
+            # Pie de página
+            elements.append(Spacer(1, 20))
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontSize=8,
+                textColor=colors.grey,
+                alignment=TA_CENTER
+            )
+            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
+            elements.append(footer)
+
+            # Generar PDF
+            doc.build(elements)
+
+            # Obtener PDF del buffer
+            pdf_data = buffer.getvalue()
+            buffer.close()
+
+            response.write(pdf_data)
+            logger.info(f"PDF generado exitosamente para {request.user.username}: {len(germinaciones)} registros")
+            return response
 
         except Exception as e:
             logger.error(f"Error generando PDF: {e}")
@@ -626,12 +943,14 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                         germinacion.actualizar_estado_por_progreso()
                     else:
                         # Fallback si el método no existe
-                        if progreso == 0:
+                        if progreso <= 10:
                             germinacion.estado_germinacion = 'INICIAL'
-                        elif progreso >= 100:
-                            germinacion.estado_germinacion = 'FINALIZADO'
+                        elif progreso <= 60:
+                            germinacion.estado_germinacion = 'EN_PROCESO_TEMPRANO'
+                        elif progreso <= 90:
+                            germinacion.estado_germinacion = 'EN_PROCESO_AVANZADO'
                         else:
-                            germinacion.estado_germinacion = 'EN_PROCESO'
+                            germinacion.estado_germinacion = 'FINALIZADO'
                     
                 except ValueError:
                     return Response(
@@ -641,7 +960,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             
             # Si se proporciona estado explícitamente, validar y actualizar
             elif nuevo_estado:
-                estados_validos = ['INICIAL', 'EN_PROCESO', 'FINALIZADO']
+                estados_validos = ['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO', 'FINALIZADO']
                 if nuevo_estado not in estados_validos:
                     return Response(
                         {'error': f'Estado inválido. Debe ser uno de: {", ".join(estados_validos)}'},
@@ -652,7 +971,11 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 
                 # Actualizar progreso según el estado
                 if nuevo_estado == 'INICIAL':
-                    germinacion.progreso_germinacion = 0
+                    germinacion.progreso_germinacion = 10
+                elif nuevo_estado == 'EN_PROCESO_TEMPRANO':
+                    germinacion.progreso_germinacion = 35
+                elif nuevo_estado == 'EN_PROCESO_AVANZADO':
+                    germinacion.progreso_germinacion = 75
                 elif nuevo_estado == 'FINALIZADO':
                     germinacion.progreso_germinacion = 100
                     # Registrar fecha de germinación (personalizada o actual)
@@ -668,12 +991,6 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     elif not germinacion.fecha_germinacion:
                         from django.utils import timezone
                         germinacion.fecha_germinacion = timezone.now().date()
-                # Si es EN_PROCESO y el progreso es 0 o 100, ajustarlo
-                elif nuevo_estado == 'EN_PROCESO':
-                    if germinacion.progreso_germinacion == 0:
-                        germinacion.progreso_germinacion = 50
-                    elif germinacion.progreso_germinacion == 100:
-                        germinacion.progreso_germinacion = 50
             
             else:
                 return Response(
@@ -761,159 +1078,100 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def _generate_simple_pdf(self, user, germinaciones, search=""):
-        """Genera PDF profesional de germinaciones"""
+    @action(detail=True, methods=['post'], url_path='marcar-revisado')
+    def marcar_revisado(self, request, pk=None):
+        """Marca una germinación como revisada y programa la próxima revisión"""
         try:
-            from reportlab.lib import colors
-            from reportlab.lib.pagesizes import letter, A4
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.lib.enums import TA_CENTER, TA_LEFT
-            import io
-            from datetime import datetime
-            from django.http import HttpResponse
-
-            # Crear respuesta HTTP para PDF
-            response = HttpResponse(content_type='application/pdf')
-            search_text = f"_busqueda_{search}" if search else ""
-            filename = f"germinaciones_{user.username}_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
-            response['Cache-Control'] = 'no-cache'
-
-            # Crear PDF con platypus (mejor que canvas directo)
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
-
-            # Contenedor de elementos
-            elements = []
-            styles = getSampleStyleSheet()
-
-            # Estilo personalizado para el título
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=18,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=12,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
-
-            # Estilo para subtítulos
-            subtitle_style = ParagraphStyle(
-                'CustomSubtitle',
-                parent=styles['Normal'],
-                fontSize=11,
-                textColor=colors.HexColor('#475569'),
-                spaceAfter=6,
-                alignment=TA_CENTER
-            )
-
-            # Título
-            user_name = f"{user.first_name} {user.last_name}".strip() or user.username
-            title = Paragraph(f"<b>Reporte de Germinaciones</b>", title_style)
-            elements.append(title)
-
-            # Subtítulo con información del usuario
-            subtitle = Paragraph(f"Usuario: {user_name} ({user.username})", subtitle_style)
-            elements.append(subtitle)
-
-            # Información adicional
-            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
-            info_text = f"Fecha de generación: {fecha_generacion}"
-            if search:
-                info_text += f" | Búsqueda: {search}"
-            info_text += f" | Total: {len(germinaciones)} registros"
-
-            info = Paragraph(info_text, subtitle_style)
-            elements.append(info)
-            elements.append(Spacer(1, 20))
-
-            # Crear tabla de datos
-            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
-
-            for germ in germinaciones:
-                data.append([
-                    str(germ.codigo or '')[:15],
-                    str(germ.genero or '')[:10],
-                    str(germ.especie_variedad or '')[:20],
-                    germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
-                    str(germ.no_capsulas or '0'),
-                    str(germ.estado_capsula or '')[:10],
-                    str(germ.clima or '')[:4],
-                    str(germ.responsable or '')[:15]
-                ])
-
-            # Crear tabla
-            table = Table(data, colWidths=[1*inch, 0.8*inch, 1.5*inch, 0.9*inch, 0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch])
-
-            # Estilo de la tabla
-            table.setStyle(TableStyle([
-                # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-
-                # Datos
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Código
-                ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Género
-                ('ALIGN', (2, 1), (2, -1), 'LEFT'),  # Especie
-                ('ALIGN', (3, 1), (3, -1), 'CENTER'), # Fecha
-                ('ALIGN', (4, 1), (4, -1), 'CENTER'), # Cápsulas
-                ('ALIGN', (5, 1), (5, -1), 'CENTER'), # Estado
-                ('ALIGN', (6, 1), (6, -1), 'CENTER'), # Clima
-                ('ALIGN', (7, 1), (7, -1), 'LEFT'),  # Responsable
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 1), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-            ]))
-
-            elements.append(table)
-
-            # Pie de página con información adicional
-            elements.append(Spacer(1, 20))
-            footer_style = ParagraphStyle(
-                'Footer',
-                parent=styles['Normal'],
-                fontSize=8,
-                textColor=colors.grey,
-                alignment=TA_CENTER
-            )
-            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
-            elements.append(footer)
-
-            # Generar PDF
-            doc.build(elements)
-
-            # Obtener PDF del buffer
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            response.write(pdf_data)
-            logger.info(f"PDF generado exitosamente para {user.username}: {len(germinaciones)} registros")
-            return response
-
+            germinacion = self.get_object()
+            
+            # Obtener datos del request
+            nuevo_estado = request.data.get('estado')
+            progreso = request.data.get('progreso')
+            dias_proxima_revision = request.data.get('dias_proxima_revision', 10)  # Por defecto 10 días
+            
+            from django.utils import timezone
+            from datetime import timedelta
+            
+            # Actualizar fecha de última revisión
+            germinacion.fecha_ultima_revision = timezone.now().date()
+            
+            # Actualizar estado si se proporciona
+            if nuevo_estado:
+                estados_validos = ['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO', 'FINALIZADO']
+                if nuevo_estado in estados_validos:
+                    germinacion.estado_germinacion = nuevo_estado
+                    
+                    # Actualizar progreso según el estado
+                    if nuevo_estado == 'INICIAL':
+                        germinacion.progreso_germinacion = 10
+                    elif nuevo_estado == 'EN_PROCESO_TEMPRANO':
+                        germinacion.progreso_germinacion = 35
+                    elif nuevo_estado == 'EN_PROCESO_AVANZADO':
+                        germinacion.progreso_germinacion = 75
+                    elif nuevo_estado == 'FINALIZADO':
+                        germinacion.progreso_germinacion = 100
+                        if not germinacion.fecha_germinacion:
+                            germinacion.fecha_germinacion = timezone.now().date()
+            
+            # Actualizar progreso si se proporciona explícitamente
+            if progreso is not None:
+                try:
+                    progreso = int(progreso)
+                    if 0 <= progreso <= 100:
+                        germinacion.progreso_germinacion = progreso
+                        germinacion.actualizar_estado_por_progreso()
+                except ValueError:
+                    pass
+            
+            # Programar próxima revisión solo si no está finalizada
+            if germinacion.estado_germinacion != 'FINALIZADO':
+                germinacion.fecha_proxima_revision = timezone.now().date() + timedelta(days=dias_proxima_revision)
+                germinacion.alerta_revision_enviada = False
+            else:
+                # Si está finalizada, no programar más revisiones
+                germinacion.fecha_proxima_revision = None
+                germinacion.alerta_revision_enviada = True
+            
+            germinacion.save()
+            
+            # Serializar y retornar
+            serializer = self.get_serializer(germinacion)
+            
+            return Response({
+                'message': 'Germinación marcada como revisada exitosamente',
+                'germinacion': serializer.data,
+                'proxima_revision': germinacion.fecha_proxima_revision.isoformat() if germinacion.fecha_proxima_revision else None
+            })
+            
         except Exception as e:
-            logger.error(f"Error generando PDF: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
-            from django.http import HttpResponse
-            return HttpResponse(
-                f'Error generando PDF: {str(e)}',
-                status=500,
-                content_type='text/plain'
+            logger.error(f"Error marcando germinación como revisada: {e}")
+            return Response(
+                {'error': f'Error al marcar como revisada: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @action(detail=False, methods=['get'], url_path='pendientes-revision')
+    def pendientes_revision(self, request):
+        """Obtiene germinaciones pendientes de revisión para el usuario actual"""
+        try:
+            from django.utils import timezone
+            hoy = timezone.now().date()
+            
+            # Filtrar por usuario
+            queryset = self.get_queryset().filter(creado_por=request.user)
+            
+            # Buscar pendientes de revisión
+            pendientes = queryset.filter(
+                fecha_proxima_revision__lte=hoy,
+                estado_germinacion__in=['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO']
+            ).order_by('fecha_proxima_revision')
+            
+            serializer = self.get_serializer(pendientes, many=True)
+            
+            return Response({
+                'count': len(serializer.data),
+                'results': serializer.data
+            })
+            
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo germinaciones pendientes de revisión")
