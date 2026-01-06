@@ -186,6 +186,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8081",
     "exp://localhost:8081",
     "exp://127.0.0.1:8081",
+    "http://207.180.230.88",
+    "http://207.180.230.88:8000",
+    "http://207.180.230.88:19006",  # Expo default port
+    "http://207.180.230.88:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
