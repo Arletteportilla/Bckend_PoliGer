@@ -348,7 +348,11 @@ class PolinizacionService(PaginatedService, CacheableService):
                     logger.warning(f"⚠️ predecir_maduracion retornó None")
             else:
                 logger.warning(f"❌ No se pudo calcular predicción: género='{genero}', especie='{especie}'")
-        
+
+        # Inicializar campo de alerta de revisión
+        if 'alerta_revision_enviada' not in data:
+            data['alerta_revision_enviada'] = False
+
         return super().create(data, user)
     
     def _generate_codigo(self) -> str:

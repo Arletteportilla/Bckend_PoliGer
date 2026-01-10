@@ -319,19 +319,23 @@ class GerminacionService(PaginatedService, CacheableService):
         if not data.get('responsable') and user:
             full_name = f"{user.first_name} {user.last_name}".strip()
             data['responsable'] = full_name if full_name else user.username
-        
+
+        # Inicializar campo de alerta de revisión
+        if 'alerta_revision_enviada' not in data:
+            data['alerta_revision_enviada'] = False
+
         # Calcular días de polinización automáticamente
         if data.get('fecha_ingreso') and data.get('fecha_polinizacion'):
             fecha_ingreso = data['fecha_ingreso']
             fecha_pol = data['fecha_polinizacion']
-            
+
             if isinstance(fecha_ingreso, str):
                 fecha_ingreso = datetime.strptime(fecha_ingreso, '%Y-%m-%d').date()
             if isinstance(fecha_pol, str):
                 fecha_pol = datetime.strptime(fecha_pol, '%Y-%m-%d').date()
-            
+
             data['dias_polinizacion'] = (fecha_ingreso - fecha_pol).days
-        
+
         return super().create(data, user)
     
     def invalidate_related_caches(self):
