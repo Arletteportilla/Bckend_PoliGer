@@ -94,6 +94,8 @@ class Polinizacion(models.Model):
     
     # Cantidad
     cantidad_capsulas = models.PositiveIntegerField(verbose_name='Cantidad de cápsulas', default=1)
+    cantidad_solicitada = models.PositiveIntegerField(verbose_name='Cantidad solicitada', default=0, null=True, blank=True)
+    cantidad_disponible = models.PositiveIntegerField(verbose_name='Cantidad disponible', default=0, null=True, blank=True)
     
     # Campos del sistema
     numero = models.AutoField(primary_key=True)
@@ -157,6 +159,27 @@ class Polinizacion(models.Model):
         default=0,
         verbose_name='Progreso de Polinización (%)',
         help_text='Porcentaje de progreso de la polinización (0-100%)'
+    )
+
+    # Campos para sistema de alertas automáticas
+    fecha_ultima_revision = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha última revisión'
+    )
+    fecha_proxima_revision = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha próxima revisión'
+    )
+    alerta_revision_enviada = models.BooleanField(
+        default=False,
+        verbose_name='Alerta de revisión enviada'
+    )
+    recordatorio_5_dias_enviado = models.BooleanField(
+        default=False,
+        verbose_name='Recordatorio 5 días enviado',
+        help_text='Indica si ya se envió el recordatorio de 5 días después de la fecha de polinización'
     )
 
     def actualizar_estado_por_progreso(self):
@@ -345,7 +368,14 @@ class Germinacion(models.Model):
     ], default='INGRESADO', null=True, blank=True)
     polinizacion = models.ForeignKey(Polinizacion, on_delete=models.CASCADE, related_name='germinaciones', null=True, blank=True)
     fecha_ultima_revision = models.DateTimeField(null=True, blank=True)
-    
+    fecha_proxima_revision = models.DateField(verbose_name='Fecha próxima revisión', null=True, blank=True)
+    alerta_revision_enviada = models.BooleanField(verbose_name='Alerta de revisión enviada', default=False)
+    recordatorio_5_dias_enviado = models.BooleanField(
+        default=False,
+        verbose_name='Recordatorio 5 días enviado',
+        help_text='Indica si ya se envió el recordatorio de 5 días después de la fecha de siembra'
+    )
+
     # Campos de predicción
     prediccion_dias_estimados = models.PositiveIntegerField(verbose_name='Días estimados de predicción', null=True, blank=True)
     prediccion_confianza = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Confianza de predicción (%)', null=True, blank=True)
@@ -439,6 +469,8 @@ class Notification(models.Model):
     TIPO_CHOICES = [
         ('NUEVA_GERMINACION', 'Nueva Germinación'),
         ('RECORDATORIO_REVISION', 'Recordatorio de Revisión'),
+        ('RECORDATORIO_5_DIAS', 'Recordatorio 5 Días'),  # Recordatorios 5 días después de fecha base
+        ('RECORDATORIO_PREDICCION', 'Recordatorio de Predicción'),  # Recordatorios 5 días antes de predicción
         ('ESTADO_ACTUALIZADO', 'Estado Actualizado'),
         ('NUEVA_POLINIZACION', 'Nueva Polinización'),
         ('ESTADO_POLINIZACION_ACTUALIZADO', 'Estado de Polinización Actualizado'),
