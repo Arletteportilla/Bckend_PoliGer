@@ -158,7 +158,7 @@ class GerminacionService(PaginatedService, CacheableService):
 
         return list(queryset.order_by('-fecha_creacion'))
     
-    def get_mis_germinaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False):
+    def get_mis_germinaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False, solo_historicos: bool = False):
         """Obtiene las germinaciones del usuario actual con paginación
 
         Args:
@@ -168,6 +168,7 @@ class GerminacionService(PaginatedService, CacheableService):
             search: Término de búsqueda opcional
             dias_recientes: Si se proporciona, filtra solo germinaciones de los últimos N días
             excluir_importadas: Si es True, excluye las germinaciones importadas desde archivos CSV/Excel
+            solo_historicos: Si es True, muestra SOLO germinaciones importadas (históricos)
         """
         from django.core.paginator import Paginator
 
@@ -175,9 +176,15 @@ class GerminacionService(PaginatedService, CacheableService):
         # Esto evita mostrar datos importados masivamente
         queryset = Germinacion.objects.filter(creado_por=user)
 
-        # Excluir germinaciones importadas desde CSV/Excel si se especifica
-        if excluir_importadas:
+        # Filtrar por tipo de registro
+        if solo_historicos:
+            # Mostrar SOLO registros históricos (importados desde archivos)
+            queryset = queryset.exclude(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+            logger.info(f"📦 Filtrando SOLO germinaciones históricas (importadas)")
+        elif excluir_importadas:
+            # Excluir germinaciones importadas desde CSV/Excel (mostrar solo nuevas)
             queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+            logger.info(f"🆕 Excluyendo germinaciones importadas (solo nuevas)")
 
         # Filtrar por fecha si se especifica
         if dias_recientes:
@@ -319,10 +326,6 @@ class GerminacionService(PaginatedService, CacheableService):
         if not data.get('responsable') and user:
             full_name = f"{user.first_name} {user.last_name}".strip()
             data['responsable'] = full_name if full_name else user.username
-
-        # Inicializar campo de alerta de revisión
-        if 'alerta_revision_enviada' not in data:
-            data['alerta_revision_enviada'] = False
 
         # Calcular días de polinización automáticamente
         if data.get('fecha_ingreso') and data.get('fecha_polinizacion'):

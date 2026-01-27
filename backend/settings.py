@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_apscheduler',  # Scheduler para tareas automáticas
 ]
 
 MIDDLEWARE = [
@@ -299,3 +300,31 @@ if DB_ENGINE == 'sqlite3':
 
 # Model ML Cache
 ML_MODEL_CACHE_TIMEOUT = 3600  # 1 hora
+
+# ============================================================================
+# CONFIGURACIÓN DE SCHEDULER (APScheduler)
+# ============================================================================
+# Configuración para tareas programadas automáticas
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Formato de fecha para logs
+
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Segundos antes de timeout
+
+# Configuración de tareas programadas
+SCHEDULER_CONFIG = {
+    'apscheduler.jobstores.default': {
+        'type': 'memory'  # Usar memoria para desarrollo (cambiar a 'sqlalchemy' en producción)
+    },
+    'apscheduler.executors.default': {
+        'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+        'max_workers': '5'
+    },
+    'apscheduler.job_defaults.coalesce': 'false',
+    'apscheduler.job_defaults.max_instances': '3',
+}
+
+# Intervalo de verificación de notificaciones (en minutos)
+NOTIFICATION_CHECK_INTERVAL_MINUTES = 60  # Verificar cada hora
+
+# Días después de fecha base para enviar recordatorio
+NOTIFICATION_REMINDER_DAYS = 5

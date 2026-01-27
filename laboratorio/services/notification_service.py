@@ -56,6 +56,8 @@ class NotificationService:
                 'especie': germinacion.especie_variedad,
                 'fecha_siembra': str(germinacion.fecha_siembra) if germinacion.fecha_siembra else None,
                 'prediccion_fecha_estimada': str(germinacion.prediccion_fecha_estimada) if germinacion.prediccion_fecha_estimada else None,
+                'estado': getattr(germinacion, 'estado_germinacion', 'INICIAL'),
+                'ubicacion': f"{germinacion.percha or ''} {germinacion.nivel or ''}".strip() if hasattr(germinacion, 'percha') else '',
             }
             
             # Crear notificación
@@ -116,7 +118,8 @@ class NotificationService:
                 'padre_especie': polinizacion.padre_especie,
                 'fecha_polinizacion': str(polinizacion.fechapol) if polinizacion.fechapol else None,
                 'prediccion_fecha_estimada': str(polinizacion.prediccion_fecha_estimada) if polinizacion.prediccion_fecha_estimada else None,
-                'estado': polinizacion.estado,
+                'estado': getattr(polinizacion, 'estado_polinizacion', polinizacion.estado) or 'INICIAL',
+                'ubicacion': polinizacion.ubicacion_nombre or polinizacion.vivero or '',
             }
             
             # Crear notificación

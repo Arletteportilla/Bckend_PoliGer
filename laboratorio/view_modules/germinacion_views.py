@@ -13,6 +13,7 @@ import logging
 
 from ..models import Germinacion
 from ..serializers import GerminacionSerializer
+from ..api.serializers import GerminacionHistoricaSerializer
 from ..services.germinacion_service import germinacion_service
 from ..services.prediccion_service import prediccion_service
 from ..permissions import CanViewGerminaciones, CanCreateGerminaciones, CanEditGerminaciones
@@ -109,13 +110,13 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         """Crear germinación usando el servicio"""
         try:
             logger.info(f"Creando germinación para usuario: {self.request.user}")
-            
+
             germinacion = self.service.create(
                 serializer.validated_data,
                 user=self.request.user
             )
-            
-            # Crear notificación automáticamente
+
+            # Crear notificación de nueva germinación
             try:
                 from ..services.notification_service import notification_service
                 notification_service.crear_notificacion_germinacion(
@@ -126,9 +127,19 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 logger.info(f"Notificación creada para germinación {germinacion.id}")
             except Exception as e:
                 logger.warning(f"No se pudo crear notificación: {e}")
-            
+
+            # NUEVO: Verificar si ya debe enviarse recordatorio de 5 días
+            # (para casos donde la fecha ingresada ya tiene más de 5 días)
+            try:
+                from ..services.recordatorio_service import recordatorio_service
+                enviado = recordatorio_service.verificar_y_notificar_germinacion(germinacion)
+                if enviado:
+                    logger.info(f"⚡ Recordatorio inmediato enviado para germinación {germinacion.id}")
+            except Exception as e:
+                logger.warning(f"Error verificando recordatorio inmediato: {e}")
+
             return germinacion
-        
+
         except Exception as e:
             logger.error(f"Error creando germinación: {e}")
             raise
@@ -172,12 +183,24 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             page = int(request.GET.get('page', 1))
             page_size = int(request.GET.get('page_size', 20))
             dias_recientes = request.GET.get('dias_recientes', None)
+            tipo_registro = request.GET.get('tipo_registro', '').strip()  # 'historicos' o 'nuevos'
+            
             if dias_recientes:
                 dias_recientes = int(dias_recientes)
-            excluir_importadas = request.GET.get('excluir_importadas', 'false').lower() == 'true'
+            
+            # Determinar si excluir importadas basado en tipo_registro
+            if tipo_registro == 'historicos':
+                excluir_importadas = False  # Mostrar SOLO registros históricos (importados)
+                solo_historicos = True
+            elif tipo_registro == 'nuevos':
+                excluir_importadas = True   # Mostrar SOLO registros nuevos (no importados)
+                solo_historicos = False
+            else:
+                excluir_importadas = request.GET.get('excluir_importadas', 'false').lower() == 'true'
+                solo_historicos = False
 
             logger.info(f"🔍 ENDPOINT mis-germinaciones - Usuario autenticado: {request.user.username} (ID: {request.user.id})")
-            logger.info(f"🔍 Parámetros recibidos: page={page}, page_size={page_size}, search='{search}', dias_recientes={dias_recientes}, excluir_importadas={excluir_importadas}")
+            logger.info(f"🔍 Parámetros recibidos: page={page}, page_size={page_size}, search='{search}', dias_recientes={dias_recientes}, tipo_registro={tipo_registro}")
             logger.info(f"🔍 Usuario autenticado: {request.user.is_authenticated}, Usuario staff: {request.user.is_staff}")
 
             # Si se solicita paginación, usar método paginado
@@ -190,12 +213,21 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     page_size=page_size,
                     search=search,
                     dias_recientes=dias_recientes,
-                    excluir_importadas=excluir_importadas
+                    excluir_importadas=excluir_importadas,
+                    solo_historicos=solo_historicos if tipo_registro == 'historicos' else False
                 )
 
                 logger.info(f"📊 Resultado del servicio: {result['count']} germinaciones totales, página {result['current_page']}/{result['total_pages']}")
 
-                serializer = self.get_serializer(result['results'], many=True)
+                # Usar serializer diferente según el tipo de registro
+                if tipo_registro == 'historicos':
+                    # Para registros históricos, usar serializer sin estados
+                    serializer = GerminacionHistoricaSerializer(result['results'], many=True)
+                    logger.info("📦 Usando GerminacionHistoricaSerializer (sin estados)")
+                else:
+                    # Para registros nuevos o todos, usar serializer completo
+                    serializer = self.get_serializer(result['results'], many=True)
+                    logger.info("🆕 Usando GerminacionSerializer completo (con estados)")
 
                 logger.info(f"✅ Retornando {len(serializer.data)} germinaciones serializadas al frontend")
 
@@ -218,7 +250,15 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     dias_recientes=dias_recientes
                 )
                 
-                serializer = self.get_serializer(germinaciones, many=True)
+                # Usar serializer diferente según el tipo de registro
+                if tipo_registro == 'historicos':
+                    # Para registros históricos, usar serializer sin estados
+                    serializer = GerminacionHistoricaSerializer(germinaciones, many=True)
+                    logger.info("📦 Usando GerminacionHistoricaSerializer (sin estados)")
+                else:
+                    # Para registros nuevos o todos, usar serializer completo
+                    serializer = self.get_serializer(germinaciones, many=True)
+                    logger.info("🆕 Usando GerminacionSerializer completo (con estados)")
                 
                 logger.info(f"Retornando {len(serializer.data)} germinaciones")
                 return Response(serializer.data)
@@ -602,12 +642,14 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             # Generar PDF directamente usando HttpResponse
             from reportlab.lib import colors
             from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch
             from reportlab.lib.enums import TA_CENTER
             import io
+            import os
             from datetime import datetime
+            from django.conf import settings
 
             # Crear respuesta HTTP para PDF
             response = HttpResponse(content_type='application/pdf')
@@ -624,6 +666,37 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             # Contenedor de elementos
             elements = []
             styles = getSampleStyleSheet()
+
+            # Agregar logo si existe
+            # Buscar el logo en diferentes ubicaciones posibles
+            logo_paths = [
+                os.path.join(settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
+                os.path.join(settings.BASE_DIR, 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
+                '/app/PoliGer/assets/images/Ecuagenera.png',  # Ruta en producción
+            ]
+
+            logo_img = None
+            for logo_path in logo_paths:
+                if os.path.exists(logo_path):
+                    try:
+                        logo_img = Image(logo_path, width=0.8*inch, height=0.8*inch)
+                        logo_img.hAlign = 'RIGHT'
+                        elements.append(logo_img)
+                        elements.append(Spacer(1, 6))
+                        break
+                    except Exception as e:
+                        logger.warning(f"No se pudo cargar el logo desde {logo_path}: {e}")
+
+            # Estilo personalizado para el encabezado principal
+            header_style = ParagraphStyle(
+                'CustomHeader',
+                parent=styles['Heading1'],
+                fontSize=20,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=6,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
 
             # Estilo personalizado para el título
             title_style = ParagraphStyle(
@@ -646,6 +719,11 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 alignment=TA_CENTER
             )
 
+            # Encabezado POLIGER ECUAGENERA
+            header = Paragraph("<b>POLIGER ECUAGENERA</b>", header_style)
+            elements.append(header)
+            elements.append(Spacer(1, 6))
+
             # Título
             title = Paragraph(f"<b>Reporte de Todas las Germinaciones del Sistema</b>", title_style)
             elements.append(title)
@@ -666,8 +744,66 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             elements.append(info)
             elements.append(Spacer(1, 20))
 
+            # Calcular estadísticas de estado
+            completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
+            pendientes = len(germinaciones) - completadas
+
+            # Tabla de resumen de estados
+            summary_data = [
+                ['Estado', 'Cantidad'],
+                ['Completadas (con fecha de germinación)', str(completadas)],
+                ['Pendientes (sin fecha de germinación)', str(pendientes)],
+                ['TOTAL', str(len(germinaciones))]
+            ]
+
+            summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
+            summary_table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Filas de datos (Completadas)
+                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
+                ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, 1), 10),
+                ('ALIGN', (0, 1), (0, 1), 'LEFT'),
+                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
+
+                # Filas de datos (Pendientes)
+                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
+                ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+                ('FONTNAME', (0, 2), (-1, 2), 'Helvetica'),
+                ('FONTSIZE', (0, 2), (-1, 2), 10),
+                ('ALIGN', (0, 2), (0, 2), 'LEFT'),
+                ('ALIGN', (1, 2), (1, 2), 'CENTER'),
+
+                # Fila TOTAL
+                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
+                ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
+                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 3), (-1, 3), 11),
+                ('ALIGN', (0, 3), (-1, 3), 'CENTER'),
+
+                # Bordes y padding
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            ]))
+
+            elements.append(summary_table)
+            elements.append(Spacer(1, 20))
+
             # Crear tabla de datos
-            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
+            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
 
             for germ in germinaciones:
                 data.append([
@@ -675,6 +811,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     str(germ.genero or '')[:10],
                     str(germ.especie_variedad or '')[:20],
                     germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
+                    str(germ.cantidad_solicitada or '0'),
                     str(germ.no_capsulas or '0'),
                     str(germ.estado_capsula or '')[:10],
                     str(germ.clima or '')[:4],
@@ -682,7 +819,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 ])
 
             # Crear tabla
-            table = Table(data, colWidths=[1*inch, 0.8*inch, 1.5*inch, 0.9*inch, 0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch])
+            table = Table(data, colWidths=[0.9*inch, 0.7*inch, 1.3*inch, 0.8*inch, 0.6*inch, 0.6*inch, 0.8*inch, 0.5*inch, 1*inch])
 
             # Estilo de la tabla
             table.setStyle(TableStyle([
@@ -763,12 +900,14 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             # Generar PDF directamente usando HttpResponse
             from reportlab.lib import colors
             from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch
             from reportlab.lib.enums import TA_CENTER
             import io
+            import os
             from datetime import datetime
+            from django.conf import settings
 
             # Crear respuesta HTTP para PDF
             response = HttpResponse(content_type='application/pdf')
@@ -785,6 +924,37 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             # Contenedor de elementos
             elements = []
             styles = getSampleStyleSheet()
+
+            # Agregar logo si existe
+            # Buscar el logo en diferentes ubicaciones posibles
+            logo_paths = [
+                os.path.join(settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
+                os.path.join(settings.BASE_DIR, 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
+                '/app/PoliGer/assets/images/Ecuagenera.png',  # Ruta en producción
+            ]
+
+            logo_img = None
+            for logo_path in logo_paths:
+                if os.path.exists(logo_path):
+                    try:
+                        logo_img = Image(logo_path, width=0.8*inch, height=0.8*inch)
+                        logo_img.hAlign = 'RIGHT'
+                        elements.append(logo_img)
+                        elements.append(Spacer(1, 6))
+                        break
+                    except Exception as e:
+                        logger.warning(f"No se pudo cargar el logo desde {logo_path}: {e}")
+
+            # Estilo personalizado para el encabezado principal
+            header_style = ParagraphStyle(
+                'CustomHeader',
+                parent=styles['Heading1'],
+                fontSize=20,
+                textColor=colors.HexColor('#1e3a8a'),
+                spaceAfter=6,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
 
             # Estilo personalizado para el título
             title_style = ParagraphStyle(
@@ -807,6 +977,11 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 alignment=TA_CENTER
             )
 
+            # Encabezado poliger ecuagenera
+            header = Paragraph("<b>POLIGER ECUAGENERA</b>", header_style)
+            elements.append(header)
+            elements.append(Spacer(1, 6))
+
             # Título
             user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
             title = Paragraph(f"<b>Reporte de Germinaciones</b>", title_style)
@@ -827,8 +1002,66 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             elements.append(info)
             elements.append(Spacer(1, 20))
 
+            # Calcular estadísticas de estado
+            completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
+            pendientes = len(germinaciones) - completadas
+
+            # Tabla de resumen de estados
+            summary_data = [
+                ['Estado', 'Cantidad'],
+                ['Completadas (con fecha de germinación)', str(completadas)],
+                ['Pendientes (sin fecha de germinación)', str(pendientes)],
+                ['TOTAL', str(len(germinaciones))]
+            ]
+
+            summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
+            summary_table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+                # Filas de datos (Completadas)
+                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
+                ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, 1), 10),
+                ('ALIGN', (0, 1), (0, 1), 'LEFT'),
+                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
+
+                # Filas de datos (Pendientes)
+                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
+                ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+                ('FONTNAME', (0, 2), (-1, 2), 'Helvetica'),
+                ('FONTSIZE', (0, 2), (-1, 2), 10),
+                ('ALIGN', (0, 2), (0, 2), 'LEFT'),
+                ('ALIGN', (1, 2), (1, 2), 'CENTER'),
+
+                # Fila TOTAL
+                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
+                ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
+                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 3), (-1, 3), 11),
+                ('ALIGN', (0, 3), (-1, 3), 'CENTER'),
+
+                # Bordes y padding
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            ]))
+
+            elements.append(summary_table)
+            elements.append(Spacer(1, 20))
+
             # Crear tabla de datos
-            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
+            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
 
             for germ in germinaciones:
                 data.append([
@@ -836,6 +1069,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     str(germ.genero or '')[:10],
                     str(germ.especie_variedad or '')[:20],
                     germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
+                    str(germ.cantidad_solicitada or '0'),
                     str(germ.no_capsulas or '0'),
                     str(germ.estado_capsula or '')[:10],
                     str(germ.clima or '')[:4],
@@ -843,7 +1077,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 ])
 
             # Crear tabla
-            table = Table(data, colWidths=[1*inch, 0.8*inch, 1.5*inch, 0.9*inch, 0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch])
+            table = Table(data, colWidths=[0.9*inch, 0.7*inch, 1.3*inch, 0.8*inch, 0.6*inch, 0.6*inch, 0.8*inch, 0.5*inch, 1*inch])
 
             # Estilo de la tabla
             table.setStyle(TableStyle([

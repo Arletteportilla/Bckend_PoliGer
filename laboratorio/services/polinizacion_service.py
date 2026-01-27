@@ -156,7 +156,7 @@ class PolinizacionService(PaginatedService, CacheableService):
 
         return list(queryset.order_by('-fecha_creacion', '-fechapol'))
     
-    def get_mis_polinizaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True):
+    def get_mis_polinizaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True, solo_historicos: bool = False):
         """Obtiene las polinizaciones del usuario actual con paginación
 
         Args:
@@ -166,15 +166,21 @@ class PolinizacionService(PaginatedService, CacheableService):
             search: Término de búsqueda opcional
             dias_recientes: Si se proporciona, filtra solo polinizaciones de los últimos N días
             excluir_importadas: Si es True (por defecto), excluye las polinizaciones importadas desde archivos CSV/Excel
+            solo_historicos: Si es True, muestra SOLO las polinizaciones importadas (registros históricos)
         """
         from django.core.paginator import Paginator
 
         # SOLO filtrar por creado_por (no por responsable)
         queryset = Polinizacion.objects.filter(creado_por=user)
 
-        # Excluir datos importados del CSV si se especifica (por defecto True para mantener compatibilidad)
-        if excluir_importadas:
+        # Filtrar por tipo de registro
+        if solo_historicos:
+            # Mostrar SOLO registros históricos (importados desde Excel/CSV)
+            queryset = queryset.exclude(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        elif excluir_importadas:
+            # Mostrar SOLO registros nuevos (creados en el sistema)
             queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        # Si ambos son False, mostrar todos los registros
 
         # Filtrar por fecha si se especifica
         if dias_recientes:
@@ -348,10 +354,6 @@ class PolinizacionService(PaginatedService, CacheableService):
                     logger.warning(f"⚠️ predecir_maduracion retornó None")
             else:
                 logger.warning(f"❌ No se pudo calcular predicción: género='{genero}', especie='{especie}'")
-
-        # Inicializar campo de alerta de revisión
-        if 'alerta_revision_enviada' not in data:
-            data['alerta_revision_enviada'] = False
 
         return super().create(data, user)
     

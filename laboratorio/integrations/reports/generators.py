@@ -83,7 +83,6 @@ class ReportGenerator:
 
     def _get_filtered_polinizaciones(self, filters=None):
         """Obtiene polinizaciones filtradas"""
-        print(f"🔍 _get_filtered_polinizaciones - Filtros recibidos: {filters}")
         queryset = Polinizacion.objects.all()
         
         if filters:
@@ -92,21 +91,17 @@ class ReportGenerator:
                 from django.contrib.auth.models import User
                 from django.db.models import Q
                 username = filters['usuario_actual']
-                print(f"🔍 Filtrando por usuario: {username}")
-                
+
                 try:
                     user = User.objects.get(username=username)
-                    print(f"✅ Usuario encontrado: {user.username} (ID: {user.id})")
-                    
+
                     # Filtrar por creado_por o por responsable como fallback
                     queryset = queryset.filter(
                         Q(creado_por=user) |
                         Q(responsable__iexact=username) |
                         Q(responsable__icontains=f"{user.first_name} {user.last_name}".strip())
                     )
-                    print(f"✅ Polinizaciones encontradas después del filtro de usuario: {queryset.count()}")
                 except User.DoesNotExist:
-                    print(f"❌ Usuario no encontrado: {username}")
                     # Si no se encuentra el usuario, devolver queryset vacío
                     queryset = queryset.none()
             
@@ -140,7 +135,6 @@ class ReportGenerator:
 
     def _get_filtered_germinaciones(self, filters=None):
         """Obtiene germinaciones filtradas"""
-        print(f"🔍 _get_filtered_germinaciones - Filtros recibidos: {filters}")
         queryset = Germinacion.objects.all()
         
         if filters:
@@ -149,21 +143,17 @@ class ReportGenerator:
                 from django.contrib.auth.models import User
                 from django.db.models import Q
                 username = filters['usuario_actual']
-                print(f"🔍 Filtrando por usuario: {username}")
-                
+
                 try:
                     user = User.objects.get(username=username)
-                    print(f"✅ Usuario encontrado: {user.username} (ID: {user.id})")
-                    
+
                     # Filtrar por creado_por o por responsable como fallback
                     queryset = queryset.filter(
                         Q(creado_por=user) |
                         Q(responsable__iexact=username) |
                         Q(responsable__icontains=f"{user.first_name} {user.last_name}".strip())
                     )
-                    print(f"✅ Germinaciones encontradas después del filtro de usuario: {queryset.count()}")
                 except User.DoesNotExist:
-                    print(f"❌ Usuario no encontrado: {username}")
                     # Si no se encuentra el usuario, devolver queryset vacío
                     queryset = queryset.none()
             
@@ -295,20 +285,15 @@ class ReportGenerator:
 
     def _generate_polinizaciones_pdf(self, filters=None):
         """Genera PDF de polinizaciones"""
-        print(f"🔍 _generate_polinizaciones_pdf - Iniciando generación con filtros: {filters}")
-        
         try:
             # Verificar que reportlab esté disponible
             from reportlab.pdfgen import canvas
             from reportlab.lib.pagesizes import letter
-            print("✅ ReportLab está disponible")
         except ImportError as e:
-            print(f"❌ ReportLab no está disponible: {e}")
             raise ImportError("ReportLab no está instalado. Instala con: pip install reportlab")
-        
+
         # Obtener datos filtrados
         polinizaciones = self._get_filtered_polinizaciones(filters)
-        print(f"✅ Polinizaciones obtenidas para PDF: {polinizaciones.count()}")
         
         # Crear respuesta HTTP
         response = HttpResponse(content_type='application/pdf')
@@ -318,24 +303,28 @@ class ReportGenerator:
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
         width, height = letter
-        
+
+        # Encabezado poliger ecuagenera
+        p.setFont("Helvetica-Bold", 18)
+        p.drawCentredString(width / 2, height - 30, "POLIGER ECUAGENERA")
+
         # Título
         p.setFont("Helvetica-Bold", 16)
         title = "Reporte de Polinizaciones"
         if filters and filters.get('usuario_actual'):
             title += f" - Usuario: {filters['usuario_actual']}"
-        p.drawString(50, height - 50, title)
+        p.drawString(50, height - 60, title)
         
         # Información adicional
-        y_position = height - 80
+        y_position = height - 90
         p.setFont("Helvetica", 10)
         p.drawString(50, y_position, f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
         p.drawString(50, y_position - 15, f"Total de registros: {polinizaciones.count()}")
-        
+
         if filters and filters.get('search'):
             p.drawString(50, y_position - 30, f"Filtro de búsqueda: {filters['search']}")
             y_position -= 15
-        
+
         y_position -= 50
         
         # Encabezados
@@ -375,20 +364,15 @@ class ReportGenerator:
 
     def _generate_germinaciones_pdf(self, filters=None):
         """Genera PDF de germinaciones"""
-        print(f"🔍 _generate_germinaciones_pdf - Iniciando generación con filtros: {filters}")
-        
         try:
             # Verificar que reportlab esté disponible
             from reportlab.pdfgen import canvas
             from reportlab.lib.pagesizes import letter
-            print("✅ ReportLab está disponible")
         except ImportError as e:
-            print(f"❌ ReportLab no está disponible: {e}")
             raise ImportError("ReportLab no está instalado. Instala con: pip install reportlab")
-        
+
         # Obtener datos filtrados
         germinaciones = self._get_filtered_germinaciones(filters)
-        print(f"✅ Germinaciones obtenidas para PDF: {germinaciones.count()}")
         
         # Crear respuesta HTTP
         response = HttpResponse(content_type='application/pdf')
@@ -398,50 +382,56 @@ class ReportGenerator:
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
         width, height = letter
-        
+
+        # Encabezado poliger ecuagenera
+        p.setFont("Helvetica-Bold", 18)
+        p.drawCentredString(width / 2, height - 30, "POLIGER ECUAGENERA")
+
         # Título
         p.setFont("Helvetica-Bold", 16)
         title = "Reporte de Germinaciones"
         if filters and filters.get('usuario_actual'):
             title += f" - Usuario: {filters['usuario_actual']}"
-        p.drawString(50, height - 50, title)
+        p.drawString(50, height - 60, title)
         
         # Información adicional
-        y_position = height - 80
+        y_position = height - 90
         p.setFont("Helvetica", 10)
         p.drawString(50, y_position, f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
         p.drawString(50, y_position - 15, f"Total de registros: {germinaciones.count()}")
-        
+
         if filters and filters.get('search'):
             p.drawString(50, y_position - 30, f"Filtro de búsqueda: {filters['search']}")
             y_position -= 15
-        
+
         y_position -= 50
         
         # Encabezados
         p.setFont("Helvetica-Bold", 10)
         p.drawString(50, y_position, "Código")
-        p.drawString(150, y_position, "Género")
-        p.drawString(250, y_position, "Especie")
-        p.drawString(350, y_position, "Fecha")
-        p.drawString(450, y_position, "Estado")
-        
+        p.drawString(140, y_position, "Género")
+        p.drawString(220, y_position, "Especie")
+        p.drawString(310, y_position, "Fecha")
+        p.drawString(390, y_position, "Cant. Sol.")
+        p.drawString(460, y_position, "Estado")
+
         y_position -= 20
         p.setFont("Helvetica", 9)
-        
+
         # Datos
         for germ in germinaciones:
             if y_position < 50:  # Nueva página si no hay espacio
                 p.showPage()
                 y_position = height - 50
                 p.setFont("Helvetica", 9)
-            
-            p.drawString(50, y_position, str(germ.codigo or '')[:15])
-            p.drawString(150, y_position, str(germ.genero or '')[:15])
-            p.drawString(250, y_position, str(germ.especie_variedad or '')[:15])
-            p.drawString(350, y_position, str(germ.fecha_siembra or '')[:10])
-            p.drawString(450, y_position, str(germ.etapa_actual or '')[:10])
-            
+
+            p.drawString(50, y_position, str(germ.codigo or '')[:12])
+            p.drawString(140, y_position, str(germ.genero or '')[:10])
+            p.drawString(220, y_position, str(germ.especie_variedad or '')[:12])
+            p.drawString(310, y_position, str(germ.fecha_siembra or '')[:10])
+            p.drawString(390, y_position, str(germ.cantidad_solicitada or '0'))
+            p.drawString(460, y_position, str(germ.etapa_actual or '')[:10])
+
             y_position -= 15
         
         p.save()
@@ -564,15 +554,14 @@ class ReportGenerator:
         
         headers = [
             'Número', 'Código', 'Fecha Polinización', 'Fecha Maduración', 'Tipo Polinización',
-            'Madre Código', 'Madre Género', 'Madre Clima', 'Madre Especie',
-            'Padre Código', 'Padre Género', 'Padre Clima', 'Padre Especie',
+            'Madre Código', 'Madre Clima', 'Padre Código', 'Padre Clima',
             'Ubicación Tipo', 'Ubicación Nombre', 'Cantidad Cápsulas', 'Responsable',
             'Disponible', 'Estado', 'Fecha Creación', 'Fecha Actualización', 'Creado por'
         ]
-        
+
         for col, header in enumerate(headers, 1):
             ws.cell(row=1, column=col, value=header)
-        
+
         for row, polinizacion in enumerate(queryset, 2):
             ws.cell(row=row, column=1, value=self.safe_get_value(polinizacion, 'numero'))
             ws.cell(row=row, column=2, value=self.safe_get_value(polinizacion, 'codigo'))
@@ -580,22 +569,18 @@ class ReportGenerator:
             ws.cell(row=row, column=4, value=self.format_date(self.safe_get_value(polinizacion, 'fechamad')))
             ws.cell(row=row, column=5, value=self.safe_get_value(polinizacion, 'tipo_polinizacion'))
             ws.cell(row=row, column=6, value=self.safe_get_value(polinizacion, 'madre_codigo'))
-            ws.cell(row=row, column=7, value=self.safe_get_value(polinizacion, 'madre_genero'))
-            ws.cell(row=row, column=8, value=self.safe_get_value(polinizacion, 'madre_clima'))
-            ws.cell(row=row, column=9, value=self.safe_get_value(polinizacion, 'madre_especie'))
-            ws.cell(row=row, column=10, value=self.safe_get_value(polinizacion, 'padre_codigo'))
-            ws.cell(row=row, column=11, value=self.safe_get_value(polinizacion, 'padre_genero'))
-            ws.cell(row=row, column=12, value=self.safe_get_value(polinizacion, 'padre_clima'))
-            ws.cell(row=row, column=13, value=self.safe_get_value(polinizacion, 'padre_especie'))
-            ws.cell(row=row, column=14, value=self.safe_get_value(polinizacion, 'ubicacion_tipo'))
-            ws.cell(row=row, column=15, value=self.safe_get_value(polinizacion, 'ubicacion_nombre'))
-            ws.cell(row=row, column=16, value=self.safe_get_value(polinizacion, 'cantidad_capsulas'))
-            ws.cell(row=row, column=17, value=self.safe_get_value(polinizacion, 'responsable'))
-            ws.cell(row=row, column=18, value='Sí' if self.safe_get_value(polinizacion, 'disponible') else 'No')
-            ws.cell(row=row, column=19, value=self.safe_get_value(polinizacion, 'estado'))
-            ws.cell(row=row, column=20, value=self.format_date(self.safe_get_value(polinizacion, 'fecha_creacion')))
-            ws.cell(row=row, column=21, value=self.format_date(self.safe_get_value(polinizacion, 'fecha_actualizacion')))
-            ws.cell(row=row, column=22, value=self.safe_get_value(polinizacion.creado_por, 'username') if polinizacion.creado_por else '')
+            ws.cell(row=row, column=7, value=self.safe_get_value(polinizacion, 'madre_clima'))
+            ws.cell(row=row, column=8, value=self.safe_get_value(polinizacion, 'padre_codigo'))
+            ws.cell(row=row, column=9, value=self.safe_get_value(polinizacion, 'padre_clima'))
+            ws.cell(row=row, column=10, value=self.safe_get_value(polinizacion, 'ubicacion_tipo'))
+            ws.cell(row=row, column=11, value=self.safe_get_value(polinizacion, 'ubicacion_nombre'))
+            ws.cell(row=row, column=12, value=self.safe_get_value(polinizacion, 'cantidad_capsulas'))
+            ws.cell(row=row, column=13, value=self.safe_get_value(polinizacion, 'responsable'))
+            ws.cell(row=row, column=14, value='Sí' if self.safe_get_value(polinizacion, 'disponible') else 'No')
+            ws.cell(row=row, column=15, value=self.safe_get_value(polinizacion, 'estado'))
+            ws.cell(row=row, column=16, value=self.format_date(self.safe_get_value(polinizacion, 'fecha_creacion')))
+            ws.cell(row=row, column=17, value=self.format_date(self.safe_get_value(polinizacion, 'fecha_actualizacion')))
+            ws.cell(row=row, column=18, value=self.safe_get_value(polinizacion.creado_por, 'username') if polinizacion.creado_por else '')
         
         for col in range(1, len(headers) + 1):
             ws.column_dimensions[get_column_letter(col)].width = 18
@@ -807,9 +792,13 @@ class ReportGenerator:
             buffer = io.BytesIO()
             p = canvas.Canvas(buffer, pagesize=letter)
             width, height = letter
-            
+
+            # Encabezado poliger ecuagenera
+            p.setFont("Helvetica-Bold", 18)
+            p.drawCentredString(width / 2, height - 30, "POLIGER ECUAGENERA")
+
             p.setFont("Helvetica-Bold", 16)
-            p.drawCentredString(width/2, height-50, f"REPORTE DE {tipo.upper()}")
+            p.drawCentredString(width/2, height-60, f"REPORTE DE {tipo.upper()}")
             
             if tipo == 'germinaciones':
                 queryset = Germinacion.objects.all()
@@ -818,8 +807,8 @@ class ReportGenerator:
                         queryset = queryset.filter(fecha_creacion__gte=filters['fecha_inicio'])
                     if filters.get('fecha_fin'):
                         queryset = queryset.filter(fecha_creacion__lte=filters['fecha_fin'])
-                
-                y_position = height - 100
+
+                y_position = height - 110
                 p.setFont("Helvetica-Bold", 12)
                 p.drawString(50, y_position, "ESTADÍSTICAS DE GERMINACIONES")
                 
@@ -840,8 +829,8 @@ class ReportGenerator:
                         queryset = queryset.filter(fecha_creacion__gte=filters['fecha_inicio'])
                     if filters.get('fecha_fin'):
                         queryset = queryset.filter(fecha_creacion__lte=filters['fecha_fin'])
-                
-                y_position = height - 100
+
+                y_position = height - 110
                 p.setFont("Helvetica-Bold", 12)
                 p.drawString(50, y_position, "ESTADÍSTICAS DE POLINIZACIONES")
                 

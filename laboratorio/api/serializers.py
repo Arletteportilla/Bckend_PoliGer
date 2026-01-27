@@ -46,6 +46,7 @@ class PolinizacionSerializer(serializers.ModelSerializer):
             'padre_codigo', 'padre_genero', 'padre_clima', 'padre_especie',
             'nueva_codigo', 'nueva_genero', 'nueva_clima', 'nueva_especie',
             'ubicacion_tipo', 'ubicacion_nombre', 'cantidad_capsulas',
+            'cantidad_solicitada', 'cantidad_disponible',
             'responsable', 'disponible', 'estado', 'creado_por',
             'fecha_creacion', 'fecha_actualizacion',
             # Campos legacy para compatibilidad
@@ -63,6 +64,57 @@ class PolinizacionSerializer(serializers.ModelSerializer):
             'prediccion_parametros_usados',
             # Estado y progreso de polinización
             'estado_polinizacion', 'progreso_polinizacion'
+        ]
+        extra_kwargs = {
+            'fechamad': {'required': False, 'allow_null': True},
+            'codigo': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'ubicacion': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'genero': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'especie': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'observaciones': {'required': False, 'allow_blank': True, 'allow_null': True},
+            # Hacer campos de padre opcionales
+            'padre_codigo': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'padre_genero': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'padre_especie': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'padre_clima': {'required': False, 'allow_blank': True, 'allow_null': True},
+            # Hacer campos de ubicación opcionales
+            'ubicacion_nombre': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
+
+
+class PolinizacionHistoricaSerializer(serializers.ModelSerializer):
+    """
+    Serializer para registros históricos (importados desde Excel)
+    Excluye campos de estado y progreso ya que son datos finalizados
+    """
+    creado_por = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Polinizacion
+        fields = [
+            'numero', 'codigo', 'fechapol', 'fechamad', 'tipo_polinizacion',
+            'madre_codigo', 'madre_genero', 'madre_clima', 'madre_especie',
+            'padre_codigo', 'padre_genero', 'padre_clima', 'padre_especie',
+            'nueva_codigo', 'nueva_genero', 'nueva_clima', 'nueva_especie',
+            'ubicacion_tipo', 'ubicacion_nombre', 'cantidad_capsulas',
+            'cantidad_solicitada', 'cantidad_disponible',
+            'responsable', 'disponible', 'creado_por',
+            'fecha_creacion', 'fecha_actualizacion',
+            # Campos legacy para compatibilidad
+            'genero', 'especie', 'ubicacion', 'cantidad', 'archivo_origen', 'observaciones',
+            # Campos de ubicación detallada
+            'vivero', 'mesa', 'pared',
+            # Campo Tipo para predicción ML
+            'Tipo',
+            # Campos de predicción ML (mantener para análisis histórico)
+            'dias_maduracion_predichos', 'fecha_maduracion_predicha', 
+            'metodo_prediccion', 'confianza_prediccion',
+            # Campos de predicción legacy
+            'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
+            'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
+            'prediccion_parametros_usados',
+            # NOTA: Se excluyen 'estado', 'estado_polinizacion', 'progreso_polinizacion'
+            # porque los registros históricos son datos finalizados
         ]
         extra_kwargs = {
             'fechamad': {'required': False, 'allow_null': True},
@@ -345,6 +397,35 @@ class GerminacionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return data
+
+
+class GerminacionHistoricaSerializer(serializers.ModelSerializer):
+    """
+    Serializer para registros históricos de germinaciones (importados desde Excel/CSV)
+    Excluye campos de estado y progreso ya que son datos finalizados
+    """
+    creado_por = serializers.PrimaryKeyRelatedField(read_only=True)
+    
+    class Meta:
+        model = Germinacion
+        fields = [
+            'id', 'fecha_polinizacion', 'fecha_siembra', 'fecha_ingreso', 'codigo', 'nombre',
+            'genero', 'especie_variedad', 'clima', 'percha', 'nivel', 'clima_lab',
+            'cantidad_solicitada', 'no_capsulas', 'estado_capsula', 'estado_semilla',
+            'cantidad_semilla', 'semilla_en_stock', 'observaciones', 'responsable',
+            'archivo_origen', 'fecha_creacion', 'fecha_actualizacion', 'creado_por',
+            # Campos de predicción (mantener para análisis histórico)
+            'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
+            'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
+            'prediccion_parametros_usados',
+            # Campos legacy para compatibilidad
+            'fecha_germinacion', 'estado_capsulas', 'tipo_polinizacion',
+            'entrega_capsulas', 'recibe_capsulas', 'semilla_vana', 'semillas_stock',
+            'disponibles'
+            # NOTA: Se excluyen 'estado_validacion', 'estado_germinacion', 'progreso_germinacion'
+            # porque los registros históricos son datos finalizados
+        ]
+
 
 class SeguimientoGerminacionSerializer(serializers.ModelSerializer):
     class Meta:

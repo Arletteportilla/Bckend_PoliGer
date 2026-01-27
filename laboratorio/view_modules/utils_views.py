@@ -387,44 +387,48 @@ def estadisticas_polinizaciones(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def estadisticas_usuario(request):
-    """Estadísticas específicas del usuario logueado"""
+    """Estadísticas específicas del usuario logueado - Solo registros creados por el usuario"""
     try:
         user = request.user
-        
-        # Estadísticas de germinaciones del usuario
+
+        # Estadísticas de germinaciones creadas por el usuario
         mis_germinaciones = Germinacion.objects.filter(creado_por=user)
         total_germinaciones = mis_germinaciones.count()
-        
-        # Estadísticas de polinizaciones del usuario
+
+        # Germinaciones actuales (en proceso, no finalizadas)
+        germinaciones_actuales = mis_germinaciones.filter(
+            estado_capsula__in=['Verde', 'En Proceso', 'Sin Fecha']
+        ).exclude(
+            estado_capsula__in=['Germinado', 'Finalizado']
+        ).count()
+
+        # Estadísticas de polinizaciones creadas por el usuario
         mis_polinizaciones = Polinizacion.objects.filter(creado_por=user)
         total_polinizaciones = mis_polinizaciones.count()
-        
+
+        # Polinizaciones actuales (en proceso, no finalizadas)
+        polinizaciones_actuales = mis_polinizaciones.filter(
+            estado__in=['INGRESADO', 'EN_PROCESO', 'GERMINANDO']
+        ).exclude(
+            estado__in=['COMPLETADA', 'FINALIZADA']
+        ).count()
+
         # Notificaciones no leídas
         notificaciones_no_leidas = Notification.objects.filter(
             usuario=user,
             leida=False
         ).count()
-        
+
+        # Respuesta en el formato esperado por el frontend
         return Response({
-            'usuario': {
-                'username': user.username,
-                'nombre_completo': f"{user.first_name} {user.last_name}".strip() or user.username
-            },
-            'germinaciones': {
-                'total': total_germinaciones,
-                'por_estado': list(mis_germinaciones.values('estado_capsula').annotate(
-                    count=Count('id')
-                ).order_by('estado_capsula'))
-            },
-            'polinizaciones': {
-                'total': total_polinizaciones,
-                'por_estado': list(mis_polinizaciones.values('estado').annotate(
-                    count=Count('numero')
-                ).order_by('estado'))
-            },
+            'total_polinizaciones': total_polinizaciones,
+            'total_germinaciones': total_germinaciones,
+            'polinizaciones_actuales': polinizaciones_actuales,
+            'germinaciones_actuales': germinaciones_actuales,
+            'usuario': user.username,
             'notificaciones_no_leidas': notificaciones_no_leidas
         })
-        
+
     except Exception as e:
         logger.error(f"Error obteniendo estadísticas del usuario: {e}")
         return Response({'error': str(e)}, status=500)
