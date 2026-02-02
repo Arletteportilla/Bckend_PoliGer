@@ -8,6 +8,7 @@ __pycache__/
 
 # Django
 *.log
+logs/
 db.sqlite3
 db.sqlite3-journal
 media/
@@ -32,6 +33,9 @@ Thumbs.db
 # Backups
 backups/
 *.bak
+*.backup
+*_backup.*
+*_BACKUP_*
 
 # Testing
 .coverage
@@ -41,3 +45,13 @@ htmlcov/
 # Environment variables
 .env
 .env.local
+
+# Data exports (no versionar datos grandes)
+*.dump
+germinaciones_export.json
+
+# Scripts de deployment con credenciales
+export_to_production.py
+
+# Carpetas de reorganización temporal
+backup_reorganizacion/
