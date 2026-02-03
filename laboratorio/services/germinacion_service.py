@@ -115,13 +115,16 @@ class GerminacionService(PaginatedService, CacheableService):
         return validated_data
     
     def _apply_user_filter(self, queryset, user: User):
-        """Aplica filtros basados en el rol del usuario"""
-        # Los administradores ven todo
-        if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
-            return queryset
-        
-        # Otros usuarios solo ven sus propias germinaciones
-        return queryset.filter(creado_por=user)
+        """Aplica filtros basados en el rol del usuario.
+
+        Para la página principal (list), todos los usuarios con permiso CanViewGerminaciones
+        pueden ver TODAS las germinaciones del sistema.
+
+        Para el perfil (mis-germinaciones), se usa get_mis_germinaciones que filtra por usuario.
+        """
+        # Ya no filtramos por usuario aquí - todos los usuarios con permiso ven todas las germinaciones
+        # El filtrado por usuario propio se hace en get_mis_germinaciones para la página de perfil
+        return queryset
     
     def get_mis_germinaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False) -> List[Germinacion]:
         """Obtiene las germinaciones del usuario actual

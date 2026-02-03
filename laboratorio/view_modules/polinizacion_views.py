@@ -925,15 +925,14 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
 
     @action(detail=False, methods=['get'], url_path='filter-options')
     def filter_options(self, request):
-        """Obtiene opciones para filtros de polinizaciones"""
+        """Obtiene opciones para filtros de TODAS las polinizaciones del sistema"""
         try:
             user = request.user
 
-            # Obtener queryset base (todos si es admin, solo propios si no)
-            if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
-                queryset = Polinizacion.objects.all()
-            else:
-                queryset = Polinizacion.objects.filter(creado_por=user)
+            # Obtener queryset base - TODAS las polinizaciones del sistema
+            # para que los filtros reflejen todos los valores posibles
+            queryset = Polinizacion.objects.all()
+            logger.info(f"Obteniendo opciones de filtros para todas las polinizaciones del sistema")
 
             options = {
                 'estados': list(queryset.values_list('estado', flat=True).distinct().exclude(estado='').order_by('estado')),
@@ -960,6 +959,65 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
             })
         except Exception as e:
             return self.handle_error(e, "Error obteniendo opciones de filtro de polinizaciones")
+
+    @action(detail=False, methods=['get'], url_path='buscar-genero-por-especie')
+    def buscar_genero_por_especie(self, request):
+        """
+        Busca el género correspondiente a una especie en las polinizaciones.
+        Útil para autocompletar el género en formularios de germinación.
+
+        GET /api/polinizaciones/buscar-genero-por-especie/?especie=nombre_especie
+        """
+        try:
+            especie = request.GET.get('especie', '').strip()
+
+            if not especie:
+                return Response({
+                    'found': False,
+                    'genero': None,
+                    'message': 'Especie no proporcionada'
+                })
+
+            especie_lower = especie.lower()
+
+            # Buscar en los diferentes campos de especie
+            polinizacion = Polinizacion.objects.filter(
+                Q(especie__iexact=especie) |
+                Q(madre_especie__iexact=especie) |
+                Q(padre_especie__iexact=especie) |
+                Q(nueva_especie__iexact=especie)
+            ).first()
+
+            if polinizacion:
+                # Determinar qué género devolver según el campo que coincidió
+                genero = None
+                if polinizacion.especie and polinizacion.especie.lower() == especie_lower:
+                    genero = polinizacion.genero
+                elif polinizacion.madre_especie and polinizacion.madre_especie.lower() == especie_lower:
+                    genero = polinizacion.madre_genero
+                elif polinizacion.padre_especie and polinizacion.padre_especie.lower() == especie_lower:
+                    genero = polinizacion.padre_genero
+                elif polinizacion.nueva_especie and polinizacion.nueva_especie.lower() == especie_lower:
+                    genero = polinizacion.nueva_genero
+
+                if genero:
+                    return Response({
+                        'found': True,
+                        'genero': genero,
+                        'especie': especie,
+                        'message': 'Genero encontrado'
+                    })
+
+            return Response({
+                'found': False,
+                'genero': None,
+                'especie': especie,
+                'message': 'No se encontro genero para esta especie'
+            })
+
+        except Exception as e:
+            logger.error(f"Error buscando genero por especie: {e}")
+            return self.handle_error(e, "Error buscando genero por especie")
 
     @action(detail=False, methods=['get'], url_path='viveros')
     def viveros(self, request):

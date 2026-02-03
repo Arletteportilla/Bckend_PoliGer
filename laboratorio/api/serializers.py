@@ -618,18 +618,21 @@ class CreateUserWithProfileSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Crear usuario con perfil"""
+        from django.utils import timezone
+
         # Extraer datos del perfil
         rol = validated_data.pop('rol', 'TIPO_3')
         telefono = validated_data.pop('telefono', '')
         departamento = validated_data.pop('departamento', '')
-        fecha_ingreso = validated_data.pop('fecha_ingreso', None)
-        
+        # Si no se proporciona fecha_ingreso, usar la fecha actual
+        fecha_ingreso = validated_data.pop('fecha_ingreso', None) or timezone.now().date()
+
         # Remover confirmación de contraseña
         validated_data.pop('password_confirm')
-        
+
         # Crear usuario
         user = User.objects.create_user(**validated_data)
-        
+
         # Actualizar o crear perfil
         profile, created = UserProfile.objects.get_or_create(user=user)
         profile.rol = rol
@@ -637,7 +640,7 @@ class CreateUserWithProfileSerializer(serializers.ModelSerializer):
         profile.departamento = departamento
         profile.fecha_ingreso = fecha_ingreso
         profile.save()
-        
+
         return user
 
 

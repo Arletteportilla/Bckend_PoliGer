@@ -71,23 +71,20 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
 
     def list(self, request, *args, **kwargs):
         """
-        Lista germinaciones con paginación y filtros.
+        Lista TODAS las germinaciones del sistema con paginación y filtros.
+        Cualquier usuario con permiso CanViewGerminaciones puede ver todas las germinaciones.
         Admite filtros por: código, especie, estado, clima, responsable, fechas, etc.
         """
         try:
             user = request.user
 
-            logger.info(f"Listando germinaciones para usuario: {user.username}")
+            logger.info(f"Listando TODAS las germinaciones para usuario: {user.username}")
 
-            # Obtener el queryset base según el rol del usuario
+            # Obtener el queryset base - SIN filtrar por usuario
+            # Todos los usuarios con permiso CanViewGerminaciones pueden ver todas las germinaciones
             queryset = self.filter_queryset(self.get_queryset())
 
-            # Filtrar por usuario si no es administrador
-            if not (hasattr(user, 'profile') and user.profile.rol == 'TIPO_4'):
-                queryset = queryset.filter(creado_por=user)
-                logger.info(f"Usuario regular - filtrando solo sus germinaciones")
-            else:
-                logger.info(f"Usuario es administrador - mostrando todas las germinaciones")
+            logger.info(f"Mostrando todas las germinaciones del sistema (usuario tiene permiso CanViewGerminaciones)")
 
             # Aplicar paginación
             page = self.paginate_queryset(queryset)
@@ -294,15 +291,14 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     
     @action(detail=False, methods=['get'], url_path='filtros-opciones')
     def filtros_opciones(self, request):
-        """Obtiene opciones disponibles para filtros y estadísticas"""
+        """Obtiene opciones disponibles para filtros y estadísticas de TODAS las germinaciones"""
         try:
             user = request.user
 
-            # Obtener queryset base según rol
-            if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
-                queryset = self.get_queryset()
-            else:
-                queryset = self.get_queryset().filter(creado_por=user)
+            # Obtener queryset base - TODAS las germinaciones del sistema
+            # para que los filtros reflejen todos los valores posibles
+            queryset = self.get_queryset()
+            logger.info(f"Obteniendo opciones de filtros para todas las germinaciones del sistema")
 
             # Obtener valores únicos para filtros
             responsables = list(queryset.exclude(responsable__isnull=True).exclude(responsable='').values_list('responsable', flat=True).distinct())

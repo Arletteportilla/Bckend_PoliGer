@@ -771,7 +771,7 @@ def crear_perfil_usuario(sender, instance, created, **kwargs):
     Crea automáticamente un perfil de usuario cuando se crea un nuevo usuario
     """
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(user=instance, fecha_ingreso=timezone.now().date())
 
 @receiver(post_save, sender=User)
 def guardar_perfil_usuario(sender, instance, **kwargs):

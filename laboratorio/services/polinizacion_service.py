@@ -107,13 +107,16 @@ class PolinizacionService(PaginatedService, CacheableService):
         return validated_data
     
     def _apply_user_filter(self, queryset, user: User):
-        """Aplica filtros basados en el rol del usuario"""
-        # Los administradores ven todo
-        if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
-            return queryset
-        
-        # Otros usuarios solo ven sus propias polinizaciones
-        return queryset.filter(creado_por=user)
+        """Aplica filtros basados en el rol del usuario.
+
+        Para la página principal (list), todos los usuarios con permiso CanViewPolinizaciones
+        pueden ver TODAS las polinizaciones del sistema.
+
+        Para el perfil (mis-polinizaciones), se usa get_mis_polinizaciones que filtra por usuario.
+        """
+        # Ya no filtramos por usuario aquí - todos los usuarios con permiso ven todas las polinizaciones
+        # El filtrado por usuario propio se hace en get_mis_polinizaciones para la página de perfil
+        return queryset
     
     def get_mis_polinizaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True) -> List[Polinizacion]:
         """Obtiene las polinizaciones del usuario actual
