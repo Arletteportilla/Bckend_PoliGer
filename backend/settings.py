@@ -191,6 +191,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://207.180.230.88:8000",
     "http://207.180.230.88:19006",  # Expo default port
     "http://207.180.230.88:3000",
+    # Dominios de producción
+    "http://www.poligerecuagenera.org",
+    "https://www.poligerecuagenera.org",
+    "http://poligerecuagenera.org",
+    "https://poligerecuagenera.org",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
