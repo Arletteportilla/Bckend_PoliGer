@@ -293,33 +293,32 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     def filtros_opciones(self, request):
         """Obtiene opciones disponibles para filtros y estadísticas de TODAS las germinaciones"""
         try:
+            from django.db.models import Count
+
             user = request.user
 
-            # Obtener queryset base - TODAS las germinaciones del sistema
-            # para que los filtros reflejen todos los valores posibles
-            queryset = self.get_queryset()
+            # Usar Germinacion.objects directamente en lugar de get_queryset() para evitar select_related innecesarios
+            queryset = Germinacion.objects.all()
             logger.info(f"Obteniendo opciones de filtros para todas las germinaciones del sistema")
 
-            # Obtener valores únicos para filtros
-            responsables = list(queryset.exclude(responsable__isnull=True).exclude(responsable='').values_list('responsable', flat=True).distinct())
-            perchas = list(queryset.exclude(percha__isnull=True).exclude(percha='').values_list('percha', flat=True).distinct())
-            niveles = list(queryset.exclude(nivel__isnull=True).exclude(nivel='').values_list('nivel', flat=True).distinct())
-            generos = list(queryset.exclude(genero__isnull=True).exclude(genero='').values_list('genero', flat=True).distinct())
+            # Obtener valores únicos para filtros usando only() para cargar solo campos necesarios
+            responsables = list(queryset.exclude(responsable__isnull=True).exclude(responsable='').values_list('responsable', flat=True).distinct()[:100])
+            perchas = list(queryset.exclude(percha__isnull=True).exclude(percha='').values_list('percha', flat=True).distinct()[:100])
+            niveles = list(queryset.exclude(nivel__isnull=True).exclude(nivel='').values_list('nivel', flat=True).distinct()[:100])
+            generos = list(queryset.exclude(genero__isnull=True).exclude(genero='').values_list('genero', flat=True).distinct()[:100])
 
-            # Estadísticas
-            total = queryset.count()
-            por_estado = {
-                'CERRADA': queryset.filter(estado_capsulas='CERRADA').count(),
-                'ABIERTA': queryset.filter(estado_capsulas='ABIERTA').count(),
-                'SEMIABIERTA': queryset.filter(estado_capsulas='SEMIABIERTA').count(),
-            }
-            por_clima = {
-                'I': queryset.filter(clima='I').count(),
-                'IW': queryset.filter(clima='IW').count(),
-                'IC': queryset.filter(clima='IC').count(),
-                'W': queryset.filter(clima='W').count(),
-                'C': queryset.filter(clima='C').count(),
-            }
+            # Usar agregación para estadísticas en una sola query
+            stats = queryset.aggregate(
+                total=Count('id'),
+                cerrada=Count('id', filter=Q(estado_capsulas='CERRADA')),
+                abierta=Count('id', filter=Q(estado_capsulas='ABIERTA')),
+                semiabierta=Count('id', filter=Q(estado_capsulas='SEMIABIERTA')),
+                clima_i=Count('id', filter=Q(clima='I')),
+                clima_iw=Count('id', filter=Q(clima='IW')),
+                clima_ic=Count('id', filter=Q(clima='IC')),
+                clima_w=Count('id', filter=Q(clima='W')),
+                clima_c=Count('id', filter=Q(clima='C')),
+            )
 
             return Response({
                 'opciones': {
@@ -332,9 +331,19 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     'tipos_polinizacion': ['SELF', 'HIBRIDA', 'SIBLING']
                 },
                 'estadisticas': {
-                    'total': total,
-                    'por_estado': por_estado,
-                    'por_clima': por_clima
+                    'total': stats['total'],
+                    'por_estado': {
+                        'CERRADA': stats['cerrada'],
+                        'ABIERTA': stats['abierta'],
+                        'SEMIABIERTA': stats['semiabierta'],
+                    },
+                    'por_clima': {
+                        'I': stats['clima_i'],
+                        'IW': stats['clima_iw'],
+                        'IC': stats['clima_ic'],
+                        'W': stats['clima_w'],
+                        'C': stats['clima_c'],
+                    }
                 }
             })
         except Exception as e:
@@ -369,20 +378,33 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         """
         Obtiene códigos disponibles desde la tabla Polinizacion con su información
         Usado para autocompletar en formularios de polinización
+        Limitado a 500 resultados más recientes para performance
         """
         try:
             from ..models import Polinizacion
 
-            logger.info("Obteniendo códigos disponibles desde polinizaciones")
+            # Parámetro de búsqueda opcional para filtrar
+            search = request.GET.get('search', '').strip()
 
-            # Obtener polinizaciones con código no vacío
-            polinizaciones = Polinizacion.objects.exclude(
+            logger.info(f"Obteniendo códigos disponibles desde polinizaciones (búsqueda: '{search}')")
+
+            # Construir query base con índices
+            queryset = Polinizacion.objects.exclude(
                 codigo__isnull=True
             ).exclude(
                 codigo__exact=''
-            ).values(
+            )
+
+            # Si hay búsqueda, filtrar
+            if search:
+                queryset = queryset.filter(codigo__icontains=search)
+
+            # Limitar a 500 resultados más recientes usando only() para cargar menos campos
+            polinizaciones = queryset.only(
                 'codigo', 'genero', 'especie', 'nueva_clima'
-            ).distinct().order_by('codigo')
+            ).order_by('-fecha_creacion')[:500].values(
+                'codigo', 'genero', 'especie', 'nueva_clima'
+            ).distinct()
 
             # Formatear respuesta
             codigos_disponibles = []

@@ -927,34 +927,36 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     def filter_options(self, request):
         """Obtiene opciones para filtros de TODAS las polinizaciones del sistema"""
         try:
+            from django.db.models import Count
+
             user = request.user
 
             # Obtener queryset base - TODAS las polinizaciones del sistema
-            # para que los filtros reflejen todos los valores posibles
             queryset = Polinizacion.objects.all()
             logger.info(f"Obteniendo opciones de filtros para todas las polinizaciones del sistema")
 
+            # Limitar resultados a 100 más comunes para evitar sobrecarga
             options = {
-                'estados': list(queryset.values_list('estado', flat=True).distinct().exclude(estado='').order_by('estado')),
-                'tipos_polinizacion': list(queryset.values_list('tipo_polinizacion', flat=True).distinct().exclude(tipo_polinizacion='').order_by('tipo_polinizacion')),
-                'responsables': list(queryset.values_list('responsable', flat=True).distinct().exclude(responsable='').order_by('responsable')),
-                'generos': list(queryset.values_list('genero', flat=True).distinct().exclude(genero='').order_by('genero')),
-                'especies': list(queryset.values_list('especie', flat=True).distinct().exclude(especie='').order_by('especie')),
-                'ubicacion_nombres': list(queryset.values_list('ubicacion_nombre', flat=True).distinct().exclude(ubicacion_nombre='').order_by('ubicacion_nombre')),
-                'ubicacion_tipos': list(queryset.values_list('ubicacion_tipo', flat=True).distinct().exclude(ubicacion_tipo='').order_by('ubicacion_tipo')),
+                'estados': list(queryset.exclude(estado='').values_list('estado', flat=True).distinct().order_by('estado')[:50]),
+                'tipos_polinizacion': list(queryset.exclude(tipo_polinizacion='').values_list('tipo_polinizacion', flat=True).distinct().order_by('tipo_polinizacion')[:50]),
+                'responsables': list(queryset.exclude(responsable='').values_list('responsable', flat=True).distinct().order_by('responsable')[:100]),
+                'generos': list(queryset.exclude(genero='').values_list('genero', flat=True).distinct().order_by('genero')[:100]),
+                'especies': list(queryset.exclude(especie='').values_list('especie', flat=True).distinct().order_by('especie')[:100]),
+                'ubicacion_nombres': list(queryset.exclude(ubicacion_nombre='').values_list('ubicacion_nombre', flat=True).distinct().order_by('ubicacion_nombre')[:100]),
+                'ubicacion_tipos': list(queryset.exclude(ubicacion_tipo='').values_list('ubicacion_tipo', flat=True).distinct().order_by('ubicacion_tipo')[:50]),
                 # Nuevos campos de ubicación detallada
-                'viveros': list(queryset.values_list('vivero', flat=True).distinct().exclude(vivero='').order_by('vivero')),
-                'mesas': list(queryset.values_list('mesa', flat=True).distinct().exclude(mesa='').order_by('mesa')),
-                'paredes': list(queryset.values_list('pared', flat=True).distinct().exclude(pared='').order_by('pared')),
+                'viveros': list(queryset.exclude(vivero='').values_list('vivero', flat=True).distinct().order_by('vivero')[:100]),
+                'mesas': list(queryset.exclude(mesa='').values_list('mesa', flat=True).distinct().order_by('mesa')[:100]),
+                'paredes': list(queryset.exclude(pared='').values_list('pared', flat=True).distinct().order_by('pared')[:100]),
             }
 
-            # Opciones de madre, padre, nueva (pueden ser muchos, limitar o solo ofrecer búsqueda)
-            # Por ahora, solo listamos las opciones más relevantes como chips
+            # Usar aggregate para count en vez de queryset.count() separado
+            total_count = queryset.aggregate(total=Count('numero'))['total']
 
             return Response({
                 'opciones': options,
-                'estadisticas': { # Podemos añadir estadísticas rápidas aquí si es necesario
-                    'total': queryset.count()
+                'estadisticas': {
+                    'total': total_count
                 }
             })
         except Exception as e:
@@ -1248,7 +1250,7 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
 
     @action(detail=False, methods=['get'], url_path='opciones-ubicacion')
     def opciones_ubicacion(self, request):
-        """Obtiene todas las opciones de ubicación (viveros, mesas, paredes) en una sola llamada"""
+        """Obtiene todas las opciones de ubicación (viveros, mesas, paredes) en una sola llamada - limitado para performance"""
         try:
             import re
 
@@ -1284,16 +1286,17 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 except:
                     return (2, 0, codigo)
 
+            # Limitar a 200 opciones cada uno para no sobrecargar
             # Obtener viveros
-            viveros = list(Polinizacion.objects.exclude(vivero='').values_list('vivero', flat=True).distinct())
+            viveros = list(Polinizacion.objects.exclude(vivero='').values_list('vivero', flat=True).distinct()[:200])
             viveros.sort(key=ordenar_codigo)
 
             # Obtener mesas
-            mesas = list(Polinizacion.objects.exclude(mesa='').values_list('mesa', flat=True).distinct())
+            mesas = list(Polinizacion.objects.exclude(mesa='').values_list('mesa', flat=True).distinct()[:200])
             mesas.sort(key=ordenar_mesa)
 
             # Obtener paredes
-            paredes = list(Polinizacion.objects.exclude(pared='').values_list('pared', flat=True).distinct())
+            paredes = list(Polinizacion.objects.exclude(pared='').values_list('pared', flat=True).distinct()[:200])
             paredes.sort(key=ordenar_pared)
 
             return Response({
