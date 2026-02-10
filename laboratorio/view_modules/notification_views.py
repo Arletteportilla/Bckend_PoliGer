@@ -31,21 +31,38 @@ class NotificationViewSet(viewsets.ModelViewSet):
         ).order_by('-fecha_creacion')
     
     def list(self, request, *args, **kwargs):
-        """Lista las notificaciones del usuario"""
+        """Lista las notificaciones del usuario con paginación"""
         try:
             solo_no_leidas = request.GET.get('solo_no_leidas', 'false').lower() == 'true'
             incluir_archivadas = request.GET.get('incluir_archivadas', 'false').lower() == 'true'
-            
-            notificaciones = notification_service.obtener_notificaciones_usuario(
-                usuario=request.user,
-                solo_no_leidas=solo_no_leidas,
-                incluir_archivadas=incluir_archivadas
-            )
-            
+
+            # Usar queryset optimizado con select_related
+            queryset = self.get_queryset()
+
+            if solo_no_leidas:
+                queryset = queryset.filter(leida=False)
+
+            if not incluir_archivadas:
+                queryset = queryset.filter(archivada=False)
+
+            # Paginación: limitar a las más recientes
+            page_size = min(int(request.GET.get('page_size', 50)), 100)
+            page = max(int(request.GET.get('page', 1)), 1)
+            offset = (page - 1) * page_size
+
+            total = queryset.count()
+            notificaciones = queryset[offset:offset + page_size]
+
             serializer = self.get_serializer(notificaciones, many=True)
-            
-            return Response(serializer.data)
-            
+
+            return Response({
+                'count': total,
+                'page': page,
+                'page_size': page_size,
+                'total_pages': (total + page_size - 1) // page_size if total > 0 else 1,
+                'results': serializer.data
+            })
+
         except Exception as e:
             logger.error(f"Error obteniendo notificaciones: {e}")
             return Response(

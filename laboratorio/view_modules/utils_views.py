@@ -413,6 +413,11 @@ def estadisticas_usuario(request):
             estado__in=['COMPLETADA', 'FINALIZADA']
         ).count()
 
+        # Polinizaciones completadas (para cálculo de éxito promedio)
+        polinizaciones_completadas = mis_polinizaciones.filter(
+            estado__in=['COMPLETADA', 'FINALIZADA', 'MADURO', 'LISTO']
+        ).count()
+
         # Notificaciones no leídas
         notificaciones_no_leidas = Notification.objects.filter(
             usuario=user,
@@ -425,6 +430,7 @@ def estadisticas_usuario(request):
             'total_germinaciones': total_germinaciones,
             'polinizaciones_actuales': polinizaciones_actuales,
             'germinaciones_actuales': germinaciones_actuales,
+            'polinizaciones_completadas': polinizaciones_completadas,
             'usuario': user.username,
             'notificaciones_no_leidas': notificaciones_no_leidas
         })
