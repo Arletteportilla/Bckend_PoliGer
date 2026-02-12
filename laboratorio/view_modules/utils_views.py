@@ -66,13 +66,32 @@ def apply_data_style(worksheet, row, columns):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def generar_reporte_germinaciones(request):
-    """Generar reporte Excel de germinaciones"""
+    """Generar reporte de germinaciones (Excel o PDF según parámetro formato)"""
     try:
+        # Leer parámetros del request
+        formato = request.GET.get('formato', 'excel').lower()
+
+        # Construir filtros
+        filtros = {
+            'fecha_inicio': request.GET.get('fecha_inicio'),
+            'fecha_fin': request.GET.get('fecha_fin'),
+            'search': request.GET.get('search'),
+        }
+
+        # Limpiar filtros nulos
+        filtros = {k: v for k, v in filtros.items() if v}
+
+        logger.info(f"Generando reporte de germinaciones - formato: {formato}, filtros: {filtros}")
+
         # Usar ReportGenerator si está disponible
         try:
             from ..reports import ReportGenerator
             generator = ReportGenerator()
-            return generator.generate_excel_report('germinaciones', {})
+
+            if formato == 'pdf':
+                return generator.generate_pdf_report('germinaciones', filtros)
+            else:
+                return generator.generate_excel_report('germinaciones', filtros)
         except ImportError:
             return generar_reporte_basico_germinaciones(request)
     except Exception as e:
@@ -141,13 +160,32 @@ def generar_reporte_basico_germinaciones(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def generar_reporte_polinizaciones(request):
-    """Generar reporte Excel de polinizaciones"""
+    """Generar reporte de polinizaciones (Excel o PDF según parámetro formato)"""
     try:
+        # Leer parámetros del request
+        formato = request.GET.get('formato', 'excel').lower()
+
+        # Construir filtros
+        filtros = {
+            'fecha_inicio': request.GET.get('fecha_inicio'),
+            'fecha_fin': request.GET.get('fecha_fin'),
+            'search': request.GET.get('search'),
+        }
+
+        # Limpiar filtros nulos
+        filtros = {k: v for k, v in filtros.items() if v}
+
+        logger.info(f"Generando reporte de polinizaciones - formato: {formato}, filtros: {filtros}")
+
         # Usar ReportGenerator si está disponible
         try:
             from ..reports import ReportGenerator
             generator = ReportGenerator()
-            return generator.generate_excel_report('polinizaciones', {})
+
+            if formato == 'pdf':
+                return generator.generate_pdf_report('polinizaciones', filtros)
+            else:
+                return generator.generate_excel_report('polinizaciones', filtros)
         except ImportError:
             return generar_reporte_basico_polinizaciones(request)
     except Exception as e:
