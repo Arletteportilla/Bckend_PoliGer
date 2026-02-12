@@ -54,6 +54,17 @@ class GerminacionFilter(filters.FilterSet):
     # Filtro booleano
     semilla_en_stock = filters.BooleanFilter(field_name='semilla_en_stock')
 
+    # Filtro por tipo de registro (nuevos vs historicos)
+    tipo_registro = filters.CharFilter(method='filter_tipo_registro')
+
+    def filter_tipo_registro(self, queryset, name, value):
+        from django.db.models import Q
+        if value == 'nuevos':
+            return queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        elif value == 'historicos':
+            return queryset.exclude(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        return queryset
+
     class Meta:
         model = Germinacion
         fields = [
@@ -66,6 +77,7 @@ class GerminacionFilter(filters.FilterSet):
             'clima',
             'tipo_polinizacion',
             'semilla_en_stock',
+            'tipo_registro',
         ]
 
 

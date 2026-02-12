@@ -256,7 +256,7 @@ class GerminacionSerializer(serializers.ModelSerializer):
             'cantidad_semilla', 'semilla_en_stock', 'observaciones', 'responsable',
             'archivo_origen', 'estado_validacion', 'fecha_creacion', 'fecha_actualizacion', 'creado_por',
             # Estado de germinación (INICIAL, EN_PROCESO, FINALIZADO)
-            'estado_germinacion', 'progreso_germinacion',
+            'estado_germinacion', 'progreso_germinacion', 'etapa_actual',
             # Campos de predicción
             'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
             'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',
@@ -414,6 +414,8 @@ class GerminacionHistoricaSerializer(serializers.ModelSerializer):
             'cantidad_solicitada', 'no_capsulas', 'estado_capsula', 'estado_semilla',
             'cantidad_semilla', 'semilla_en_stock', 'observaciones', 'responsable',
             'archivo_origen', 'fecha_creacion', 'fecha_actualizacion', 'creado_por',
+            # Campos de estado (incluir etapa_actual para compatibilidad)
+            'etapa_actual',
             # Campos de predicción (mantener para análisis histórico)
             'prediccion_dias_estimados', 'prediccion_confianza', 'prediccion_fecha_estimada',
             'prediccion_tipo', 'prediccion_condiciones_climaticas', 'prediccion_especie_info',

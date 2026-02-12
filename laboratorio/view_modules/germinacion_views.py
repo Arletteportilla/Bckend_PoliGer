@@ -289,6 +289,42 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         except Exception as e:
             return self.handle_error(e, "Error obteniendo todas las germinaciones")
     
+    @action(detail=False, methods=['get'], url_path='metricas-nuevos')
+    def metricas_nuevos(self, request):
+        """Obtiene métricas solo de registros creados en el sistema (no importados)"""
+        try:
+            from django.db.models import Count
+
+            queryset = Germinacion.objects.filter(
+                Q(archivo_origen__isnull=True) | Q(archivo_origen='')
+            )
+
+            stats = queryset.aggregate(
+                total=Count('id'),
+                en_proceso=Count('id', filter=Q(
+                    Q(estado_germinacion='EN_PROCESO') |
+                    Q(estado_germinacion='EN_PROCESO_TEMPRANO') |
+                    Q(estado_germinacion='EN_PROCESO_AVANZADO')
+                )),
+                finalizados=Count('id', filter=Q(
+                    Q(estado_germinacion='FINALIZADO') |
+                    Q(etapa_actual='LISTA')
+                )),
+            )
+
+            total = stats['total'] or 0
+            finalizados = stats['finalizados'] or 0
+            exito_promedio = round((finalizados / total) * 100) if total > 0 else 0
+
+            return Response({
+                'en_proceso': stats['en_proceso'] or 0,
+                'finalizados': finalizados,
+                'exito_promedio': exito_promedio,
+                'total': total,
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo métricas de germinaciones")
+
     @action(detail=False, methods=['get'], url_path='filtros-opciones')
     def filtros_opciones(self, request):
         """Obtiene opciones disponibles para filtros y estadísticas de TODAS las germinaciones"""
@@ -1220,7 +1256,15 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                     )
                 
                 germinacion.estado_germinacion = nuevo_estado
-                
+
+                # Sincronizar etapa_actual (campo legacy)
+                if nuevo_estado == 'INICIAL':
+                    germinacion.etapa_actual = 'INGRESADO'
+                elif nuevo_estado in ('EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO'):
+                    germinacion.etapa_actual = 'EN_PROCESO'
+                elif nuevo_estado == 'FINALIZADO':
+                    germinacion.etapa_actual = 'LISTA'
+
                 # Actualizar progreso según el estado
                 if nuevo_estado == 'INICIAL':
                     germinacion.progreso_germinacion = 10
