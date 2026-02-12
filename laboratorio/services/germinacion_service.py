@@ -127,7 +127,7 @@ class GerminacionService(PaginatedService, CacheableService):
         return queryset
     
     def get_mis_germinaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False) -> List[Germinacion]:
-        """Obtiene las germinaciones del usuario actual
+        """Obtiene las germinaciones accesibles para el usuario actual
 
         Args:
             user: Usuario actual
@@ -135,9 +135,11 @@ class GerminacionService(PaginatedService, CacheableService):
             dias_recientes: Si se proporciona, filtra solo germinaciones de los últimos N días
             excluir_importadas: Si es True, excluye las germinaciones importadas desde archivos CSV/Excel
         """
-        # SOLO filtrar por creado_por (no por responsable)
-        # Esto evita mostrar datos importados masivamente
-        queryset = Germinacion.objects.filter(creado_por=user)
+        # Usuarios con rol de acceso completo a germinaciones ven TODAS
+        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']:
+            queryset = Germinacion.objects.all()
+        else:
+            queryset = Germinacion.objects.filter(creado_por=user)
 
         # Excluir germinaciones importadas desde CSV/Excel si se especifica
         if excluir_importadas:
@@ -162,7 +164,7 @@ class GerminacionService(PaginatedService, CacheableService):
         return list(queryset.order_by('-fecha_creacion'))
     
     def get_mis_germinaciones_paginated(self, user: User, page: int = 1, page_size: int = 20, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False, solo_historicos: bool = False):
-        """Obtiene las germinaciones del usuario actual con paginación
+        """Obtiene las germinaciones accesibles para el usuario actual con paginación
 
         Args:
             user: Usuario actual
@@ -175,9 +177,11 @@ class GerminacionService(PaginatedService, CacheableService):
         """
         from django.core.paginator import Paginator
 
-        # SOLO filtrar por creado_por (no por responsable)
-        # Esto evita mostrar datos importados masivamente
-        queryset = Germinacion.objects.filter(creado_por=user)
+        # Usuarios con rol de acceso completo a germinaciones ven TODAS
+        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']:
+            queryset = Germinacion.objects.all()
+        else:
+            queryset = Germinacion.objects.filter(creado_por=user)
 
         # Filtrar por tipo de registro
         if solo_historicos:

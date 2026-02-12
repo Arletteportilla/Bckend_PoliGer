@@ -26,8 +26,8 @@ class UserProfileViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     """ViewSet para gestión de perfiles de usuario"""
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
-    
+    # NO definir permission_classes aquí - dejar que RoleBasedViewSetMixin lo maneje
+
     # Definir permisos por acción
     role_permissions = {
         'list': IsAdministrator,
@@ -139,8 +139,11 @@ class UserManagementViewSet(viewsets.ModelViewSet):
     """ViewSet para gestión completa de usuarios (solo administradores)"""
     queryset = User.objects.all()
     serializer_class = UserWithProfileSerializer
-    permission_classes = [IsAuthenticated, IsAdministrator]
-    
+
+    def get_permissions(self):
+        """Solo administradores pueden gestionar usuarios"""
+        return [IsAuthenticated(), IsAdministrator()]
+
     def get_queryset(self):
         """Optimizar consulta con select_related"""
         return User.objects.select_related('profile').all().order_by('username')

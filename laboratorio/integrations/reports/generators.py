@@ -11,7 +11,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from datetime import datetime, timedelta
 import io
-from .models import Germinacion, Polinizacion
+from laboratorio.models import Germinacion, Polinizacion
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 
@@ -284,162 +284,381 @@ class ReportGenerator:
         return response
 
     def _generate_polinizaciones_pdf(self, filters=None):
-        """Genera PDF de polinizaciones"""
+        """Genera PDF profesional de polinizaciones con tablas"""
         try:
-            # Verificar que reportlab esté disponible
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-        except ImportError as e:
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import A4, landscape
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+            from reportlab.lib.enums import TA_CENTER
+            import os
+        except ImportError:
             raise ImportError("ReportLab no está instalado. Instala con: pip install reportlab")
 
         # Obtener datos filtrados
         polinizaciones = self._get_filtered_polinizaciones(filters)
-        
+
         # Crear respuesta HTTP
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="polinizaciones_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
-        
-        # Crear PDF
+
+        # Crear PDF con platypus en formato A4 horizontal
         buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4),
+                              rightMargin=30, leftMargin=30,
+                              topMargin=50, bottomMargin=30)
 
-        # Encabezado poliger ecuagenera
-        p.setFont("Helvetica-Bold", 18)
-        p.drawCentredString(width / 2, height - 30, "POLIGER ECUAGENERA")
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=20,
+            textColor=colors.HexColor('#1e3a8a'),
+            spaceAfter=10,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Heading2'],
+            fontSize=16,
+            textColor=colors.HexColor('#1e3a8a'),
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
 
-        # Título
-        p.setFont("Helvetica-Bold", 16)
-        title = "Reporte de Polinizaciones"
-        if filters and filters.get('usuario_actual'):
-            title += f" - Usuario: {filters['usuario_actual']}"
-        p.drawString(50, height - 60, title)
-        
-        # Información adicional
-        y_position = height - 90
-        p.setFont("Helvetica", 10)
-        p.drawString(50, y_position, f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-        p.drawString(50, y_position - 15, f"Total de registros: {polinizaciones.count()}")
+        # Contenido del PDF
+        story = []
 
-        if filters and filters.get('search'):
-            p.drawString(50, y_position - 30, f"Filtro de búsqueda: {filters['search']}")
-            y_position -= 15
+        # Logo Ecuagenera
+        logo_path = r'C:\Users\arlet\Desktop\78\78\PoliGer\assets\images\Ecuagenera.png'
+        if os.path.exists(logo_path):
+            try:
+                logo = Image(logo_path, width=1.2*inch, height=1.2*inch)
+                logo.hAlign = 'RIGHT'
+                story.append(logo)
+                story.append(Spacer(1, 0.1*inch))
+            except Exception as e:
+                print(f"No se pudo cargar el logo: {e}")
 
-        y_position -= 50
-        
-        # Encabezados
-        p.setFont("Helvetica-Bold", 10)
-        p.drawString(50, y_position, "Código")
-        p.drawString(150, y_position, "Género")
-        p.drawString(250, y_position, "Especie")
-        p.drawString(350, y_position, "Fecha")
-        p.drawString(450, y_position, "Estado")
-        
-        y_position -= 20
-        p.setFont("Helvetica", 9)
-        
-        # Datos
+        # Título principal
+        story.append(Paragraph("POLIGER ECUAGENERA", title_style))
+        story.append(Paragraph("Reporte de Polinizaciones", subtitle_style))
+        story.append(Spacer(1, 0.2*inch))
+
+        # Información del reporte
+        info_text = f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        if filters and filters.get('fecha_inicio'):
+            info_text += f" | Desde: {filters['fecha_inicio']}"
+        if filters and filters.get('fecha_fin'):
+            info_text += f" hasta: {filters['fecha_fin']}"
+        story.append(Paragraph(info_text, styles['Normal']))
+        story.append(Spacer(1, 0.3*inch))
+
+        # Preparar datos para la tabla principal
+        data = [['Código', 'Tipo', 'Fecha\nPolini.', 'Fecha\nMad.', 'Nueva\nGénero',
+                 'Nueva\nEspecie', 'Ubicación', 'Cantidad\nSolicitada', 'Cantidad\nDisponible']]
+
+        # Contar por estado
+        completadas = 0
+        en_proceso = 0
+
         for pol in polinizaciones:
-            if y_position < 50:  # Nueva página si no hay espacio
-                p.showPage()
-                y_position = height - 50
-                p.setFont("Helvetica", 9)
-            
-            p.drawString(50, y_position, str(pol.codigo or '')[:15])
-            p.drawString(150, y_position, str(pol.genero or '')[:15])
-            p.drawString(250, y_position, str(pol.especie or '')[:15])
-            p.drawString(350, y_position, str(pol.fechapol or '')[:10])
-            p.drawString(450, y_position, str(pol.estado or '')[:10])
-            
-            y_position -= 15
-        
-        p.save()
-        
+            estado = str(pol.estado or 'N/A')
+            if estado in ['COMPLETADA', 'FINALIZADA', 'MADURO', 'LISTO', 'FINALIZADO']:
+                completadas += 1
+            else:
+                en_proceso += 1
+
+            # Ubicación combinada
+            ubicacion = f"{pol.ubicacion_tipo or ''} {pol.ubicacion_nombre or ''}".strip() or 'N/A'
+
+            data.append([
+                str(pol.codigo or '')[:15],
+                str(pol.tipo_polinizacion or 'N/A')[:10],
+                str(pol.fechapol)[:10] if pol.fechapol else 'N/A',
+                str(pol.fechamad)[:10] if pol.fechamad else 'N/A',
+                str(pol.nueva_genero or pol.genero or '')[:12],
+                str(pol.nueva_especie or pol.especie or '')[:15],
+                ubicacion[:12],
+                str(pol.cantidad_solicitada or '0'),
+                str(pol.cantidad_disponible or '0')
+            ])
+
+        # Crear tabla principal (9 columnas)
+        col_widths = [0.9*inch, 0.6*inch, 0.8*inch, 0.8*inch, 0.9*inch,
+                     1.1*inch, 0.9*inch, 0.8*inch, 0.8*inch]
+        table = Table(data, colWidths=col_widths, repeatRows=1)
+
+        # Estilo de la tabla principal
+        table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+
+            # Body
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),  # Tipo centrado
+            ('ALIGN', (7, 1), (8, -1), 'CENTER'),  # Cantidades centradas
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f3f4f6')]),
+
+            # Bordes
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#1e3a8a')),
+        ]))
+
+        story.append(table)
+        story.append(Spacer(1, 0.4*inch))
+
+        # Tabla de resumen
+        total = completadas + en_proceso
+        summary_data = [
+            ['Estado', 'Cantidad'],
+            ['Completadas', str(completadas)],
+            ['En Proceso', str(en_proceso)],
+            ['TOTAL', str(total)]
+        ]
+
+        summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
+        summary_table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+
+            # Completadas (verde)
+            ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+
+            # En Proceso (amarillo)
+            ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
+            ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+
+            # Total (gris)
+            ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
+            ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
+            ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+
+            # General
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#1e3a8a')),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+
+        story.append(summary_table)
+
+        # Construir PDF
+        doc.build(story)
+
         # Obtener PDF del buffer
         pdf_data = buffer.getvalue()
         buffer.close()
-        
+
         response.write(pdf_data)
         return response
 
     def _generate_germinaciones_pdf(self, filters=None):
-        """Genera PDF de germinaciones"""
+        """Genera PDF profesional de germinaciones con tablas"""
         try:
-            # Verificar que reportlab esté disponible
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-        except ImportError as e:
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import A4, landscape
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT
+            import os
+        except ImportError:
             raise ImportError("ReportLab no está instalado. Instala con: pip install reportlab")
 
         # Obtener datos filtrados
         germinaciones = self._get_filtered_germinaciones(filters)
-        
+
         # Crear respuesta HTTP
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="germinaciones_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
-        
-        # Crear PDF
+
+        # Crear PDF con platypus en formato A4 horizontal
         buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4),
+                              rightMargin=30, leftMargin=30,
+                              topMargin=50, bottomMargin=30)
 
-        # Encabezado poliger ecuagenera
-        p.setFont("Helvetica-Bold", 18)
-        p.drawCentredString(width / 2, height - 30, "POLIGER ECUAGENERA")
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=20,
+            textColor=colors.HexColor('#1e3a8a'),
+            spaceAfter=10,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Heading2'],
+            fontSize=16,
+            textColor=colors.HexColor('#1e3a8a'),
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
 
-        # Título
-        p.setFont("Helvetica-Bold", 16)
-        title = "Reporte de Germinaciones"
-        if filters and filters.get('usuario_actual'):
-            title += f" - Usuario: {filters['usuario_actual']}"
-        p.drawString(50, height - 60, title)
-        
-        # Información adicional
-        y_position = height - 90
-        p.setFont("Helvetica", 10)
-        p.drawString(50, y_position, f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-        p.drawString(50, y_position - 15, f"Total de registros: {germinaciones.count()}")
+        # Contenido del PDF
+        story = []
 
-        if filters and filters.get('search'):
-            p.drawString(50, y_position - 30, f"Filtro de búsqueda: {filters['search']}")
-            y_position -= 15
+        # Logo Ecuagenera
+        logo_path = r'C:\Users\arlet\Desktop\78\78\PoliGer\assets\images\Ecuagenera.png'
+        if os.path.exists(logo_path):
+            try:
+                logo = Image(logo_path, width=1.2*inch, height=1.2*inch)
+                logo.hAlign = 'RIGHT'
+                story.append(logo)
+                story.append(Spacer(1, 0.1*inch))
+            except Exception as e:
+                print(f"No se pudo cargar el logo: {e}")
 
-        y_position -= 50
-        
-        # Encabezados
-        p.setFont("Helvetica-Bold", 10)
-        p.drawString(50, y_position, "Código")
-        p.drawString(140, y_position, "Género")
-        p.drawString(220, y_position, "Especie")
-        p.drawString(310, y_position, "Fecha")
-        p.drawString(390, y_position, "Cant. Sol.")
-        p.drawString(460, y_position, "Estado")
+        # Título principal
+        story.append(Paragraph("POLIGER ECUAGENERA", title_style))
+        story.append(Paragraph("Reporte de Germinaciones", subtitle_style))
+        story.append(Spacer(1, 0.2*inch))
 
-        y_position -= 20
-        p.setFont("Helvetica", 9)
+        # Información del reporte
+        info_text = f"Generado el: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        if filters and filters.get('fecha_inicio'):
+            info_text += f" | Desde: {filters['fecha_inicio']}"
+        if filters and filters.get('fecha_fin'):
+            info_text += f" hasta: {filters['fecha_fin']}"
+        story.append(Paragraph(info_text, styles['Normal']))
+        story.append(Spacer(1, 0.3*inch))
 
-        # Datos
+        # Preparar datos para la tabla principal
+        data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.',
+                 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
+
+        # Contar completadas y pendientes
+        completadas = 0
+        pendientes = 0
+
         for germ in germinaciones:
-            if y_position < 50:  # Nueva página si no hay espacio
-                p.showPage()
-                y_position = height - 50
-                p.setFont("Helvetica", 9)
+            # Determinar si está completada (tiene fecha de germinación)
+            estado_germ = str(germ.estado_germinacion or germ.etapa_actual or 'N/A')
+            if germ.fecha_germinacion or estado_germ in ['FINALIZADO', 'LISTA', 'FINALIZADA']:
+                completadas += 1
+            else:
+                pendientes += 1
 
-            p.drawString(50, y_position, str(germ.codigo or '')[:12])
-            p.drawString(140, y_position, str(germ.genero or '')[:10])
-            p.drawString(220, y_position, str(germ.especie_variedad or '')[:12])
-            p.drawString(310, y_position, str(germ.fecha_siembra or '')[:10])
-            p.drawString(390, y_position, str(germ.cantidad_solicitada or '0'))
-            p.drawString(460, y_position, str(germ.etapa_actual or '')[:10])
+            data.append([
+                str(germ.codigo or '')[:15],
+                str(germ.genero or '')[:15],
+                str(germ.especie_variedad or '')[:20],
+                str(germ.fecha_siembra)[:10] if germ.fecha_siembra else 'N/A',
+                str(germ.cantidad_solicitada or '0'),
+                str(germ.no_capsulas or '0'),
+                estado_germ[:12],
+                str(germ.clima or 'I'),
+                str(germ.responsable or '')[:15]
+            ])
 
-            y_position -= 15
-        
-        p.save()
-        
+        # Crear tabla principal
+        col_widths = [0.9*inch, 0.9*inch, 1.3*inch, 0.8*inch, 0.6*inch,
+                     0.7*inch, 0.9*inch, 0.6*inch, 1.1*inch]
+        table = Table(data, colWidths=col_widths, repeatRows=1)
+
+        # Estilo de la tabla principal
+        table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+
+            # Body
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ('ALIGN', (4, 1), (5, -1), 'CENTER'),  # Cant. y Cápsulas centradas
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f3f4f6')]),
+
+            # Bordes
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#1e3a8a')),
+        ]))
+
+        story.append(table)
+        story.append(Spacer(1, 0.4*inch))
+
+        # Tabla de resumen
+        total = completadas + pendientes
+        summary_data = [
+            ['Estado', 'Cantidad'],
+            ['Completadas (con fecha de germinación)', str(completadas)],
+            ['Pendientes (sin fecha de germinación)', str(pendientes)],
+            ['TOTAL', str(total)]
+        ]
+
+        summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
+        summary_table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+
+            # Completadas (verde)
+            ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+
+            # Pendientes (amarillo)
+            ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
+            ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+
+            # Total (gris)
+            ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
+            ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
+            ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+
+            # General
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#1e3a8a')),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+
+        story.append(summary_table)
+
+        # Construir PDF
+        doc.build(story)
+
         # Obtener PDF del buffer
         pdf_data = buffer.getvalue()
         buffer.close()
-        
+
         response.write(pdf_data)
         return response
     

@@ -53,7 +53,11 @@ urlpatterns = [
     # Rutas específicas (deben ir ANTES del router para evitar conflictos)
     path('api/polinizaciones/mis-polinizaciones/', PolinizacionViewSet.as_view({'get': 'mis_polinizaciones'}), name='mis_polinizaciones'),
     path('api/germinaciones/mis-germinaciones/', GerminacionViewSet.as_view({'get': 'mis_germinaciones'}), name='mis_germinaciones'),
-    
+
+    # Rutas para reportes (ANTES del router para evitar conflictos)
+    path('api/polinizaciones/reporte/', generar_reporte_polinizaciones, name='reporte_polinizaciones'),
+    path('api/germinaciones/reporte/', generar_reporte_germinaciones, name='reporte_germinaciones'),
+
     # Incluir las rutas del router
     path('api/', include(router.urls)),
     
@@ -66,11 +70,7 @@ urlpatterns = [
     path('api/estadisticas/germinaciones/', estadisticas_germinaciones, name='estadisticas_germinaciones'),
     path('api/estadisticas/polinizaciones/', estadisticas_polinizaciones, name='estadisticas_polinizaciones'),
     path('api/estadisticas/usuario/', estadisticas_usuario, name='estadisticas_usuario'),
-    
-    # Rutas para reportes (Excel y PDF)
-    path('api/polinizaciones/reporte/', generar_reporte_polinizaciones, name='reporte_polinizaciones'),
-    path('api/germinaciones/reporte/', generar_reporte_germinaciones, name='reporte_germinaciones'),
-    
+
     # Rutas para importación de CSV
     path('api/upload/polinizaciones/', csv_views.upload_csv_polinizaciones, name='upload_csv_polinizaciones'),
     path('api/upload/germinaciones/', csv_views.upload_csv_germinaciones, name='upload_csv_germinaciones'),

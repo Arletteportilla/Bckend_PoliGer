@@ -13,7 +13,7 @@ import logging
 
 from ..models import Germinacion, Polinizacion, Notification
 from ..serializers import GerminacionSerializer, PolinizacionSerializer
-# from ..permissions import require_reports_access, require_germinacion_access, require_polinizacion_access
+from ..permissions import CanViewGerminaciones, CanViewPolinizaciones, CanViewReportes, CanGenerateReportes
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def apply_data_style(worksheet, row, columns):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, CanViewGerminaciones])
 def generar_reporte_germinaciones(request):
     """Generar reporte de germinaciones (Excel o PDF según parámetro formato)"""
     try:
@@ -158,7 +158,7 @@ def generar_reporte_basico_germinaciones(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, CanViewPolinizaciones])
 def generar_reporte_polinizaciones(request):
     """Generar reporte de polinizaciones (Excel o PDF según parámetro formato)"""
     try:
@@ -256,7 +256,7 @@ def generar_reporte_basico_polinizaciones(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, CanViewGerminaciones])
 def estadisticas_germinaciones(request):
     """Estadísticas de germinaciones"""
     try:
@@ -290,11 +290,15 @@ def estadisticas_germinaciones(request):
         )['promedio'] or 0
         
         # Calcular tasa de éxito (germinaciones completadas vs total)
+        # Una germinación es exitosa si tiene fecha de germinación o semilla en stock
         total_germinaciones = Germinacion.objects.count()
         germinaciones_exitosas = Germinacion.objects.filter(
-            estado_capsula__in=['ABIERTA', 'GERMINADA']
+            Q(fecha_germinacion__isnull=False) | Q(semilla_en_stock=True)
         ).count()
         tasa_exito = round((germinaciones_exitosas / total_germinaciones * 100), 2) if total_germinaciones > 0 else 0
+
+        # Log para debugging
+        logger.info(f"Total germinaciones: {total_germinaciones}, Exitosas: {germinaciones_exitosas}, Tasa: {tasa_exito}%")
         
         # Promedio de días para germinar (simulado)
         promedio_dias_germinar = 15  # Valor por defecto, se puede calcular si hay datos de fechas
@@ -320,7 +324,7 @@ def estadisticas_germinaciones(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, CanViewPolinizaciones])
 def estadisticas_polinizaciones(request):
     """Estadísticas de polinizaciones"""
     try:
@@ -388,11 +392,15 @@ def estadisticas_polinizaciones(request):
             })
         
         # Calcular tasa de éxito (polinizaciones exitosas vs total)
+        # Una polinización es exitosa si tiene fecha de maduración (fechamad) o cantidad disponible > 0
         total_polinizaciones = Polinizacion.objects.count()
         polinizaciones_exitosas = Polinizacion.objects.filter(
-            estado__in=['COMPLETADA', 'EXITOSA', 'MADURO']
+            Q(fechamad__isnull=False) | Q(cantidad_disponible__gt=0)
         ).count()
         tasa_exito = round((polinizaciones_exitosas / total_polinizaciones * 100), 2) if total_polinizaciones > 0 else 0
+
+        # Log para debugging
+        logger.info(f"Total polinizaciones: {total_polinizaciones}, Exitosas: {polinizaciones_exitosas}, Tasa: {tasa_exito}%")
         
         # Promedio de semillas por fruto (simulado)
         promedio_semillas_fruto = 25  # Valor por defecto, se puede calcular si hay datos
@@ -479,7 +487,7 @@ def estadisticas_usuario(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, CanGenerateReportes])
 def generar_reporte_con_estadisticas(request):
     """Genera un reporte completo con estadísticas"""
     try:

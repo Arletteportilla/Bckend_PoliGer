@@ -16,7 +16,7 @@ from ..serializers import GerminacionSerializer
 from ..api.serializers import GerminacionHistoricaSerializer
 from ..services.germinacion_service import germinacion_service
 from ..services.prediccion_service import prediccion_service
-from ..permissions import CanViewGerminaciones, CanCreateGerminaciones, CanEditGerminaciones
+from ..permissions import CanViewGerminaciones, CanCreateGerminaciones, CanEditGerminaciones, RoleBasedViewSetMixin
 from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
 from ..api.pagination import StandardResultsSetPagination
 from ..api.filters import GerminacionFilter
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 
-class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
+class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     """
     ViewSet para Germinaciones usando servicios de negocio
     Incluye paginación, filtros y búsqueda
@@ -36,7 +36,7 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     queryset = Germinacion.objects.all()
     serializer_class = GerminacionSerializer
     service_class = type(germinacion_service)
-    permission_classes = [IsAuthenticated]
+    # NO definir permission_classes aquí - dejar que RoleBasedViewSetMixin lo maneje
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = GerminacionFilter
@@ -55,6 +55,21 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         'destroy': CanEditGerminaciones,
         'mis_germinaciones': CanViewGerminaciones,
         'todas_admin': CanViewGerminaciones,
+        'metricas_nuevos': CanViewGerminaciones,
+        'filtros_opciones': CanViewGerminaciones,
+        'codigos_unicos': CanViewGerminaciones,
+        'codigos_con_especies': CanViewGerminaciones,
+        'codigos_disponibles': CanViewGerminaciones,
+        'buscar_por_codigo': CanViewGerminaciones,
+        'buscar_por_especie': CanViewGerminaciones,
+        'calcular_prediccion': CanViewGerminaciones,
+        'calcular_prediccion_mejorada': CanViewGerminaciones,
+        'germinaciones_pdf': CanViewGerminaciones,
+        'mis_germinaciones_pdf': CanViewGerminaciones,
+        'cambiar_estado': CanEditGerminaciones,
+        'alertas_germinacion': CanViewGerminaciones,
+        'marcar_revisado': CanEditGerminaciones,
+        'pendientes_revision': CanViewGerminaciones,
     }
     
     def __init__(self, *args, **kwargs):
@@ -436,11 +451,10 @@ class GerminacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
                 queryset = queryset.filter(codigo__icontains=search)
 
             # Limitar a 500 resultados más recientes usando only() para cargar menos campos
-            polinizaciones = queryset.only(
+            # IMPORTANTE: distinct() debe ir ANTES del slice [:500]
+            polinizaciones = queryset.values(
                 'codigo', 'genero', 'especie', 'nueva_clima'
-            ).order_by('-fecha_creacion')[:500].values(
-                'codigo', 'genero', 'especie', 'nueva_clima'
-            ).distinct()
+            ).distinct().order_by('-codigo')[:500]
 
             # Formatear respuesta
             codigos_disponibles = []

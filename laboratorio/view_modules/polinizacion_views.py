@@ -15,21 +15,21 @@ from ..models import Polinizacion
 from ..serializers import PolinizacionSerializer
 from ..api.serializers import PolinizacionHistoricaSerializer
 from ..services.polinizacion_service import polinizacion_service
-from ..permissions import CanViewPolinizaciones, CanCreatePolinizaciones, CanEditPolinizaciones
+from ..permissions import CanViewPolinizaciones, CanCreatePolinizaciones, CanEditPolinizaciones, RoleBasedViewSetMixin
 from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
 from ..renderers import BinaryFileRenderer
 
 logger = logging.getLogger(__name__)
 
 
-class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
+class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
     """
     ViewSet para Polinizaciones usando servicios de negocio
     """
     queryset = Polinizacion.objects.all()
     serializer_class = PolinizacionSerializer
     service_class = type(polinizacion_service)
-    permission_classes = [IsAuthenticated]
+    # NO definir permission_classes aquí - dejar que RoleBasedViewSetMixin lo maneje
     
     # Definir permisos por acción
     role_permissions = {
@@ -41,6 +41,25 @@ class PolinizacionViewSet(BaseServiceViewSet, ErrorHandlerMixin, SearchMixin):
         'destroy': CanEditPolinizaciones,
         'mis_polinizaciones': CanViewPolinizaciones,
         'todas_admin': CanViewPolinizaciones,
+        'polinizaciones_pdf': CanViewPolinizaciones,
+        'mis_polinizaciones_pdf': CanViewPolinizaciones,
+        'alertas_polinizacion': CanViewPolinizaciones,
+        'filter_options': CanViewPolinizaciones,
+        'codigos_nuevas_plantas': CanViewPolinizaciones,
+        'codigos_con_especies': CanViewPolinizaciones,
+        'buscar_por_codigo': CanViewPolinizaciones,
+        'buscar_planta_info': CanViewPolinizaciones,
+        'buscar_genero_por_especie': CanViewPolinizaciones,
+        'viveros': CanViewPolinizaciones,
+        'mesas': CanViewPolinizaciones,
+        'paredes': CanViewPolinizaciones,
+        'opciones_ubicacion': CanViewPolinizaciones,
+        'marcar_revisado': CanEditPolinizaciones,
+        'pendientes_revision': CanViewPolinizaciones,
+        'predecir_maduracion': CanViewPolinizaciones,
+        'info_modelo_ml': CanViewPolinizaciones,
+        'cambiar_estado': CanEditPolinizaciones,
+        'generar_predicciones_usuario': CanEditPolinizaciones,
     }
     
     def __init__(self, *args, **kwargs):
