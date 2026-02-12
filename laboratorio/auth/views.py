@@ -105,7 +105,7 @@ class ProtectedView(APIView):
                 })
             else:
                 # Si no tiene perfil, crear uno por defecto
-                from .models import UserProfile
+                from laboratorio.core.models import UserProfile
                 profile = UserProfile.objects.create(
                     user=request.user,
                     rol='TIPO_3'  # Rol por defecto
