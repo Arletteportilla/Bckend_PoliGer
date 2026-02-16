@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError
 import logging
 
@@ -107,16 +108,21 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            
+
             obj = self.service.create(serializer.validated_data, user=request.user)
-            
+
             # Invalidar caches relacionados si el servicio lo soporta
             if hasattr(self.service, 'invalidate_related_caches'):
                 self.service.invalidate_related_caches()
-            
+
             response_serializer = self.get_serializer(obj)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-        
+
+        except DRFValidationError as e:
+            return Response(
+                {'error': e.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except ValidationError as e:
             return Response(
                 {'error': str(e)},
@@ -134,25 +140,30 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
         try:
             obj_id = kwargs.get('pk')
             partial = kwargs.pop('partial', False)
-            
+
             serializer = self.get_serializer(data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
-            
+
             obj = self.service.update(obj_id, serializer.validated_data, user=request.user)
-            
+
             if not obj:
                 return Response(
                     {'error': 'Registro no encontrado'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Invalidar caches relacionados si el servicio lo soporta
             if hasattr(self.service, 'invalidate_related_caches'):
                 self.service.invalidate_related_caches()
-            
+
             response_serializer = self.get_serializer(obj)
             return Response(response_serializer.data)
-        
+
+        except DRFValidationError as e:
+            return Response(
+                {'error': e.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except ValidationError as e:
             return Response(
                 {'error': str(e)},

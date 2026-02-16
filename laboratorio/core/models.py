@@ -86,7 +86,7 @@ class Polinizacion(models.Model):
     nueva_codigo = models.CharField(max_length=50, verbose_name='Código nueva planta', default='', blank=True)
     nueva_genero = models.CharField(max_length=100, verbose_name='Género nueva planta', default='', blank=True)
     nueva_clima = models.CharField(max_length=50, verbose_name='Clima nueva planta', default='I', blank=True)
-    nueva_especie = models.CharField(max_length=100, verbose_name='Especie/Variedad nueva planta', default='', blank=True)
+    nueva_especie = models.CharField(max_length=255, verbose_name='Especie/Variedad nueva planta', default='', blank=True)
     
     # Ubicación
     ubicacion_tipo = models.CharField(max_length=20, choices=UBICACIONES, verbose_name='Tipo de ubicación', default='vivero', blank=True)

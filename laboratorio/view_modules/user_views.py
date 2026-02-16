@@ -163,10 +163,14 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
+            # Capturar contraseña en texto plano ANTES de que create_user la hashee
+            plain_password = request.data.get('password', '')
+
             # El serializer se encarga de crear tanto el usuario como el perfil
             user = serializer.save()
 
-            # Obtener el perfil creado
+            # Obtener el perfil creado (refresh para evitar caché del signal post_save)
+            user.refresh_from_db()
             profile = user.profile
 
             # Retornar usuario creado con perfil
@@ -188,6 +192,24 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             }
 
             logger.info(f"Usuario creado: {user.username} con rol {profile.rol}")
+
+            # Enviar email de bienvenida (no bloquea la creación del usuario)
+            email_sent = False
+            try:
+                from ..services.email_service import email_service
+                email_sent = email_service.enviar_email_bienvenida(
+                    user=user,
+                    password=plain_password,
+                    rol_display=profile.get_rol_display(),
+                )
+            except Exception as email_error:
+                logger.error(
+                    f"Error al enviar email de bienvenida para {user.username}: "
+                    f"{email_error}"
+                )
+
+            response_data['email_enviado'] = email_sent
+
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         except ValidationError as e:

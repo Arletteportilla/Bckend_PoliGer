@@ -258,17 +258,22 @@ def generar_reporte_basico_polinizaciones(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, CanViewGerminaciones])
 def estadisticas_germinaciones(request):
-    """Estadísticas de germinaciones"""
+    """Estadísticas de germinaciones (solo registros creados en el sistema)"""
     try:
+        # Base queryset - excluir registros importados
+        base_qs = Germinacion.objects.filter(
+            Q(archivo_origen__isnull=True) | Q(archivo_origen='')
+        )
+
         # Totales por estado
-        estados_count = Germinacion.objects.values('estado_capsula').annotate(
+        estados_count = base_qs.values('estado_capsula').annotate(
             count=Count('id')
         ).order_by('estado_capsula')
-        
+
         # Totales por mes (últimos 12 meses)
         from django.db.models.functions import TruncMonth
         fecha_limite = datetime.now() - timedelta(days=365)
-        por_mes_raw = Germinacion.objects.filter(
+        por_mes_raw = base_qs.filter(
             fecha_creacion__gte=fecha_limite
         ).annotate(
             mes=TruncMonth('fecha_creacion')
@@ -285,14 +290,14 @@ def estadisticas_germinaciones(request):
             })
         
         # Promedio de cápsulas
-        promedio_capsulas = Germinacion.objects.aggregate(
+        promedio_capsulas = base_qs.aggregate(
             promedio=Avg('no_capsulas')
         )['promedio'] or 0
-        
+
         # Calcular tasa de éxito (germinaciones completadas vs total)
         # Una germinación es exitosa si tiene fecha de germinación o semilla en stock
-        total_germinaciones = Germinacion.objects.count()
-        germinaciones_exitosas = Germinacion.objects.filter(
+        total_germinaciones = base_qs.count()
+        germinaciones_exitosas = base_qs.filter(
             Q(fecha_germinacion__isnull=False) | Q(semilla_en_stock=True)
         ).count()
         tasa_exito = round((germinaciones_exitosas / total_germinaciones * 100), 2) if total_germinaciones > 0 else 0
@@ -304,7 +309,7 @@ def estadisticas_germinaciones(request):
         promedio_dias_germinar = 15  # Valor por defecto, se puede calcular si hay datos de fechas
         
         # Top especies
-        top_especies = Germinacion.objects.values('especie_variedad').annotate(
+        top_especies = base_qs.values('especie_variedad').annotate(
             count=Count('id')
         ).order_by('-count')[:10]
         
@@ -331,9 +336,15 @@ def estadisticas_polinizaciones(request):
         # Obtener filtros de fecha si existen
         fecha_inicio = request.GET.get('fecha_inicio')
         fecha_fin = request.GET.get('fecha_fin')
-        
+        solo_nuevos = request.GET.get('solo_nuevos', 'false').lower() == 'true'
+
+        # Base queryset - excluir registros importados por defecto
+        base_qs = Polinizacion.objects.filter(
+            Q(archivo_origen__isnull=True) | Q(archivo_origen='')
+        )
+
         # Totales por estado
-        estados_count = Polinizacion.objects.values('estado').annotate(
+        estados_count = base_qs.values('estado').annotate(
             count=Count('numero')
         ).order_by('estado')
         
@@ -342,7 +353,7 @@ def estadisticas_polinizaciones(request):
         from django.utils.dateparse import parse_date
         
         # Usar fechapol para la tendencia
-        query = Polinizacion.objects.filter(fechapol__isnull=False)
+        query = base_qs.filter(fechapol__isnull=False)
 
         # Aplicar filtros de fecha si existen
         if fecha_inicio:
@@ -393,30 +404,33 @@ def estadisticas_polinizaciones(request):
         
         # Calcular tasa de éxito (polinizaciones exitosas vs total)
         # Una polinización es exitosa si tiene fecha de maduración (fechamad) o cantidad disponible > 0
-        total_polinizaciones = Polinizacion.objects.count()
-        polinizaciones_exitosas = Polinizacion.objects.filter(
+        total_polinizaciones = base_qs.count()
+        polinizaciones_exitosas = base_qs.filter(
             Q(fechamad__isnull=False) | Q(cantidad_disponible__gt=0)
         ).count()
+        polinizaciones_activas = total_polinizaciones - polinizaciones_exitosas
         tasa_exito = round((polinizaciones_exitosas / total_polinizaciones * 100), 2) if total_polinizaciones > 0 else 0
 
         # Log para debugging
-        logger.info(f"Total polinizaciones: {total_polinizaciones}, Exitosas: {polinizaciones_exitosas}, Tasa: {tasa_exito}%")
-        
+        logger.info(f"Total polinizaciones: {total_polinizaciones}, Exitosas: {polinizaciones_exitosas}, Activas: {polinizaciones_activas}, Tasa: {tasa_exito}%")
+
         # Promedio de semillas por fruto (simulado)
         promedio_semillas_fruto = 25  # Valor por defecto, se puede calcular si hay datos
-        
+
         # Top géneros
-        top_generos = Polinizacion.objects.values('genero').annotate(
+        top_generos = base_qs.values('genero').annotate(
             count=Count('numero')
         ).order_by('-count')[:10]
-        
+
         # Top especies
-        top_especies = Polinizacion.objects.values('especie').annotate(
+        top_especies = base_qs.values('especie').annotate(
             count=Count('numero')
         ).order_by('-count')[:10]
-        
+
         return Response({
             'total': total_polinizaciones,
+            'activas': polinizaciones_activas,
+            'cosechas': polinizaciones_exitosas,
             'tasa_exito': tasa_exito,
             'promedio_semillas_fruto': promedio_semillas_fruto,
             'estados': list(estados_count),
@@ -437,8 +451,12 @@ def estadisticas_usuario(request):
     try:
         user = request.user
 
-        # Estadísticas de germinaciones creadas por el usuario
-        mis_germinaciones = Germinacion.objects.filter(creado_por=user)
+        # Estadísticas de germinaciones creadas por el usuario (excluyendo importadas)
+        mis_germinaciones = Germinacion.objects.filter(
+            creado_por=user
+        ).filter(
+            Q(archivo_origen__isnull=True) | Q(archivo_origen='')
+        )
         total_germinaciones = mis_germinaciones.count()
 
         # Germinaciones actuales (en proceso, no finalizadas)
@@ -448,8 +466,12 @@ def estadisticas_usuario(request):
             estado_capsula__in=['Germinado', 'Finalizado']
         ).count()
 
-        # Estadísticas de polinizaciones creadas por el usuario
-        mis_polinizaciones = Polinizacion.objects.filter(creado_por=user)
+        # Estadísticas de polinizaciones creadas por el usuario (excluyendo importadas)
+        mis_polinizaciones = Polinizacion.objects.filter(
+            creado_por=user
+        ).filter(
+            Q(archivo_origen__isnull=True) | Q(archivo_origen='')
+        )
         total_polinizaciones = mis_polinizaciones.count()
 
         # Polinizaciones actuales (en proceso, no finalizadas)
@@ -462,6 +484,11 @@ def estadisticas_usuario(request):
         # Polinizaciones completadas (para cálculo de éxito promedio)
         polinizaciones_completadas = mis_polinizaciones.filter(
             estado__in=['COMPLETADA', 'FINALIZADA', 'MADURO', 'LISTO']
+        ).count()
+
+        # Germinaciones completadas (para cálculo de éxito promedio)
+        germinaciones_completadas = mis_germinaciones.filter(
+            estado_germinacion='FINALIZADO'
         ).count()
 
         # Notificaciones no leídas
@@ -477,6 +504,7 @@ def estadisticas_usuario(request):
             'polinizaciones_actuales': polinizaciones_actuales,
             'germinaciones_actuales': germinaciones_actuales,
             'polinizaciones_completadas': polinizaciones_completadas,
+            'germinaciones_completadas': germinaciones_completadas,
             'usuario': user.username,
             'notificaciones_no_leidas': notificaciones_no_leidas
         })

@@ -334,3 +334,18 @@ NOTIFICATION_CHECK_INTERVAL_MINUTES = 60  # Verificar cada hora
 
 # Días después de fecha base para enviar recordatorio
 NOTIFICATION_REMINDER_DAYS = 5
+
+# ============================================================================
+# EMAIL CONFIGURATION (Gmail SMTP)
+# ============================================================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'noreply@poliger.com')
+
+# URL y nombre de la aplicación (para enlaces en emails)
+APP_URL = 'http://207.180.230.88'
+APP_NAME = 'PoliGer - EcuaGenera'
