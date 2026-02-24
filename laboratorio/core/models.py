@@ -142,14 +142,16 @@ class Polinizacion(models.Model):
     # Estado del proceso de polinización
     ESTADOS_POLINIZACION_PROCESO = [
         ('INICIAL', 'Inicial'),
-        ('EN_PROCESO', 'En Proceso'),
+        ('EN_PROCESO', 'En Proceso'),          # Legacy - backward compat
+        ('EN_PROCESO_TEMPRANO', 'En Proceso - Temprano'),
+        ('EN_PROCESO_AVANZADO', 'En Proceso - Avanzado'),
         ('FINALIZADO', 'Finalizado'),
     ]
-    
+
     estado_polinizacion = models.CharField(
-        max_length=20, 
-        choices=ESTADOS_POLINIZACION_PROCESO, 
-        default='INICIAL', 
+        max_length=20,
+        choices=ESTADOS_POLINIZACION_PROCESO,
+        default='INICIAL',
         verbose_name='Estado de Polinización',
         help_text='Estado del proceso de polinización'
     )

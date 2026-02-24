@@ -1546,20 +1546,25 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             
             # Actualizar estado si se proporciona
             if estado:
-                if estado not in ['INICIAL', 'EN_PROCESO', 'FINALIZADO']:
+                estados_validos = ['INICIAL', 'EN_PROCESO', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO', 'FINALIZADO']
+                if estado not in estados_validos:
                     return Response({
-                        'error': 'Estado inválido. Debe ser INICIAL, EN_PROCESO o FINALIZADO'
+                        'error': f'Estado inválido. Debe ser uno de: {", ".join(estados_validos)}'
                     }, status=status.HTTP_400_BAD_REQUEST)
-                
+
                 polinizacion.estado_polinizacion = estado
-                
+
                 # Sincronizar progreso con estado
                 if estado == 'INICIAL':
                     polinizacion.progreso_polinizacion = 0
+                elif estado in ('EN_PROCESO', 'EN_PROCESO_TEMPRANO'):
+                    if polinizacion.progreso_polinizacion < 35:
+                        polinizacion.progreso_polinizacion = 35
+                elif estado == 'EN_PROCESO_AVANZADO':
+                    if polinizacion.progreso_polinizacion < 75:
+                        polinizacion.progreso_polinizacion = 75
                 elif estado == 'FINALIZADO':
                     polinizacion.progreso_polinizacion = 100
-                elif estado == 'EN_PROCESO' and polinizacion.progreso_polinizacion == 0:
-                    polinizacion.progreso_polinizacion = 50
             
             # Actualizar fecha de maduración si se proporciona
             if fecha_maduracion:
