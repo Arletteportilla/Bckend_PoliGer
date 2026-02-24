@@ -383,8 +383,8 @@ _predictor_instance = None
 
 
 def get_predictor():
-    """Obtiene instancia única del predictor (singleton)"""
+    """Obtiene instancia única del predictor (singleton). Reintenta si el modelo no cargó."""
     global _predictor_instance
-    if _predictor_instance is None:
+    if _predictor_instance is None or not _predictor_instance.model_loaded:
         _predictor_instance = XGBoostPolinizacionPredictor()
     return _predictor_instance

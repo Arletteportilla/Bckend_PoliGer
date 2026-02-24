@@ -422,8 +422,8 @@ class GerminacionPredictor:
 _predictor_instance = None
 
 def get_germinacion_predictor():
-    """Retorna la instancia única del predictor de germinación"""
+    """Retorna la instancia única del predictor de germinación. Reintenta si el modelo no cargó."""
     global _predictor_instance
-    if _predictor_instance is None:
+    if _predictor_instance is None or not _predictor_instance.model_loaded:
         _predictor_instance = GerminacionPredictor()
     return _predictor_instance
