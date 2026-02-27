@@ -60,6 +60,7 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
         'info_modelo_ml': CanViewPolinizaciones,
         'cambiar_estado': CanEditPolinizaciones,
         'generar_predicciones_usuario': CanEditPolinizaciones,
+        'validar_prediccion': CanEditPolinizaciones,
     }
     
     def __init__(self, *args, **kwargs):
@@ -268,54 +269,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
         except Exception as e:
             return self.handle_error(e, "Error obteniendo todas las polinizaciones")
     
-    @action(detail=False, methods=['get'], url_path='codigos-nuevas-plantas')
-    def codigos_nuevas_plantas(self, request):
-        """Obtiene códigos de nuevas plantas para autocompletado"""
-        try:
-            codigos = self.service.get_codigos_nuevas_plantas()
-            return Response({
-                'codigos': codigos,
-                'total': len(codigos)
-            })
-        except Exception as e:
-            return self.handle_error(e, "Error obteniendo códigos de nuevas plantas")
-    
-    @action(detail=False, methods=['get'], url_path='codigos-con-especies')
-    def codigos_con_especies(self, request):
-        """Obtiene códigos con especies para autocompletado"""
-        try:
-            codigos_especies = self.service.get_codigos_con_especies()
-            return Response({
-                'codigos_especies': codigos_especies,
-                'total': len(codigos_especies)
-            })
-        except Exception as e:
-            return self.handle_error(e, "Error obteniendo códigos con especies")
-    
-    @action(detail=False, methods=['get'], url_path='buscar-por-codigo')
-    def buscar_por_codigo(self, request):
-        """Busca una polinización por código de nueva planta"""
-        try:
-            codigo = request.GET.get('codigo', '').strip()
-            if not codigo:
-                return Response(
-                    {'error': 'Código es requerido'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            resultado = self.service.get_polinizacion_by_codigo_nueva_planta(codigo)
-
-            if resultado:
-                return Response(resultado)
-            else:
-                return Response(
-                    {'error': 'No se encontró polinización con ese código'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-        except Exception as e:
-            return self.handle_error(e, "Error buscando por código")
-
     @action(detail=False, methods=['get'], url_path='buscar-planta-info')
     def buscar_planta_info(self, request):
         """Busca información de una planta por código en polinizaciones y germinaciones"""
@@ -384,258 +337,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             logger.error(f"Error buscando información de planta: {e}")
             return self.handle_error(e, "Error buscando información de planta")
     
-    @action(detail=False, methods=['get'], url_path='polinizaciones-pdf', renderer_classes=[BinaryFileRenderer])
-    def polinizaciones_pdf(self, request):
-        """Genera PDF de TODAS las polinizaciones del sistema"""
-        try:
-            search = request.GET.get('search', '').strip()
-
-            # Obtener todas las polinizaciones del sistema
-            queryset = Polinizacion.objects.select_related(
-                'creado_por'
-            ).order_by('-fecha_creacion')
-
-            # Aplicar búsqueda si existe
-            if search:
-                queryset = queryset.filter(
-                    Q(codigo__icontains=search) |
-                    Q(nueva_codigo__icontains=search) |
-                    Q(genero__icontains=search) |
-                    Q(madre_genero__icontains=search) |
-                    Q(padre_genero__icontains=search) |
-                    Q(nueva_genero__icontains=search) |
-                    Q(especie__icontains=search) |
-                    Q(madre_especie__icontains=search) |
-                    Q(padre_especie__icontains=search) |
-                    Q(nueva_especie__icontains=search)
-                )
-
-            polinizaciones = list(queryset)
-
-            # Generar PDF directamente usando HttpResponse
-            from reportlab.lib import colors
-            from reportlab.lib.pagesizes import A4, landscape
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch, cm
-            from reportlab.lib.enums import TA_CENTER
-            import io
-            import os
-            from datetime import datetime
-            from django.http import HttpResponse
-            from django.conf import settings
-
-            # Crear respuesta HTTP para PDF
-            response = HttpResponse(content_type='application/pdf')
-            search_text = f"_busqueda_{search}" if search else ""
-            filename = f"polinizaciones_todas_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
-            response['Cache-Control'] = 'no-cache'
-
-            # Función para agregar pie de página en cada página
-            def add_page_footer(canvas, doc):
-                canvas.saveState()
-                footer_text = "PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente"
-                canvas.setFont('Helvetica', 8)
-                canvas.setFillColor(colors.grey)
-                page_width = landscape(A4)[0]
-                canvas.drawCentredString(page_width / 2, 0.5 * cm, footer_text)
-                # Número de página
-                canvas.drawRightString(page_width - 1 * cm, 0.5 * cm, f"Página {doc.page}")
-                canvas.restoreState()
-
-            # Crear PDF en modo landscape A4 para más columnas
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), topMargin=0.5*inch, bottomMargin=1*cm)
-
-            # Contenedor de elementos
-            elements = []
-            styles = getSampleStyleSheet()
-
-            # Agregar logo si existe
-            # Buscar el logo en diferentes ubicaciones posibles
-            logo_paths = [
-                os.path.join(settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
-                os.path.join(settings.BASE_DIR, 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
-                '/app/PoliGer/assets/images/Ecuagenera.png',  # Ruta en producción
-            ]
-
-            logo_img = None
-            for logo_path in logo_paths:
-                if os.path.exists(logo_path):
-                    try:
-                        logo_img = Image(logo_path, width=0.8*inch, height=0.8*inch)
-                        logo_img.hAlign = 'RIGHT'
-                        elements.append(logo_img)
-                        elements.append(Spacer(1, 6))
-                        break
-                    except Exception as e:
-                        logger.warning(f"No se pudo cargar el logo desde {logo_path}: {e}")
-
-            # Estilo personalizado para el encabezado principal
-            header_style = ParagraphStyle(
-                'CustomHeader',
-                parent=styles['Heading1'],
-                fontSize=20,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=6,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
-
-            # Estilo personalizado para el título
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=18,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=12,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
-
-            # Estilo para subtítulos
-            subtitle_style = ParagraphStyle(
-                'CustomSubtitle',
-                parent=styles['Normal'],
-                fontSize=11,
-                textColor=colors.HexColor('#475569'),
-                spaceAfter=6,
-                alignment=TA_CENTER
-            )
-
-            # Encabezado POLIGER ECUAGENERA
-            header = Paragraph("<b>POLIGER ECUAGENERA</b>", header_style)
-            elements.append(header)
-            elements.append(Spacer(1, 6))
-
-            # Título
-            title = Paragraph(f"<b>Reporte de Todas las Polinizaciones del Sistema</b>", title_style)
-            elements.append(title)
-
-            # Subtítulo
-            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-            subtitle = Paragraph(f"Generado por: {user_name}", subtitle_style)
-            elements.append(subtitle)
-
-            # Información adicional
-            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
-            info_text = f"Fecha de generación: {fecha_generacion}"
-            if search:
-                info_text += f" | Búsqueda: {search}"
-            info_text += f" | Total: {len(polinizaciones)} registros"
-
-            info = Paragraph(info_text, subtitle_style)
-            elements.append(info)
-            elements.append(Spacer(1, 20))
-
-            # Crear tabla de datos
-            data = [['Código', 'Tipo', 'Fecha\nPolini.', 'Fecha\nMad.', 'Nueva\nGénero', 'Nueva\nEspecie', 'Ubicación', 'Cantidad\nSolicitada', 'Cantidad\nDisponible']]
-
-            for pol in polinizaciones:
-                data.append([
-                    str(pol.codigo or pol.nueva_codigo or '')[:12],
-                    str(pol.tipo_polinizacion or pol.Tipo or '')[:6],
-                    pol.fechapol.strftime('%d/%m/%Y') if pol.fechapol else '',
-                    pol.fechamad.strftime('%d/%m/%Y') if pol.fechamad else '-',
-                    str(pol.nueva_genero or pol.madre_genero or pol.genero or '')[:10],
-                    str(pol.nueva_especie or pol.madre_especie or pol.especie or '')[:15],
-                    str(pol.ubicacion_nombre or pol.vivero or pol.ubicacion or '')[:10],
-                    str(pol.cantidad_solicitada or '-'),
-                    str(pol.cantidad_disponible or '-')
-                ])
-
-            # Crear tabla
-            table = Table(data, colWidths=[0.95*inch, 0.55*inch, 0.75*inch, 0.75*inch, 0.9*inch, 1.2*inch, 0.8*inch, 0.75*inch, 0.75*inch])
-
-            # Estilo de la tabla
-            table.setStyle(TableStyle([
-                # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 8),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-
-                # Datos
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
-                ('ALIGN', (2, 1), (2, -1), 'CENTER'),  # Fecha
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 7),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 1), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-            ]))
-
-            elements.append(table)
-
-            # Resumen de totales
-            elements.append(Spacer(1, 20))
-
-            # Calcular totales
-            total_completadas = sum(1 for pol in polinizaciones if pol.fechamad)
-            total_pendientes = len(polinizaciones) - total_completadas
-
-            summary_style = ParagraphStyle(
-                'Summary',
-                parent=styles['Normal'],
-                fontSize=10,
-                textColor=colors.HexColor('#1e3a8a'),
-                alignment=TA_CENTER,
-                spaceAfter=5
-            )
-
-            summary_title = Paragraph("<b>RESUMEN DE POLINIZACIONES</b>", summary_style)
-            elements.append(summary_title)
-
-            # Tabla de resumen
-            summary_data = [
-                ['Estado', 'Cantidad'],
-                ['Completadas (con fecha de maduración)', str(total_completadas)],
-                ['Pendientes (sin fecha de maduración)', str(total_pendientes)],
-                ['TOTAL', str(len(polinizaciones))]
-            ]
-
-            summary_table = Table(summary_data, colWidths=[3.5*inch, 1.5*inch])
-            summary_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-                ('TOPPADDING', (0, 0), (-1, -1), 8),
-                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),  # Verde claro para completadas
-                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),  # Amarillo claro para pendientes
-                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),  # Gris para total
-                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ]))
-            elements.append(summary_table)
-
-            # Generar PDF con pie de página en cada página
-            doc.build(elements, onFirstPage=add_page_footer, onLaterPages=add_page_footer)
-
-            # Escribir el buffer al response
-            pdf = buffer.getvalue()
-            buffer.close()
-            response.write(pdf)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error generando PDF de polinizaciones: {e}")
-            return Response({'error': str(e)}, status=500)
-
     @action(detail=False, methods=['get'], url_path='mis-polinizaciones-pdf', renderer_classes=[BinaryFileRenderer])
     def mis_polinizaciones_pdf(self, request):
         """Genera PDF de las polinizaciones del usuario"""
@@ -880,17 +581,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 content_type='text/plain'
             )
             return response
-
-    @action(detail=False, methods=['get'], url_path='debug-headers')
-    def debug_headers(self, request):
-        """Endpoint de debug para ver headers"""
-        return Response({
-            'headers': dict(request.headers),
-            'method': request.method,
-            'content_type': request.content_type,
-            'accepts': request.META.get('HTTP_ACCEPT', 'No Accept header'),
-            'user_agent': request.META.get('HTTP_USER_AGENT', 'No User-Agent'),
-        })
 
     @action(detail=False, methods=['get'], url_path='alertas_polinizacion')
     def alertas_polinizacion(self, request):
@@ -1672,3 +1362,94 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
         except Exception as e:
             logger.error(f"Error generando predicciones masivas: {e}")
             return self.handle_error(e, "Error generando predicciones")
+
+    @action(detail=True, methods=['post'], url_path='validar-prediccion')
+    def validar_prediccion(self, request, pk=None):
+        """
+        Valida la predicción de maduración comparando con la fecha real
+
+        POST /api/polinizaciones/{id}/validar-prediccion/
+        Body: { "fecha_maduracion_real": "YYYY-MM-DD" }
+        """
+        try:
+            polinizacion = self.get_object()
+            fecha_real_str = request.data.get('fecha_maduracion_real')
+
+            if not fecha_real_str:
+                return Response(
+                    {'error': 'El campo fecha_maduracion_real es requerido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            from datetime import datetime as dt
+            try:
+                fecha_real = dt.strptime(fecha_real_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Formato de fecha inválido. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Obtener fecha predicha (usar el campo de predicción ML si existe)
+            fecha_predicha = (
+                polinizacion.fecha_maduracion_predicha or
+                polinizacion.prediccion_fecha_estimada
+            )
+
+            dias_reales = None
+            dias_predichos = None
+            diferencia_dias = None
+            precision = None
+            desviacion_porcentual = None
+            calidad = 'sin_datos'
+
+            if polinizacion.fechapol:
+                dias_reales = (fecha_real - polinizacion.fechapol).days
+
+            if fecha_predicha:
+                dias_predichos = (
+                    polinizacion.dias_maduracion_predichos or
+                    polinizacion.prediccion_dias_estimados or
+                    (fecha_predicha - polinizacion.fechapol).days if polinizacion.fechapol else None
+                )
+                diferencia_dias = abs((fecha_real - fecha_predicha).days)
+
+                if dias_predichos and dias_predichos > 0:
+                    precision = max(0.0, 100 - (diferencia_dias / dias_predichos * 100))
+                    desviacion_porcentual = round(diferencia_dias / dias_predichos * 100, 2)
+                else:
+                    precision = max(0.0, 100 - diferencia_dias * 2)
+                    desviacion_porcentual = None
+
+                if diferencia_dias <= 3:
+                    calidad = 'Excelente'
+                elif diferencia_dias <= 7:
+                    calidad = 'Buena'
+                elif diferencia_dias <= 14:
+                    calidad = 'Aceptable'
+                else:
+                    calidad = 'Pobre'
+
+            logger.info(
+                f"Predicción validada para polinización {polinizacion.numero}: "
+                f"precision={precision}, calidad={calidad}"
+            )
+
+            return Response({
+                'success': True,
+                'mensaje': 'Predicción validada exitosamente',
+                'validacion': {
+                    'fecha_predicha': str(fecha_predicha) if fecha_predicha else None,
+                    'fecha_real': fecha_real_str,
+                    'diferencia_dias': diferencia_dias,
+                    'precision': round(precision, 1) if precision is not None else None,
+                    'calidad': calidad,
+                    'dias_estimados': dias_predichos,
+                    'dias_reales': dias_reales,
+                    'desviacion_porcentual': desviacion_porcentual,
+                }
+            })
+
+        except Exception as e:
+            logger.error(f"Error validando predicción de polinización {pk}: {e}")
+            return self.handle_error(e, "Error validando predicción")

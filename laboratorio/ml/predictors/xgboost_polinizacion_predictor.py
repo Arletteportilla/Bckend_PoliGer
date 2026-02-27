@@ -175,6 +175,8 @@ class XGBoostPolinizacionPredictor:
             'HYBRID': 'HYBRID',
             'HIBRIDO': 'HYBRID',
             'HÍBRIDO': 'HYBRID',
+            'HIBRIDA': 'HYBRID',
+            'HÍBRIDA': 'HYBRID',
             'SELF': 'SELF',
             'SIBBLING': 'SIBBLING',
             'SIBLING': 'SIBBLING',

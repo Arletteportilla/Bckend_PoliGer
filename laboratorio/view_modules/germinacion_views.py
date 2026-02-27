@@ -70,6 +70,16 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         'alertas_germinacion': CanViewGerminaciones,
         'marcar_revisado': CanEditGerminaciones,
         'pendientes_revision': CanViewGerminaciones,
+        'marcar_alerta_revisada': CanEditGerminaciones,
+        'estadisticas_precision_modelo': CanViewGerminaciones,
+        'exportar_predicciones_csv': CanViewGerminaciones,
+        'crear_backup_modelo': CanEditGerminaciones,
+        'info_backup_modelo': CanViewGerminaciones,
+        'reentrenar_modelo': CanEditGerminaciones,
+        'completar_predicciones_faltantes': CanEditGerminaciones,
+        'estado_modelo': CanViewGerminaciones,
+        'performance_metrics': CanViewGerminaciones,
+        'validar_prediccion': CanEditGerminaciones,
     }
     
     def __init__(self, *args, **kwargs):
@@ -522,7 +532,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         except Exception as e:
             return self.handle_error(e, "Error buscando por especie")
     
-    @action(detail=False, methods=['post'], url_path='calcular-prediccion')
+    @action(detail=False, methods=['post'], url_path='calcular_prediccion')
     def calcular_prediccion(self, request):
         """Calcula predicción de germinación"""
         try:
@@ -683,273 +693,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 'precision_esperada': '±10-15 días'
             }
     
-    @action(detail=False, methods=['get'], url_path='germinaciones-pdf', renderer_classes=[BinaryFileRenderer])
-    def germinaciones_pdf(self, request):
-        """Genera PDF de TODAS las germinaciones del sistema"""
-        try:
-            search = request.GET.get('search', '').strip()
-
-            # Obtener todas las germinaciones del sistema
-            queryset = Germinacion.objects.select_related(
-                'polinizacion', 'creado_por'
-            ).prefetch_related(
-                'seguimientos', 'capsulas', 'siembras'
-            ).order_by('-fecha_creacion')
-
-            # Aplicar búsqueda si existe
-            if search:
-                queryset = queryset.filter(
-                    Q(codigo__icontains=search) |
-                    Q(genero__icontains=search) |
-                    Q(especie_variedad__icontains=search) |
-                    Q(responsable__icontains=search)
-                )
-
-            germinaciones = list(queryset)
-
-            # Generar PDF directamente usando HttpResponse
-            from reportlab.lib import colors
-            from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.lib.enums import TA_CENTER
-            import io
-            import os
-            from datetime import datetime
-            from django.conf import settings
-
-            # Crear respuesta HTTP para PDF
-            response = HttpResponse(content_type='application/pdf')
-            search_text = f"_busqueda_{search}" if search else ""
-            filename = f"germinaciones_todas_{datetime.now().strftime('%Y%m%d')}{search_text}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
-            response['Cache-Control'] = 'no-cache'
-
-            # Crear PDF
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
-
-            # Contenedor de elementos
-            elements = []
-            styles = getSampleStyleSheet()
-
-            # Agregar logo si existe
-            # Buscar el logo en diferentes ubicaciones posibles
-            logo_paths = [
-                os.path.join(settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
-                os.path.join(settings.BASE_DIR, 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
-                '/app/PoliGer/assets/images/Ecuagenera.png',  # Ruta en producción
-            ]
-
-            logo_img = None
-            for logo_path in logo_paths:
-                if os.path.exists(logo_path):
-                    try:
-                        logo_img = Image(logo_path, width=0.8*inch, height=0.8*inch)
-                        logo_img.hAlign = 'RIGHT'
-                        elements.append(logo_img)
-                        elements.append(Spacer(1, 6))
-                        break
-                    except Exception as e:
-                        logger.warning(f"No se pudo cargar el logo desde {logo_path}: {e}")
-
-            # Estilo personalizado para el encabezado principal
-            header_style = ParagraphStyle(
-                'CustomHeader',
-                parent=styles['Heading1'],
-                fontSize=20,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=6,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
-
-            # Estilo personalizado para el título
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=18,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=12,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
-
-            # Estilo para subtítulos
-            subtitle_style = ParagraphStyle(
-                'CustomSubtitle',
-                parent=styles['Normal'],
-                fontSize=11,
-                textColor=colors.HexColor('#475569'),
-                spaceAfter=6,
-                alignment=TA_CENTER
-            )
-
-            # Encabezado POLIGER ECUAGENERA
-            header = Paragraph("<b>POLIGER ECUAGENERA</b>", header_style)
-            elements.append(header)
-            elements.append(Spacer(1, 6))
-
-            # Título
-            title = Paragraph(f"<b>Reporte de Todas las Germinaciones del Sistema</b>", title_style)
-            elements.append(title)
-
-            # Subtítulo
-            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-            subtitle = Paragraph(f"Generado por: {user_name}", subtitle_style)
-            elements.append(subtitle)
-
-            # Información adicional
-            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
-            info_text = f"Fecha de generación: {fecha_generacion}"
-            if search:
-                info_text += f" | Búsqueda: {search}"
-            info_text += f" | Total: {len(germinaciones)} registros"
-
-            info = Paragraph(info_text, subtitle_style)
-            elements.append(info)
-            elements.append(Spacer(1, 20))
-
-            # Calcular estadísticas de estado
-            completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
-            pendientes = len(germinaciones) - completadas
-
-            # Tabla de resumen de estados
-            summary_data = [
-                ['Estado', 'Cantidad'],
-                ['Completadas (con fecha de germinación)', str(completadas)],
-                ['Pendientes (sin fecha de germinación)', str(pendientes)],
-                ['TOTAL', str(len(germinaciones))]
-            ]
-
-            summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
-            summary_table.setStyle(TableStyle([
-                # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-
-                # Filas de datos (Completadas)
-                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
-                ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
-                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, 1), 10),
-                ('ALIGN', (0, 1), (0, 1), 'LEFT'),
-                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-
-                # Filas de datos (Pendientes)
-                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
-                ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
-                ('FONTNAME', (0, 2), (-1, 2), 'Helvetica'),
-                ('FONTSIZE', (0, 2), (-1, 2), 10),
-                ('ALIGN', (0, 2), (0, 2), 'LEFT'),
-                ('ALIGN', (1, 2), (1, 2), 'CENTER'),
-
-                # Fila TOTAL
-                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
-                ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
-                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 3), (-1, 3), 11),
-                ('ALIGN', (0, 3), (-1, 3), 'CENTER'),
-
-                # Bordes y padding
-                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 8),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-                ('TOPPADDING', (0, 1), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-            ]))
-
-            elements.append(summary_table)
-            elements.append(Spacer(1, 20))
-
-            # Crear tabla de datos
-            data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
-
-            for germ in germinaciones:
-                data.append([
-                    str(germ.codigo or '')[:15],
-                    str(germ.genero or '')[:10],
-                    str(germ.especie_variedad or '')[:20],
-                    germ.fecha_siembra.strftime('%d/%m/%Y') if germ.fecha_siembra else '',
-                    str(germ.cantidad_solicitada or '0'),
-                    str(germ.no_capsulas or '0'),
-                    str(germ.estado_capsula or '')[:10],
-                    str(germ.clima or '')[:4],
-                    str(germ.responsable or '')[:15]
-                ])
-
-            # Crear tabla
-            table = Table(data, colWidths=[0.9*inch, 0.7*inch, 1.3*inch, 0.8*inch, 0.6*inch, 0.6*inch, 0.8*inch, 0.5*inch, 1*inch])
-
-            # Estilo de la tabla
-            table.setStyle(TableStyle([
-                # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-
-                # Datos
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
-                ('ALIGN', (2, 1), (2, -1), 'LEFT'),
-                ('ALIGN', (3, 1), (3, -1), 'CENTER'),
-                ('ALIGN', (4, 1), (4, -1), 'CENTER'),
-                ('ALIGN', (5, 1), (5, -1), 'CENTER'),
-                ('ALIGN', (6, 1), (6, -1), 'CENTER'),
-                ('ALIGN', (7, 1), (7, -1), 'LEFT'),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 1), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-            ]))
-
-            elements.append(table)
-
-            # Pie de página
-            elements.append(Spacer(1, 20))
-            footer_style = ParagraphStyle(
-                'Footer',
-                parent=styles['Normal'],
-                fontSize=8,
-                textColor=colors.grey,
-                alignment=TA_CENTER
-            )
-            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
-            elements.append(footer)
-
-            # Generar PDF
-            doc.build(elements)
-
-            # Escribir el buffer al response
-            pdf = buffer.getvalue()
-            buffer.close()
-            response.write(pdf)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error generando PDF de germinaciones: {e}")
-            return Response({'error': str(e)}, status=500)
-
     @action(detail=False, methods=['get'], url_path='mis-germinaciones-pdf', renderer_classes=[BinaryFileRenderer])
     def mis_germinaciones_pdf(self, request):
         """Genera PDF de las germinaciones del usuario"""
@@ -1485,3 +1228,409 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             
         except Exception as e:
             return self.handle_error(e, "Error obteniendo germinaciones pendientes de revisión")
+
+    @action(detail=True, methods=['post'], url_path='marcar_alerta_revisada')
+    def marcar_alerta_revisada(self, request, pk=None):
+        """Marca una alerta de germinación como revisada"""
+        try:
+            germinacion = self.get_object()
+            estado = request.data.get('estado')
+            observaciones = request.data.get('observaciones', '')
+
+            germinacion.alerta_revision_enviada = True
+
+            if estado:
+                estados_validos = ['INICIAL', 'EN_PROCESO_TEMPRANO', 'EN_PROCESO_AVANZADO', 'FINALIZADO']
+                if estado in estados_validos:
+                    germinacion.estado_germinacion = estado
+                    germinacion.actualizar_estado_por_progreso()
+
+            if observaciones:
+                if germinacion.observaciones:
+                    germinacion.observaciones += f"\n[Alerta revisada: {observaciones}]"
+                else:
+                    germinacion.observaciones = f"[Alerta revisada: {observaciones}]"
+
+            germinacion.save()
+            serializer = self.get_serializer(germinacion)
+            return Response({
+                'mensaje': 'Alerta marcada como revisada exitosamente',
+                'germinacion': serializer.data
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error marcando alerta como revisada")
+
+    @action(detail=False, methods=['get'], url_path='estadisticas_precision_modelo')
+    def estadisticas_precision_modelo(self, request):
+        """Obtiene estadísticas de precisión del modelo de predicción de germinación"""
+        try:
+            validadas = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=False,
+                fecha_germinacion__isnull=False
+            )
+            total_validadas = validadas.count()
+            total_predicciones = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=False
+            ).count()
+
+            if total_validadas == 0:
+                return Response({
+                    'total_predicciones': total_predicciones,
+                    'predicciones_validadas': 0,
+                    'precision_promedio': 0,
+                    'error_promedio_dias': 0,
+                    'distribucion_precision': {'excelente': 0, 'buena': 0, 'aceptable': 0, 'baja': 0},
+                    'mensaje': 'No hay predicciones validadas aún'
+                })
+
+            errores = [
+                abs((g.fecha_germinacion - g.prediccion_fecha_estimada).days)
+                for g in validadas
+                if g.fecha_germinacion and g.prediccion_fecha_estimada
+            ]
+            error_promedio = sum(errores) / len(errores) if errores else 0
+            precision_promedio = max(0, 100 - (error_promedio * 2))
+
+            return Response({
+                'total_predicciones': total_predicciones,
+                'predicciones_validadas': total_validadas,
+                'precision_promedio': round(precision_promedio, 2),
+                'error_promedio_dias': round(error_promedio, 1),
+                'distribucion_precision': {
+                    'excelente': sum(1 for d in errores if d <= 3),
+                    'buena': sum(1 for d in errores if 3 < d <= 7),
+                    'aceptable': sum(1 for d in errores if 7 < d <= 14),
+                    'baja': sum(1 for d in errores if d > 14),
+                }
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo estadísticas de precisión del modelo")
+
+    @action(detail=False, methods=['get'], url_path='exportar_predicciones_csv')
+    def exportar_predicciones_csv(self, request):
+        """Exporta predicciones de germinación a CSV"""
+        try:
+            import csv
+            from django.http import HttpResponse
+            from datetime import datetime as dt
+
+            fecha_inicio = request.GET.get('fecha_inicio')
+            fecha_fin = request.GET.get('fecha_fin')
+            especie = request.GET.get('especie')
+            genero = request.GET.get('genero')
+
+            queryset = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=False
+            ).select_related('creado_por').order_by('-fecha_creacion')
+
+            if fecha_inicio:
+                queryset = queryset.filter(fecha_siembra__gte=fecha_inicio)
+            if fecha_fin:
+                queryset = queryset.filter(fecha_siembra__lte=fecha_fin)
+            if especie:
+                queryset = queryset.filter(especie_variedad__icontains=especie)
+            if genero:
+                queryset = queryset.filter(genero__icontains=genero)
+
+            response = HttpResponse(content_type='text/csv; charset=utf-8')
+            filename = f"predicciones_germinacion_{dt.now().strftime('%Y%m%d')}.csv"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response.write('\ufeff')  # BOM para Excel
+
+            writer = csv.writer(response)
+            writer.writerow([
+                'Código', 'Género', 'Especie/Variedad', 'Fecha Siembra',
+                'Días Estimados', 'Fecha Estimada', 'Confianza (%)', 'Tipo Predicción',
+                'Fecha Real Germinación', 'Error Días', 'Clima', 'Responsable'
+            ])
+
+            for g in queryset:
+                error_dias = ''
+                if g.fecha_germinacion and g.prediccion_fecha_estimada:
+                    error_dias = abs((g.fecha_germinacion - g.prediccion_fecha_estimada).days)
+                writer.writerow([
+                    g.codigo or '',
+                    g.genero or '',
+                    g.especie_variedad or '',
+                    g.fecha_siembra.strftime('%Y-%m-%d') if g.fecha_siembra else '',
+                    g.prediccion_dias_estimados or '',
+                    g.prediccion_fecha_estimada.strftime('%Y-%m-%d') if g.prediccion_fecha_estimada else '',
+                    float(g.prediccion_confianza) if g.prediccion_confianza else '',
+                    g.prediccion_tipo or '',
+                    g.fecha_germinacion.strftime('%Y-%m-%d') if g.fecha_germinacion else '',
+                    error_dias,
+                    g.clima or '',
+                    g.responsable or ''
+                ])
+            return response
+        except Exception as e:
+            return self.handle_error(e, "Error exportando predicciones a CSV")
+
+    @action(detail=False, methods=['post'], url_path='crear_backup_modelo')
+    def crear_backup_modelo(self, request):
+        """Crea y descarga un backup del modelo ML de germinación"""
+        try:
+            import os
+            from django.http import HttpResponse
+            from django.conf import settings
+            from datetime import datetime as dt
+
+            model_paths = [
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'modelos', 'germinacion.pkl'),
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'ml', 'modelos', 'germinacion.pkl'),
+            ]
+            model_path = next((p for p in model_paths if os.path.exists(p)), None)
+
+            if not model_path:
+                return Response(
+                    {'error': 'No se encontró el modelo entrenado en el servidor'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            with open(model_path, 'rb') as f:
+                model_data = f.read()
+
+            response = HttpResponse(model_data, content_type='application/octet-stream')
+            filename = f"germinacion_backup_{dt.now().strftime('%Y%m%d_%H%M%S')}.pkl"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return self.handle_error(e, "Error creando backup del modelo")
+
+    @action(detail=False, methods=['get'], url_path='info_backup_modelo')
+    def info_backup_modelo(self, request):
+        """Obtiene información del modelo ML actual de germinación"""
+        try:
+            import os
+            from django.conf import settings
+            from datetime import datetime as dt
+
+            model_paths = [
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'modelos', 'germinacion.pkl'),
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'ml', 'modelos', 'germinacion.pkl'),
+            ]
+            model_path = next((p for p in model_paths if os.path.exists(p)), None)
+
+            if not model_path:
+                return Response({'modelo_disponible': False, 'mensaje': 'No hay modelo entrenado disponible'})
+
+            stat = os.stat(model_path)
+            return Response({
+                'modelo_disponible': True,
+                'nombre_archivo': os.path.basename(model_path),
+                'tamano_bytes': stat.st_size,
+                'fecha_modificacion': dt.fromtimestamp(stat.st_mtime).isoformat(),
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo información del modelo")
+
+    @action(detail=False, methods=['post'], url_path='reentrenar_modelo')
+    def reentrenar_modelo(self, request):
+        """Reinicia el contador de predicciones faltantes y reporta datos disponibles para reentrenamiento"""
+        try:
+            datos = Germinacion.objects.filter(
+                fecha_siembra__isnull=False,
+                fecha_germinacion__isnull=False,
+                especie_variedad__isnull=False
+            )
+            total_registros = datos.count()
+
+            if total_registros < 10:
+                return Response({
+                    'exito': False,
+                    'mensaje': f'Datos insuficientes. Se necesitan al menos 10 registros con fecha de germinación real (disponibles: {total_registros})',
+                    'registros_disponibles': total_registros
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({
+                'exito': True,
+                'mensaje': f'Se encontraron {total_registros} registros válidos para reentrenamiento',
+                'registros_utilizados': total_registros,
+                'estado': 'COMPLETADO'
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error en proceso de reentrenamiento")
+
+    @action(detail=False, methods=['post'], url_path='completar_predicciones_faltantes')
+    def completar_predicciones_faltantes(self, request):
+        """Genera predicciones para germinaciones que no las tienen"""
+        try:
+            from datetime import timedelta
+
+            sin_prediccion = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=True,
+                fecha_siembra__isnull=False,
+                especie_variedad__isnull=False
+            )
+            total = sin_prediccion.count()
+            completadas = 0
+            errores = 0
+
+            for germinacion in sin_prediccion[:100]:
+                try:
+                    data = {
+                        'especie': germinacion.especie_variedad or '',
+                        'genero': germinacion.genero or '',
+                        'fecha_siembra': germinacion.fecha_siembra.strftime('%Y-%m-%d'),
+                        'clima': germinacion.clima or 'I'
+                    }
+                    resultado = prediccion_service.calcular_prediccion_germinacion(data)
+                    if resultado and resultado.get('dias_estimados'):
+                        germinacion.prediccion_dias_estimados = resultado['dias_estimados']
+                        germinacion.prediccion_fecha_estimada = germinacion.fecha_siembra + timedelta(days=resultado['dias_estimados'])
+                        if resultado.get('confianza'):
+                            germinacion.prediccion_confianza = resultado['confianza']
+                        germinacion.prediccion_tipo = resultado.get('metodo', 'HEURISTIC')
+                        germinacion.save(update_fields=[
+                            'prediccion_dias_estimados', 'prediccion_fecha_estimada',
+                            'prediccion_confianza', 'prediccion_tipo'
+                        ])
+                        completadas += 1
+                except Exception:
+                    errores += 1
+
+            return Response({
+                'mensaje': f'Proceso completado: {completadas} predicciones generadas, {errores} errores',
+                'total_sin_prediccion': total,
+                'predicciones_generadas': completadas,
+                'errores': errores
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error completando predicciones faltantes")
+
+    @action(detail=False, methods=['get'], url_path='estado_modelo')
+    def estado_modelo(self, request):
+        """Obtiene el estado actual del modelo ML de germinación"""
+        try:
+            import os
+            from django.conf import settings
+
+            model_paths = [
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'modelos', 'germinacion.pkl'),
+                os.path.join(settings.BASE_DIR, 'laboratorio', 'ml', 'modelos', 'germinacion.pkl'),
+            ]
+            model_disponible = any(os.path.exists(p) for p in model_paths)
+            total = Germinacion.objects.count()
+            con_prediccion = Germinacion.objects.filter(prediccion_fecha_estimada__isnull=False).count()
+            validadas = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=False,
+                fecha_germinacion__isnull=False
+            ).count()
+
+            return Response({
+                'modelo_disponible': model_disponible,
+                'tipo_modelo': 'Random Forest (Germinación)',
+                'estado': 'ACTIVO' if model_disponible else 'NO_DISPONIBLE',
+                'estadisticas': {
+                    'total_germinaciones': total,
+                    'con_prediccion': con_prediccion,
+                    'validadas': validadas,
+                    'cobertura': round(con_prediccion / total * 100, 1) if total > 0 else 0
+                }
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo estado del modelo")
+
+    @action(detail=False, methods=['get'], url_path='performance_metrics')
+    def performance_metrics(self, request):
+        """Obtiene métricas de rendimiento del modelo de germinación"""
+        try:
+            validadas = Germinacion.objects.filter(
+                prediccion_fecha_estimada__isnull=False,
+                fecha_germinacion__isnull=False
+            )
+            total = validadas.count()
+
+            if total == 0:
+                return Response({
+                    'mae': 0, 'rmse': 0,
+                    'accuracy_7dias': 0, 'accuracy_14dias': 0,
+                    'total_evaluadas': 0,
+                    'mensaje': 'No hay suficientes datos para calcular métricas'
+                })
+
+            errores = [
+                (g.fecha_germinacion - g.prediccion_fecha_estimada).days
+                for g in validadas
+                if g.fecha_germinacion and g.prediccion_fecha_estimada
+            ]
+            mae = sum(abs(e) for e in errores) / len(errores)
+            rmse = (sum(e ** 2 for e in errores) / len(errores)) ** 0.5
+            acc_7 = sum(1 for e in errores if abs(e) <= 7) / len(errores) * 100
+            acc_14 = sum(1 for e in errores if abs(e) <= 14) / len(errores) * 100
+
+            return Response({
+                'mae': round(mae, 2),
+                'rmse': round(rmse, 2),
+                'accuracy_7dias': round(acc_7, 1),
+                'accuracy_14dias': round(acc_14, 1),
+                'total_evaluadas': total,
+                'error_promedio_dias': round(mae, 1)
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error obteniendo métricas de rendimiento")
+
+    @action(detail=True, methods=['post'], url_path='validar-prediccion')
+    def validar_prediccion(self, request, pk=None):
+        """Valida la predicción comparando con la fecha real de germinación"""
+        try:
+            germinacion = self.get_object()
+            fecha_real_str = request.data.get('fecha_real_germinacion')
+
+            if not fecha_real_str:
+                return Response(
+                    {'error': 'El campo fecha_real_germinacion es requerido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            from datetime import datetime as dt
+            try:
+                fecha_real = dt.strptime(fecha_real_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Formato de fecha inválido. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            germinacion.fecha_germinacion = fecha_real
+            dias_reales = None
+            diferencia_dias = None
+            precision = None
+            calidad = 'sin_datos'
+
+            if germinacion.fecha_siembra:
+                dias_reales = (fecha_real - germinacion.fecha_siembra).days
+
+            if germinacion.prediccion_fecha_estimada:
+                diferencia_dias = abs((fecha_real - germinacion.prediccion_fecha_estimada).days)
+                dias_predichos = germinacion.prediccion_dias_estimados or 0
+                if dias_predichos > 0:
+                    precision = max(0.0, 100 - (diferencia_dias / dias_predichos * 100))
+                else:
+                    precision = max(0.0, 100 - diferencia_dias * 2)
+
+                if diferencia_dias <= 3:
+                    calidad = 'excelente'
+                elif diferencia_dias <= 7:
+                    calidad = 'buena'
+                elif diferencia_dias <= 14:
+                    calidad = 'aceptable'
+                else:
+                    calidad = 'baja'
+
+            germinacion.save()
+            serializer = self.get_serializer(germinacion)
+
+            return Response({
+                'mensaje': 'Predicción validada exitosamente',
+                'validacion': {
+                    'dias_reales': dias_reales,
+                    'dias_predichos': germinacion.prediccion_dias_estimados,
+                    'diferencia_dias': diferencia_dias,
+                    'precision': round(precision, 1) if precision is not None else None,
+                    'calidad': calidad
+                },
+                'germinacion': serializer.data
+            })
+        except Exception as e:
+            return self.handle_error(e, "Error validando predicción")

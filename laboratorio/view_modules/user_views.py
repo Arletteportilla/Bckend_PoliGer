@@ -37,8 +37,6 @@ class UserProfileViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         'partial_update': IsAdministrator,
         'destroy': IsAdministrator,
         'mi_perfil': IsAuthenticated,
-        'actualizar_mi_perfil': IsAuthenticated,
-        'actualizar_metas': IsAuthenticated,
     }
     
     def get_queryset(self):
@@ -72,67 +70,6 @@ class UserProfileViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         except Exception as e:
             return self.handle_error(e, "Error obteniendo perfil del usuario")
     
-    @action(detail=False, methods=['put', 'patch'], url_path='actualizar-mi-perfil')
-    def actualizar_mi_perfil(self, request):
-        """Actualiza el perfil del usuario actual"""
-        try:
-            user = request.user
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            
-            # Usar serializer específico para actualización de perfil
-            serializer = UpdateUserProfileSerializer(
-                profile, 
-                data=request.data, 
-                partial=request.method == 'PATCH'
-            )
-            
-            if serializer.is_valid():
-                serializer.save()
-                
-                # Retornar perfil actualizado
-                response_serializer = UserWithProfileSerializer({
-                    'user': user,
-                    'profile': profile
-                })
-                
-                logger.info(f"Perfil actualizado para usuario: {user.username}")
-                return Response(response_serializer.data)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                
-        except Exception as e:
-            return self.handle_error(e, "Error actualizando perfil del usuario")
-    
-    @action(detail=False, methods=['put', 'patch'], url_path='actualizar-metas')
-    def actualizar_metas(self, request):
-        """Actualiza las metas de rendimiento del usuario"""
-        try:
-            user = request.user
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            
-            serializer = UpdateUserMetasSerializer(
-                profile,
-                data=request.data,
-                partial=request.method == 'PATCH'
-            )
-            
-            if serializer.is_valid():
-                serializer.save()
-                
-                logger.info(f"Metas actualizadas para usuario: {user.username}")
-                return Response({
-                    'mensaje': 'Metas actualizadas exitosamente',
-                    'metas': {
-                        'meta_germinaciones_mes': profile.meta_germinaciones_mes,
-                        'meta_polinizaciones_mes': profile.meta_polinizaciones_mes,
-                        'meta_eficiencia': profile.meta_eficiencia
-                    }
-                })
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                
-        except Exception as e:
-            return self.handle_error(e, "Error actualizando metas del usuario")
 
 
 class UserManagementViewSet(viewsets.ModelViewSet):
@@ -260,7 +197,7 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=True, methods=['post'], url_path='cambiar-estado')
+    @action(detail=True, methods=['post'], url_path='cambiar_estado')
     def cambiar_estado(self, request, pk=None):
         """Activar/desactivar usuario"""
         try:
@@ -338,14 +275,87 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
+    @action(detail=True, methods=['post'], url_path='cambiar-password')
+    def cambiar_password(self, request, pk=None):
+        """Cambiar contraseña de un usuario (solo admin)"""
+        try:
+            user = self.get_object()
+
+            password = request.data.get('password')
+            confirm_password = request.data.get('confirm_password')
+
+            if not password or not confirm_password:
+                return Response(
+                    {'error': 'Los campos password y confirm_password son requeridos'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if password != confirm_password:
+                return Response(
+                    {'error': 'Las contraseñas no coinciden'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if len(password) < 8:
+                return Response(
+                    {'error': 'La contraseña debe tener al menos 8 caracteres'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user.set_password(password)
+            user.save()
+
+            logger.info(f"Contraseña cambiada para usuario {user.username} por {request.user.username}")
+
+            return Response({
+                'mensaje': f'Contraseña actualizada exitosamente para {user.username}'
+            })
+
+        except Exception as e:
+            logger.error(f"Error cambiando contraseña del usuario {pk}: {e}")
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'], url_path='estadisticas_usuarios')
+    def estadisticas_usuarios(self, request):
+        """Estadísticas de usuarios agrupadas por rol"""
+        try:
+            from django.contrib.auth.models import User as DjangoUser
+            from ..models import UserProfile
+
+            roles_display = dict(UserProfile.TIPOS_USUARIO)
+            por_rol = {}
+            for codigo, nombre in UserProfile.TIPOS_USUARIO:
+                total = UserProfile.objects.filter(rol=codigo).count()
+                por_rol[codigo] = {'nombre': nombre, 'total': total}
+
+            activos = UserProfile.objects.filter(activo=True).count()
+            inactivos = UserProfile.objects.filter(activo=False).count()
+            total = DjangoUser.objects.count()
+
+            return Response({
+                'por_rol': por_rol,
+                'usuarios_activos': activos,
+                'usuarios_inactivos': inactivos,
+                'total_usuarios': total
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas de usuarios: {e}")
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=False, methods=['get'], url_path='permisos')
     def permisos(self, request):
         """Obtiene información sobre permisos y roles"""
         try:
             permisos_info = {
                 'roles': [
-                    {'codigo': choice[0], 'nombre': choice[1]} 
+                    {'codigo': choice[0], 'nombre': choice[1]}
                     for choice in UserProfile.TIPOS_USUARIO
                 ],
                 'permisos_por_rol': {
@@ -355,11 +365,61 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                     'TIPO_4': ['all_permissions']
                 }
             }
-            
+
             return Response(permisos_info)
-            
+
         except Exception as e:
             logger.error(f"Error obteniendo información de permisos: {e}")
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['post'], url_path='bulk-toggle-status')
+    def bulk_toggle_status(self, request):
+        """Activar/desactivar múltiples usuarios a la vez"""
+        try:
+            user_ids = request.data.get('user_ids', [])
+            nuevo_estado = request.data.get('status')
+
+            if not user_ids:
+                return Response(
+                    {'error': 'El campo user_ids es requerido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if nuevo_estado is None:
+                return Response(
+                    {'error': 'El campo status es requerido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            actualizados = 0
+            errores = []
+
+            with transaction.atomic():
+                for user_id in user_ids:
+                    try:
+                        user = User.objects.get(pk=user_id)
+                        profile, _ = UserProfile.objects.get_or_create(user=user)
+                        profile.activo = bool(nuevo_estado)
+                        profile.save()
+                        user.is_active = profile.activo
+                        user.save()
+                        actualizados += 1
+                    except User.DoesNotExist:
+                        errores.append(f'Usuario {user_id} no encontrado')
+
+            estado_texto = 'activados' if nuevo_estado else 'desactivados'
+            logger.info(f"Bulk toggle: {actualizados} usuarios {estado_texto} por {request.user.username}")
+
+            return Response({
+                'mensaje': f'{actualizados} usuarios {estado_texto} exitosamente',
+                'actualizados': actualizados,
+                'errores': errores
+            })
+
+        except Exception as e:
+            logger.error(f"Error en bulk toggle status: {e}")
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -383,31 +443,63 @@ class UserMetasViewSet(viewsets.ModelViewSet):
         # Otros usuarios solo ven sus propias metas
         return UserProfile.objects.filter(user=user)
     
-    @action(detail=False, methods=['get'], url_path='mis-metas')
-    def mis_metas(self, request):
-        """Obtiene las metas del usuario actual"""
+    @action(detail=True, methods=['post'], url_path='actualizar_progreso')
+    def actualizar_progreso(self, request, pk=None):
+        """Calcula y actualiza el progreso mensual del usuario vs sus metas"""
         try:
-            user = request.user
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            
+            from django.utils import timezone
+            from django.db.models import Count
+
+            profile = self.get_object()
+            user = profile.user
+            ahora = timezone.now()
+            inicio_mes = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+            from ..models import Germinacion, Polinizacion
+            germinaciones_mes = Germinacion.objects.filter(
+                creado_por=user,
+                fecha_creacion__gte=inicio_mes
+            ).count()
+            polinizaciones_mes = Polinizacion.objects.filter(
+                creado_por=user,
+                fecha_creacion__gte=inicio_mes
+            ).count() if hasattr(Polinizacion, 'creado_por') else 0
+
+            meta_germ = profile.meta_germinaciones_mes or 1
+            meta_pol = profile.meta_polinizaciones_mes or 1
+            meta_ef = profile.meta_eficiencia or 1
+
+            progreso_germ = min(100, round(germinaciones_mes / meta_germ * 100, 1))
+            progreso_pol = min(100, round(polinizaciones_mes / meta_pol * 100, 1))
+            eficiencia = round((progreso_germ + progreso_pol) / 2, 1)
+
+            logger.info(f"Progreso calculado para usuario {user.username}")
+
             return Response({
                 'usuario': user.username,
-                'metas': {
-                    'meta_germinaciones_mes': profile.meta_germinaciones_mes,
-                    'meta_polinizaciones_mes': profile.meta_polinizaciones_mes,
-                    'meta_eficiencia': profile.meta_eficiencia
-                },
+                'mes': ahora.strftime('%Y-%m'),
                 'progreso': {
-                    # Aquí se calcularía el progreso real vs las metas
-                    'germinaciones_mes_actual': 0,  # Calcular desde la base de datos
-                    'polinizaciones_mes_actual': 0,  # Calcular desde la base de datos
-                    'eficiencia_actual': 0.0  # Calcular desde la base de datos
+                    'germinaciones': {
+                        'actual': germinaciones_mes,
+                        'meta': profile.meta_germinaciones_mes,
+                        'porcentaje': progreso_germ
+                    },
+                    'polinizaciones': {
+                        'actual': polinizaciones_mes,
+                        'meta': profile.meta_polinizaciones_mes,
+                        'porcentaje': progreso_pol
+                    },
+                    'eficiencia': {
+                        'actual': eficiencia,
+                        'meta': profile.meta_eficiencia,
+                        'porcentaje': min(100, round(eficiencia / meta_ef * 100, 1))
+                    }
                 }
             })
-            
         except Exception as e:
-            logger.error(f"Error obteniendo metas del usuario: {e}")
+            logger.error(f"Error actualizando progreso del usuario: {e}")
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+

@@ -202,13 +202,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.archivar()
         return Response({'status': 'archivada'})
     
-    @action(detail=True, methods=['post'])
-    def desarchivar(self, request, pk=None):
-        """Desarchiva una notificación"""
-        notification = self.get_object()
-        notification.desarchivar()
-        return Response({'status': 'desarchivada'})
-    
     @action(detail=False, methods=['get'])
     def estadisticas(self, request):
         """Obtiene estadísticas de notificaciones del usuario"""

@@ -19,7 +19,8 @@ from ..view_modules.prediccion_views import (
     prediccion_germinacion, prediccion_polinizacion, prediccion_completa,
     predicciones_alertas, cambiar_estado_polinizacion, estadisticas_modelos,
     especies_promedios_germinacion, prediccion_polinizacion_ml, model_info,
-    prediccion_germinacion_ml, germinacion_model_info
+    prediccion_germinacion_ml, germinacion_model_info,
+    germinaciones_validadas, exportar_reentrenamiento_germinacion,
 )
 
 # Configurar el router para los ViewSets
@@ -122,5 +123,11 @@ urlpatterns = [
 
     # Información del modelo ML de germinación
     path('api/ml/germinacion/model-info/', germinacion_model_info, name='germinacion_model_info'),
+
+    # =============================================================================
+    # GERMINACIONES VALIDADAS Y EXPORTACIÓN PARA REENTRENAMIENTO
+    # =============================================================================
+    path('api/predicciones/germinaciones/validadas/', germinaciones_validadas, name='germinaciones_validadas'),
+    path('api/predicciones/exportar-reentrenamiento-germinacion/', exportar_reentrenamiento_germinacion, name='exportar_reentrenamiento_germinacion'),
 
 ]

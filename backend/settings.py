@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_apscheduler',  # Scheduler para tareas automáticas
+    'drf_spectacular',     # Documentación Swagger / OpenAPI
 ]
 
 MIDDLEWARE = [
@@ -132,6 +133,80 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'laboratorio.renderers.BinaryFileRenderer',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# ============================================================================
+# CONFIGURACIÓN SWAGGER / OPENAPI (drf-spectacular)
+# ============================================================================
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'PoliGer API',
+    'DESCRIPTION': (
+        'API REST para el Sistema de Gestión de Polinización y Germinación de EcuaGenera.\n\n'
+        '## Autenticación\n'
+        'Esta API usa **JWT (Bearer Token)**. Para autenticarte:\n'
+        '1. Llama a `POST /api/token/` con tus credenciales.\n'
+        '2. Copia el campo `access` de la respuesta.\n'
+        '3. En el botón **Authorize** (arriba a la derecha), ingresa: `Bearer <tu_token>`.\n\n'
+        '## Módulos principales\n'
+        '- **Autenticación**: Registro, login y tokens JWT.\n'
+        '- **Polinizaciones**: Gestión completa del proceso de polinización.\n'
+        '- **Germinaciones**: Seguimiento de germinación con estados y alertas.\n'
+        '- **Predicciones ML**: Modelos XGBoost y Random Forest para predicciones.\n'
+        '- **Inventario**: Gestión de géneros, especies, cápsulas y siembras.\n'
+        '- **Notificaciones**: Sistema de notificaciones y recordatorios.\n'
+        '- **Usuarios**: Gestión de perfiles y sistema RBAC.\n'
+        '- **Estadísticas y Reportes**: Reportes en PDF y análisis estadístico.'
+    ),
+    'VERSION': '1.1.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Agrupar endpoints por tags
+    'TAGS': [
+        {'name': 'Autenticación', 'description': 'Registro, login y gestión de tokens JWT.'},
+        {'name': 'Polinizaciones', 'description': 'Gestión del proceso de polinización.'},
+        {'name': 'Germinaciones', 'description': 'Seguimiento del proceso de germinación.'},
+        {'name': 'Seguimientos', 'description': 'Seguimiento detallado de germinaciones.'},
+        {'name': 'Géneros', 'description': 'Catálogo de géneros botánicos.'},
+        {'name': 'Especies', 'description': 'Catálogo de especies botánicas.'},
+        {'name': 'Ubicaciones', 'description': 'Gestión de ubicaciones del laboratorio.'},
+        {'name': 'Cápsulas', 'description': 'Gestión de cápsulas.'},
+        {'name': 'Siembras', 'description': 'Gestión de siembras.'},
+        {'name': 'Personal', 'description': 'Gestión del personal del laboratorio.'},
+        {'name': 'Inventario', 'description': 'Gestión del inventario.'},
+        {'name': 'Notificaciones', 'description': 'Sistema de notificaciones y alertas.'},
+        {'name': 'Usuarios', 'description': 'Gestión de perfiles y roles (RBAC).'},
+        {'name': 'Predicciones', 'description': 'Predicciones estadísticas y con Machine Learning.'},
+        {'name': 'Estadísticas', 'description': 'Reportes y estadísticas del sistema.'},
+        {'name': 'Importación CSV', 'description': 'Importación masiva de datos desde archivos CSV.'},
+        {'name': 'Salud', 'description': 'Health check y endpoints de estado del sistema.'},
+    ],
+    # Seguridad: JWT Bearer
+    'SECURITY': [{'jwtAuth': []}],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'ENUM_GENERATE_CHOICE_DESCRIPTION': True,
+    'SORT_OPERATIONS': False,
+    # Hook para renombrar tags auto-generados al español
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'laboratorio.swagger_hooks.rename_tags_hook',
+    ],
+    # UI personalizada
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+        'defaultModelsExpandDepth': 2,
+        'defaultModelExpandDepth': 2,
+        'docExpansion': 'list',
+        'filter': True,
+        'tryItOutEnabled': True,
+    },
+    'SWAGGER_UI_FAVICON_HREF': None,
+    'REDOC_UI_SETTINGS': {
+        'hideDownloadButton': False,
+        'expandResponses': '200,201',
+    },
 }
 
 SIMPLE_JWT = {

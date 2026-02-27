@@ -676,3 +676,118 @@ def germinacion_model_info(request):
             'error': 'Error obteniendo informacion del modelo',
             'details': str(e)
         }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def germinaciones_validadas(request):
+    """
+    Obtiene germinaciones con predicciones que han sido validadas
+    (tienen tanto prediccion_fecha_estimada como fecha_germinacion reales).
+    """
+    try:
+        precision_minima = request.GET.get('precision_minima')
+        desde = request.GET.get('desde')
+        hasta = request.GET.get('hasta')
+
+        queryset = Germinacion.objects.filter(
+            prediccion_fecha_estimada__isnull=False,
+            fecha_germinacion__isnull=False
+        ).select_related('creado_por').order_by('-fecha_germinacion')
+
+        if desde:
+            queryset = queryset.filter(fecha_germinacion__gte=desde)
+        if hasta:
+            queryset = queryset.filter(fecha_germinacion__lte=hasta)
+
+        germinaciones_data = []
+        for g in queryset:
+            diferencia_dias = abs((g.fecha_germinacion - g.prediccion_fecha_estimada).days)
+            dias_predichos = g.prediccion_dias_estimados or 1
+            precision = max(0.0, 100 - (diferencia_dias / dias_predichos * 100)) if dias_predichos > 0 else max(0.0, 100 - diferencia_dias * 2)
+
+            if precision_minima and precision < float(precision_minima):
+                continue
+
+            germinaciones_data.append({
+                'id': g.id,
+                'codigo': g.codigo,
+                'especie_variedad': g.especie_variedad,
+                'genero': g.genero,
+                'fecha_siembra': g.fecha_siembra,
+                'fecha_germinacion_real': g.fecha_germinacion,
+                'fecha_germinacion_predicha': g.prediccion_fecha_estimada,
+                'dias_reales': (g.fecha_germinacion - g.fecha_siembra).days if g.fecha_siembra else None,
+                'dias_predichos': g.prediccion_dias_estimados,
+                'diferencia_dias': diferencia_dias,
+                'precision': round(precision, 1),
+                'confianza_modelo': float(g.prediccion_confianza) if g.prediccion_confianza else None,
+                'clima': g.clima,
+            })
+
+        precision_promedio = (
+            sum(d['precision'] for d in germinaciones_data) / len(germinaciones_data)
+            if germinaciones_data else 0
+        )
+
+        return Response({
+            'total': len(germinaciones_data),
+            'precision_promedio': round(precision_promedio, 1),
+            'germinaciones': germinaciones_data
+        })
+
+    except Exception as e:
+        logger.error(f"Error obteniendo germinaciones validadas: {e}")
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def exportar_reentrenamiento_germinacion(request):
+    """
+    Exporta datos de germinaciones validadas para reentrenamiento del modelo ML.
+    Retorna un archivo CSV con todos los datos necesarios.
+    """
+    try:
+        import csv
+        from django.http import HttpResponse
+        from datetime import datetime as dt
+
+        queryset = Germinacion.objects.filter(
+            fecha_siembra__isnull=False,
+            fecha_germinacion__isnull=False,
+            especie_variedad__isnull=False
+        ).order_by('-fecha_germinacion')
+
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename = f"reentrenamiento_germinacion_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.write('\ufeff')  # BOM para Excel
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'especie', 'genero', 'clima', 'tipo_polinizacion',
+            'fecha_siembra', 'fecha_germinacion', 'dias_reales',
+            'prediccion_dias', 'prediccion_confianza', 'prediccion_tipo'
+        ])
+
+        for g in queryset:
+            dias_reales = (g.fecha_germinacion - g.fecha_siembra).days if g.fecha_siembra else ''
+            writer.writerow([
+                g.especie_variedad or '',
+                g.genero or '',
+                g.clima or 'I',
+                g.tipo_polinizacion or '',
+                g.fecha_siembra.strftime('%Y-%m-%d') if g.fecha_siembra else '',
+                g.fecha_germinacion.strftime('%Y-%m-%d') if g.fecha_germinacion else '',
+                dias_reales,
+                g.prediccion_dias_estimados or '',
+                float(g.prediccion_confianza) if g.prediccion_confianza else '',
+                g.prediccion_tipo or '',
+            ])
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error exportando datos de reentrenamiento: {e}")
+        return Response({'error': str(e)}, status=500)
