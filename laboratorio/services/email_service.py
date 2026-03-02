@@ -2,9 +2,7 @@
 Servicio de email para el sistema PoliGer.
 Maneja el envío de correos electrónicos del sistema.
 """
-import os
 import logging
-from email.mime.image import MIMEImage
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
@@ -29,25 +27,9 @@ COLORS = {
     'warning_text': '#92600A',  # Texto advertencia
 }
 
-# Ruta al logo
-LOGO_PATH = os.path.join(
-    settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'
-)
-# Ruta alternativa si la primera no existe
-LOGO_PATH_ALT = os.path.join(settings.BASE_DIR, 'laboratorio', 'static', 'logo.png')
-
 
 class EmailService:
     """Servicio para envío de correos electrónicos del sistema."""
-
-    @staticmethod
-    def _get_logo_path():
-        """Obtiene la ruta al logo del sistema."""
-        if os.path.exists(LOGO_PATH):
-            return LOGO_PATH
-        if os.path.exists(LOGO_PATH_ALT):
-            return LOGO_PATH_ALT
-        return None
 
     @staticmethod
     def enviar_email_bienvenida(user, password: str, rol_display: str) -> bool:
@@ -100,27 +82,18 @@ class EmailService:
                 rol_display=rol_display,
             )
 
+            # From con nombre visible para mayor confianza en clientes de correo
+            from_email = f"{app_name} <{settings.EMAIL_HOST_USER}>"
+
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body=text_content,
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=from_email,
                 to=[user.email],
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.mixed_subtype = 'related'
-
-            # Adjuntar logo como imagen embebida (CID)
-            logo_path = EmailService._get_logo_path()
-            if logo_path:
-                try:
-                    with open(logo_path, 'rb') as f:
-                        logo_data = f.read()
-                    logo_image = MIMEImage(logo_data)
-                    logo_image.add_header('Content-ID', '<logo_ecuagenera>')
-                    logo_image.add_header('Content-Disposition', 'inline', filename='Ecuagenera.png')
-                    msg.attach(logo_image)
-                except Exception as logo_error:
-                    logger.warning(f"No se pudo adjuntar el logo: {logo_error}")
+            # NOTA: NO usar msg.mixed_subtype = 'related' ni imágenes CID
+            # porque Hotmail/Outlook las bloquea y rompe la estructura MIME
 
             msg.send(fail_silently=False)
 
@@ -156,26 +129,19 @@ class EmailService:
             <td style="padding: 40px 20px;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: {c['bg_card']}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);">
 
-                    <!-- Header con logo -->
+                    <!-- Header -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, {c['primary']}, {c['primary_light']}); padding: 30px 40px; text-align: center;">
-                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                                <tr>
-                                    <td style="text-align: center; padding-bottom: 16px;">
-                                        <img src="cid:logo_ecuagenera" alt="Ecuagenera" width="90" height="90" style="border-radius: 50%; border: 3px solid {c['accent']}; background-color: #ffffff;" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">
-                                        <h1 style="color: {c['text_light']}; margin: 0 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">
-                                            {app_name}
-                                        </h1>
-                                        <p style="color: {c['accent']}; margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
-                                            Sistema de Gesti&oacute;n de Laboratorio
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td style="background: linear-gradient(135deg, {c['primary']}, {c['primary_light']}); padding: 36px 40px; text-align: center;">
+                            <!-- Iniciales en lugar de imagen CID para compatibilidad con Hotmail -->
+                            <div style="display: inline-block; width: 80px; height: 80px; border-radius: 50%; background-color: {c['accent']}; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 16px; line-height: 80px; font-size: 32px; font-weight: 900; color: {c['primary']}; text-align: center;">
+                                PG
+                            </div>
+                            <h1 style="color: {c['text_light']}; margin: 0 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">
+                                {app_name}
+                            </h1>
+                            <p style="color: {c['accent']}; margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                                Sistema de Gesti&oacute;n de Laboratorio
+                            </p>
                         </td>
                     </tr>
 
@@ -253,11 +219,11 @@ class EmailService:
                         </td>
                     </tr>
 
-                    <!-- Bot&oacute;n Iniciar Sesi&oacute;n -->
+                    <!-- Botón Iniciar Sesión -->
                     <tr>
                         <td style="padding: 0 40px 28px 40px; text-align: center;">
                             <a href="{app_url}"
-                               style="display: inline-block; background-color: {c['accent']}; color: {c['text_light']}; text-decoration: none; padding: 15px 50px; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 3px 10px rgba(233, 173, 20, 0.35);">
+                               style="display: inline-block; background-color: {c['accent']}; color: {c['text_light']}; text-decoration: none; padding: 15px 50px; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: 0.5px;">
                                 Iniciar Sesi&oacute;n
                             </a>
                             <p style="color: {c['text_muted']}; margin: 12px 0 0 0; font-size: 12px;">
@@ -273,7 +239,7 @@ class EmailService:
                                 <tr>
                                     <td style="padding: 16px 20px;">
                                         <p style="color: {c['accent_hover']}; margin: 0 0 4px 0; font-size: 14px; font-weight: 700;">
-                                            &#9888;&#65039; Recomendaci&oacute;n de Seguridad
+                                            &#9888; Recomendaci&oacute;n de Seguridad
                                         </p>
                                         <p style="color: {c['warning_text']}; margin: 0; font-size: 13px; line-height: 1.6;">
                                             Por seguridad, te recomendamos cambiar tu contrase&ntilde;a
