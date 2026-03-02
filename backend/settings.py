@@ -422,5 +422,5 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'noreply@poliger.com')
 
 # URL y nombre de la aplicación (para enlaces en emails)
-APP_URL = 'http://207.180.230.88'
+APP_URL = 'https://www.poligerecuagenera.org/login'
 APP_NAME = 'PoliGer - EcuaGenera'

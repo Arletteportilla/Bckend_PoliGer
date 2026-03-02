@@ -140,7 +140,7 @@ class EmailService:
     @staticmethod
     def _generar_html_bienvenida(user, password: str, rol_display: str) -> str:
         """Genera el HTML profesional para el email de bienvenida."""
-        app_url = getattr(settings, 'APP_URL', 'http://207.180.230.88')
+        app_url = getattr(settings, 'APP_URL', 'https://www.poligerecuagenera.org/login')
         app_name = getattr(settings, 'APP_NAME', 'PoliGer - EcuaGenera')
         c = COLORS
 
