@@ -139,6 +139,29 @@ class NotificationService:
             logger.error(f"Error creando notificación de polinización: {e}")
             raise
     
+    def crear_notificacion_sistema(
+        self,
+        usuario: User,
+        tipo: str,
+        titulo: str,
+        mensaje: str,
+        detalles: dict = None
+    ) -> Notification:
+        """Crea una notificación de sistema (sin germinación ni polinización asociada)"""
+        try:
+            notificacion = Notification.objects.create(
+                usuario=usuario,
+                tipo=tipo,
+                titulo=titulo,
+                mensaje=mensaje,
+                detalles_adicionales=detalles or {}
+            )
+            logger.info(f"Notificación de sistema creada para {usuario.username}: {tipo}")
+            return notificacion
+        except Exception as e:
+            logger.error(f"Error creando notificación de sistema: {e}")
+            raise
+
     def obtener_notificaciones_usuario(
         self, 
         usuario: User, 

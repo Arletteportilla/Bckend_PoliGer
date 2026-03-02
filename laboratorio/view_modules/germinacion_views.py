@@ -150,6 +150,35 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             except Exception as e:
                 logger.warning(f"No se pudo crear notificación: {e}")
 
+            # Calcular y guardar predicción automáticamente al crear
+            try:
+                prediccion_data = {
+                    'especie': germinacion.especie_variedad or '',
+                    'genero': germinacion.genero or '',
+                    'clima': germinacion.clima or 'I',
+                    'fecha_siembra': str(germinacion.fecha_siembra) if germinacion.fecha_siembra else None,
+                }
+                resultado = prediccion_service.calcular_prediccion_germinacion(prediccion_data)
+                if resultado and resultado.get('fecha_estimada'):
+                    from datetime import date
+                    fecha_est = resultado['fecha_estimada']
+                    if isinstance(fecha_est, str):
+                        from datetime import datetime
+                        fecha_est = datetime.strptime(fecha_est, '%Y-%m-%d').date()
+                    germinacion.prediccion_fecha_estimada = fecha_est
+                    if resultado.get('dias_estimados'):
+                        germinacion.prediccion_dias_estimados = resultado['dias_estimados']
+                    if resultado.get('confianza'):
+                        germinacion.prediccion_confianza = resultado['confianza']
+                    germinacion.save(update_fields=[
+                        'prediccion_fecha_estimada',
+                        'prediccion_dias_estimados',
+                        'prediccion_confianza',
+                    ])
+                    logger.info(f"Predicción guardada para germinación {germinacion.id}: {fecha_est}")
+            except Exception as e:
+                logger.warning(f"No se pudo calcular predicción automática para germinación {germinacion.id}: {e}")
+
             # NUEVO: Verificar si ya debe enviarse recordatorio de 5 días
             # (para casos donde la fecha ingresada ya tiene más de 5 días)
             try:
@@ -946,6 +975,18 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
 
             response.write(pdf_data)
             logger.info(f"PDF generado exitosamente para {request.user.username}: {len(germinaciones)} registros")
+            # Notificación de descarga de PDF
+            try:
+                from ..services.notification_service import notification_service
+                notification_service.crear_notificacion_sistema(
+                    usuario=request.user,
+                    tipo='ACTUALIZACION',
+                    titulo=f'Descarga de PDF - Germinaciones',
+                    mensaje=f'Se descargó el PDF con {len(germinaciones)} registro(s) de germinaciones.',
+                    detalles={'accion': 'descarga_pdf', 'tipo': 'germinaciones', 'total': len(germinaciones)}
+                )
+            except Exception:
+                pass
             return response
 
         except Exception as e:

@@ -89,11 +89,26 @@ def generar_reporte_germinaciones(request):
             generator = ReportGenerator()
 
             if formato == 'pdf':
-                return generator.generate_pdf_report('germinaciones', filtros)
+                resultado = generator.generate_pdf_report('germinaciones', filtros)
             else:
-                return generator.generate_excel_report('germinaciones', filtros)
+                resultado = generator.generate_excel_report('germinaciones', filtros)
         except ImportError:
-            return generar_reporte_basico_germinaciones(request)
+            resultado = generar_reporte_basico_germinaciones(request)
+
+        # Notificación de reporte generado
+        try:
+            from ..services.notification_service import notification_service
+            tipo_fmt = 'PDF' if formato == 'pdf' else 'Excel'
+            notification_service.crear_notificacion_sistema(
+                usuario=request.user,
+                tipo='ACTUALIZACION',
+                titulo=f'Reporte de Germinaciones ({tipo_fmt})',
+                mensaje=f'Se generó y descargó el reporte de germinaciones en formato {tipo_fmt}.',
+                detalles={'accion': 'reporte', 'tipo': 'germinaciones', 'formato': formato}
+            )
+        except Exception:
+            pass
+        return resultado
     except Exception as e:
         logger.error(f"Error generando reporte de germinaciones: {e}")
         return JsonResponse({"error": f"Error generando reporte: {str(e)}"}, status=500)
@@ -183,11 +198,26 @@ def generar_reporte_polinizaciones(request):
             generator = ReportGenerator()
 
             if formato == 'pdf':
-                return generator.generate_pdf_report('polinizaciones', filtros)
+                resultado = generator.generate_pdf_report('polinizaciones', filtros)
             else:
-                return generator.generate_excel_report('polinizaciones', filtros)
+                resultado = generator.generate_excel_report('polinizaciones', filtros)
         except ImportError:
-            return generar_reporte_basico_polinizaciones(request)
+            resultado = generar_reporte_basico_polinizaciones(request)
+
+        # Notificación de reporte generado
+        try:
+            from ..services.notification_service import notification_service
+            tipo_fmt = 'PDF' if formato == 'pdf' else 'Excel'
+            notification_service.crear_notificacion_sistema(
+                usuario=request.user,
+                tipo='ACTUALIZACION',
+                titulo=f'Reporte de Polinizaciones ({tipo_fmt})',
+                mensaje=f'Se generó y descargó el reporte de polinizaciones en formato {tipo_fmt}.',
+                detalles={'accion': 'reporte', 'tipo': 'polinizaciones', 'formato': formato}
+            )
+        except Exception:
+            pass
+        return resultado
     except Exception as e:
         logger.error(f"Error generando reporte de polinizaciones: {e}")
         return JsonResponse({"error": f"Error generando reporte: {str(e)}"}, status=500)

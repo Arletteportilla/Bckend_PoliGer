@@ -569,6 +569,18 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
 
             response.write(pdf_data)
             logger.info(f"PDF generado exitosamente para {request.user.username}: {len(polinizaciones)} registros")
+            # Notificación de descarga de PDF
+            try:
+                from ..services.notification_service import notification_service
+                notification_service.crear_notificacion_sistema(
+                    usuario=request.user,
+                    tipo='ACTUALIZACION',
+                    titulo=f'Descarga de PDF - Polinizaciones',
+                    mensaje=f'Se descargó el PDF con {len(polinizaciones)} registro(s) de polinizaciones.',
+                    detalles={'accion': 'descarga_pdf', 'tipo': 'polinizaciones', 'total': len(polinizaciones)}
+                )
+            except Exception:
+                pass
             return response
 
         except Exception as e:

@@ -65,6 +65,19 @@ class LoginView(APIView):
         if user is not None:
             if user.is_active:
                 tokens = get_tokens_for_user(user)
+                # Notificación de inicio de sesión
+                try:
+                    from ..services.notification_service import notification_service
+                    from django.utils import timezone
+                    notification_service.crear_notificacion_sistema(
+                        usuario=user,
+                        tipo='MENSAJE',
+                        titulo='Inicio de sesión exitoso',
+                        mensaje=f'Has iniciado sesión en PoliGer el {timezone.now().strftime("%d/%m/%Y a las %H:%M")}.',
+                        detalles={'accion': 'login', 'username': user.username}
+                    )
+                except Exception:
+                    pass
                 return Response(tokens, status=status.HTTP_200_OK)
             else:
                 return Response(
