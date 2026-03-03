@@ -245,11 +245,14 @@ class GerminacionService(PaginatedService, CacheableService):
         return self.get_cached_data(cache_key, get_data)
     
     def get_codigos_con_especies(self) -> List[Dict[str, str]]:
-        """Obtiene códigos con sus especies para autocompletado"""
+        """Obtiene códigos con sus especies para autocompletado.
+        Incluye especies de germinaciones existentes y de polinizaciones (madre/padre).
+        """
         cache_key = 'germinacion_codigos_con_especies'
-        
+
         def get_data():
-            return list(
+            # Especies de germinaciones existentes
+            from_germinaciones = list(
                 Germinacion.objects
                 .exclude(codigo='')
                 .exclude(codigo__isnull=True)
@@ -257,7 +260,35 @@ class GerminacionService(PaginatedService, CacheableService):
                 .distinct()
                 .order_by('codigo')
             )
-        
+
+            # Especies únicas de polinizaciones (madre y padre) para autocompletado
+            try:
+                from ..models import Polinizacion
+                especies_pol = set()
+                for campo in ['madre_especie', 'padre_especie']:
+                    vals = (
+                        Polinizacion.objects
+                        .exclude(**{campo: ''})
+                        .exclude(**{f'{campo}__isnull': True})
+                        .values_list(campo, flat=True)
+                        .distinct()
+                    )
+                    especies_pol.update(vals)
+
+                # Añadir como entradas sin código para autocompletado
+                especies_ya_en_germinaciones = {
+                    item['especie_variedad'] for item in from_germinaciones
+                    if item.get('especie_variedad')
+                }
+                extra = [
+                    {'codigo': '', 'especie_variedad': e, 'genero': ''}
+                    for e in sorted(especies_pol)
+                    if e not in especies_ya_en_germinaciones
+                ]
+                return from_germinaciones + extra
+            except Exception:
+                return from_germinaciones
+
         cached_data = self.get_cached_data(cache_key, get_data)
         return [
             {
@@ -266,6 +297,7 @@ class GerminacionService(PaginatedService, CacheableService):
                 'genero': item['genero'] or ''
             }
             for item in cached_data
+            if item.get('especie_variedad')
         ]
     
     def get_germinacion_by_codigo(self, codigo: str) -> Optional[Dict[str, str]]:
