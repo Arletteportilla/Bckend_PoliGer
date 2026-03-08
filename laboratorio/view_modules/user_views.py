@@ -101,7 +101,8 @@ class UserManagementViewSet(viewsets.ModelViewSet):
         """Crear usuario con perfil"""
         try:
             serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             # Capturar contraseña en texto plano ANTES de que create_user la hashee
             # El serializer se encarga de crear tanto el usuario como el perfil
