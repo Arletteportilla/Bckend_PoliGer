@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import logging
+import threading
 
 from ..models import UserProfile, Notification, Germinacion, Polinizacion
 from ..serializers import (
@@ -134,25 +135,28 @@ class UserManagementViewSet(viewsets.ModelViewSet):
 
             logger.info(f"Usuario creado: {user.username} con rol {profile.rol}")
 
-            # Enviar email de bienvenida con contrasena temporal (no bloquea la creacion)
-            # NOTA: La contrasena viaja por SMTP pero es temporal - el usuario DEBE cambiarla
-            email_sent = False
-            try:
-                from ..services.email_service import email_service
-                _tmp_pwd = request.data.get('password', '')
-                email_sent = email_service.enviar_email_bienvenida(
-                    user=user,
-                    password=_tmp_pwd,
-                    rol_display=profile.get_rol_display(),
-                    password_temporal=True,
-                )
-            except Exception as email_error:
-                logger.error(
-                    f"Error al enviar email de bienvenida para {user.username}: "
-                    f"{email_error}"
-                )
+            # Enviar email de bienvenida en hilo separado para no bloquear la respuesta HTTP
+            _tmp_pwd = request.data.get('password', '')
+            _rol_display = profile.get_rol_display()
+            _username = user.username
 
-            response_data['email_enviado'] = email_sent
+            def _send_welcome_email():
+                try:
+                    from ..services.email_service import email_service
+                    email_service.enviar_email_bienvenida(
+                        user=user,
+                        password=_tmp_pwd,
+                        rol_display=_rol_display,
+                        password_temporal=True,
+                    )
+                except Exception as email_error:
+                    logger.error(
+                        f"Error al enviar email de bienvenida para {_username}: "
+                        f"{email_error}"
+                    )
+
+            threading.Thread(target=_send_welcome_email, daemon=True).start()
+            response_data['email_enviado'] = True
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 
