@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 from django.http import JsonResponse
+from .models import UserProfile
 
 class RoleBasedPermission(BasePermission):
     """
@@ -30,52 +31,76 @@ class RoleBasedPermission(BasePermission):
 
 class CanViewGerminaciones(RoleBasedPermission):
     """Permiso para ver germinaciones - Solo TIPO_1, TIPO_3, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_3', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanCreateGerminaciones(RoleBasedPermission):
     """Permiso para crear germinaciones - Solo TIPO_1, TIPO_3, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_3', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanEditGerminaciones(RoleBasedPermission):
     """Permiso para editar germinaciones - Solo TIPO_1, TIPO_3, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_3', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanViewPolinizaciones(RoleBasedPermission):
     """Permiso para ver polinizaciones - Solo TIPO_1, TIPO_2, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_2', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanCreatePolinizaciones(RoleBasedPermission):
     """Permiso para crear polinizaciones - Solo TIPO_1, TIPO_2, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_2', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanEditPolinizaciones(RoleBasedPermission):
     """Permiso para editar polinizaciones - Solo TIPO_1, TIPO_2, TIPO_4"""
-    required_roles = ['TIPO_1', 'TIPO_2', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanViewReportes(RoleBasedPermission):
     """Permiso para ver reportes"""
-    required_roles = ['TIPO_1', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class CanGenerateReportes(RoleBasedPermission):
     """Permiso para generar reportes"""
-    required_roles = ['TIPO_1', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 class IsAdministrator(RoleBasedPermission):
     """Permiso solo para administradores"""
-    required_roles = ['TIPO_4']
+    required_roles = [UserProfile.Roles.SYSTEM_MANAGER]
+
+
+class PasswordNotExpired(BasePermission):
+    """
+    Bloquea peticiones si el usuario tiene una contraseña temporal pendiente de cambio.
+    Debe incluirse en DEFAULT_PERMISSION_CLASSES.
+    Las vistas que gestionan el cambio inicial deben declarar permission_classes=[IsAuthenticated]
+    explicitamente para excluirse de esta verificacion.
+    """
+    message = 'Debes cambiar tu contrasena antes de continuar. Usa POST /api/auth/cambiar-password-inicial/'
+
+    def has_permission(self, request, view):
+        # No es responsabilidad de este permiso verificar autenticacion
+        if not request.user or not request.user.is_authenticated:
+            return True
+
+        profile = getattr(request.user, 'profile', None)
+        if profile is None:
+            return True
+
+        if getattr(profile, 'debe_cambiar_password', False):
+            return False
+
+        return True
 
 
 class CanExportData(RoleBasedPermission):
     """Permiso para exportar datos"""
-    required_roles = ['TIPO_1', 'TIPO_4']
+    required_roles = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
 
 
 # ============================================================================
@@ -87,7 +112,7 @@ def require_role(allowed_roles):
     Decorador que requiere que el usuario tenga uno de los roles especificados
     
     Usage:
-        @require_role(['TIPO_1', 'TIPO_4'])
+        @require_role([UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER])
         def my_view(request):
             pass
     """
@@ -131,9 +156,9 @@ def require_germinacion_access(action='view'):
         action: 'view', 'create', 'editar'
     """
     role_mapping = {
-        'view': ['TIPO_1', 'TIPO_3', 'TIPO_4'],
-        'create': ['TIPO_1', 'TIPO_3', 'TIPO_4'],
-        'edit': ['TIPO_1', 'TIPO_3', 'TIPO_4'],
+        'view': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
+        'create': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
+        'edit': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
     }
     
     allowed_roles = role_mapping.get(action, [])
@@ -148,9 +173,9 @@ def require_polinizacion_access(action='view'):
         action: 'view', 'create', 'edit'
     """
     role_mapping = {
-        'view': ['TIPO_1', 'TIPO_2', 'TIPO_4'],
-        'create': ['TIPO_1', 'TIPO_2', 'TIPO_4'],
-        'edit': ['TIPO_1', 'TIPO_2', 'TIPO_4'],
+        'view': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
+        'create': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
+        'edit': [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER],
     }
     
     allowed_roles = role_mapping.get(action, [])
@@ -159,12 +184,12 @@ def require_polinizacion_access(action='view'):
 
 def require_admin():
     """Decorador que requiere permisos de administrador"""
-    return require_role(['TIPO_4'])
+    return require_role([UserProfile.Roles.SYSTEM_MANAGER])
 
 
 def require_reports_access():
     """Decorador que requiere acceso a reportes"""
-    return require_role(['TIPO_1', 'TIPO_4'])
+    return require_role([UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER])
 
 
 # ============================================================================
@@ -199,8 +224,8 @@ class RoleBasedViewSetMixin:
         # Verificar si el usuario puede acceder a este objeto específico
         # Por ejemplo, solo puede editar sus propios registros (excepto admin)
         if hasattr(obj, 'creado_por') and obj.creado_por:
-            if (request.user.profile.rol not in ['TIPO_4'] and 
-                obj.creado_por != request.user):
+            user_rol = getattr(getattr(request.user, 'profile', None), 'rol', None)
+            if user_rol not in [UserProfile.Roles.SYSTEM_MANAGER] and obj.creado_por != request.user:
                 raise PermissionDenied("Solo puedes editar tus propios registros")
 
 
@@ -269,7 +294,7 @@ def filter_queryset_by_role(queryset, user, model_name):
         return queryset.none()
     
     # Los administradores y usuarios con acceso completo ven todo
-    if user.profile.rol in ['TIPO_4', 'TIPO_1']:
+    if user.profile.rol in [UserProfile.Roles.SYSTEM_MANAGER, UserProfile.Roles.SENIOR_TECH]:
         return queryset
     
     # Para otros roles, solo ven sus propios registros

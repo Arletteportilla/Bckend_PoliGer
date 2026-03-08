@@ -32,7 +32,7 @@ class EmailService:
     """Servicio para envío de correos electrónicos del sistema."""
 
     @staticmethod
-    def enviar_email_bienvenida(user, password: str, rol_display: str) -> bool:
+    def enviar_email_bienvenida(user, password: str, rol_display: str, password_temporal: bool = False) -> bool:
         """
         Envía email de bienvenida al nuevo usuario con sus credenciales.
 
@@ -80,6 +80,7 @@ class EmailService:
                 user=user,
                 password=password,
                 rol_display=rol_display,
+                password_temporal=password_temporal,
             )
 
             # From con nombre visible para mayor confianza en clientes de correo
@@ -111,7 +112,7 @@ class EmailService:
             return False
 
     @staticmethod
-    def _generar_html_bienvenida(user, password: str, rol_display: str) -> str:
+    def _generar_html_bienvenida(user, password: str, rol_display: str, password_temporal: bool = False) -> str:
         """Genera el HTML profesional para el email de bienvenida."""
         app_url = getattr(settings, 'APP_URL', 'https://www.poligerecuagenera.org/login')
         app_name = getattr(settings, 'APP_NAME', 'PoliGer - EcuaGenera')
@@ -242,8 +243,7 @@ class EmailService:
                                             &#9888; Recomendaci&oacute;n de Seguridad
                                         </p>
                                         <p style="color: {c['warning_text']}; margin: 0; font-size: 13px; line-height: 1.6;">
-                                            Por seguridad, te recomendamos cambiar tu contrase&ntilde;a
-                                            despu&eacute;s de tu primer inicio de sesi&oacute;n. No compartas
+                                            {'<strong>OBLIGATORIO:</strong> Esta es una contrase&ntilde;a temporal. Debes cambiarla en tu primer inicio de sesi&oacute;n para poder usar el sistema.' if password_temporal else 'Por seguridad, te recomendamos cambiar tu contrase&ntilde;a despu&eacute;s de tu primer inicio de sesi&oacute;n.'} No compartas
                                             tus credenciales con terceros.
                                         </p>
                                     </td>

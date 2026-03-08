@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import logging
 from pathlib import Path
 from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
+
+logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +25,13 @@ from dotenv import load_dotenv
 load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-td5k-97f$l!p6(p19j3d6+p$3e#3vr*9i9*5^d+)5(9mjsmphw')
+_secret_key = os.environ.get('DJANGO_SECRET_KEY')
+if not _secret_key:
+    raise ImproperlyConfigured(
+        "La variable de entorno DJANGO_SECRET_KEY no está definida. "
+        "Agrégala al archivo .env antes de iniciar el servidor."
+    )
+SECRET_KEY = _secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
@@ -88,7 +98,7 @@ IS_GITHUB_WORKSPACE = 'GITHUB_WORKSPACE' in os.environ
 if IS_CODESPACES or IS_GITHUB_WORKSPACE:
     # En Codespaces, usar SQLite por defecto (más fácil)
     DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3').lower()
-    print(f"🔵 Entorno detectado: GitHub Codespaces - Usando {DB_ENGINE.upper()}")
+    logger.info(f"Entorno detectado: GitHub Codespaces - Usando {DB_ENGINE.upper()}")
 else:
     # En desarrollo local, usar lo que esté en .env
     DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3').lower()
@@ -100,7 +110,7 @@ if DB_ENGINE == 'postgresql':
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ.get('DB_NAME', 'laboratorio_db'),
             "USER": os.environ.get('DB_USER', 'laboratorio_user'),
-            "PASSWORD": os.environ.get('DB_PASSWORD', 'root'),
+            "PASSWORD": os.environ.get('DB_PASSWORD', ''),
             "HOST": os.environ.get('DB_HOST', 'localhost'),
             "PORT": os.environ.get('DB_PORT', '5432'),
             "OPTIONS": {
@@ -125,6 +135,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
+        'laboratorio.core.permissions.PasswordNotExpired',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -256,23 +267,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Solo True en desarrollo
-CORS_ALLOWED_ORIGINS = [
+
+# Origenes base siempre permitidos (localhost dev + dominio oficial HTTPS)
+_cors_base = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8081",
     "http://127.0.0.1:8081",
     "exp://localhost:8081",
     "exp://127.0.0.1:8081",
-    "http://207.180.230.88",
-    "http://207.180.230.88:8000",
-    "http://207.180.230.88:19006",  # Expo default port
-    "http://207.180.230.88:3000",
-    # Dominios de producción
-    "http://www.poligerecuagenera.org",
+    # Solo HTTPS para el dominio de produccion
     "https://www.poligerecuagenera.org",
-    "http://poligerecuagenera.org",
     "https://poligerecuagenera.org",
 ]
+
+# Origenes adicionales (ej: IP del servidor) via variable de entorno
+# Configurar en .env: CORS_EXTRA_ORIGINS=http://207.180.230.88:8000,http://207.180.230.88:3000
+_cors_extra_raw = os.environ.get('CORS_EXTRA_ORIGINS', '')
+_cors_extra = [o.strip() for o in _cors_extra_raw.split(',') if o.strip()]
+
+CORS_ALLOWED_ORIGINS = _cors_base + _cors_extra
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -306,7 +320,6 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # Logging Configuration
-import os
 
 # Crear directorio de logs si no existe
 log_dir = BASE_DIR / 'logs'
@@ -356,17 +369,28 @@ LOGGING = {
     },
 }
 
-# Cache Configuration - Optimized for development
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-            'CULL_FREQUENCY': 3,
+# Cache Configuration
+# En producción (DEBUG=False) se usa Redis si REDIS_URL está definido,
+# de lo contrario LocMemCache (no escala con múltiples workers Gunicorn).
+_redis_url = os.environ.get('REDIS_URL')
+if not DEBUG and _redis_url:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': _redis_url,
         }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000,
+                'CULL_FREQUENCY': 3,
+            }
+        }
+    }
 
 # Database connection optimizations
 # Aplicar solo optimizaciones compatibles según el engine

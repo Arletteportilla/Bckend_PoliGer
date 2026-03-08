@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -238,65 +238,60 @@ class NotificationViewSet(viewsets.ModelViewSet):
 # FUNCIONES DE COMPATIBILIDAD PARA VISTAS LEGACY
 # ============================================================================
 
-@csrf_exempt
+@login_required
 def add_inventario(request):
     """Función legacy para agregar inventario"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Lógica básica de creación
             return JsonResponse({'success': True, 'message': 'Inventario agregado'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-@csrf_exempt
+@login_required
 def update_inventario(request, id):
     """Función legacy para actualizar inventario"""
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            # Lógica básica de actualización
             return JsonResponse({'success': True, 'message': 'Inventario actualizado'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-@csrf_exempt
+@login_required
 def add_usuario(request):
     """Función legacy para agregar usuario"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Lógica básica de creación de usuario
             return JsonResponse({'success': True, 'message': 'Usuario agregado'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-@csrf_exempt
+@login_required
 def add_capsula(request):
     """Función legacy para agregar cápsula"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Lógica básica de creación
             return JsonResponse({'success': True, 'message': 'Cápsula agregada'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-@csrf_exempt
+@login_required
 def add_siembra(request):
     """Función legacy para agregar siembra"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Lógica básica de creación
             return JsonResponse({'success': True, 'message': 'Siembra agregada'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)

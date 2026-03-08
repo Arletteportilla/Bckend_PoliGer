@@ -54,12 +54,12 @@ class XGBoostPolinizacionPredictor:
 
             logger.info(f"Cargando modelo XGBoost desde: {model_path}")
             self.model = joblib.load(model_path)
-            logger.info(f"✓ Modelo XGBoost cargado correctamente")
+            logger.info("Modelo XGBoost cargado correctamente")
 
             # Cargar encoders
             if os.path.exists(encoders_path):
                 self.label_encoders = joblib.load(encoders_path)
-                logger.info(f"✓ Label encoders cargados: {list(self.label_encoders.keys())}")
+                logger.info(f"Label encoders cargados: {list(self.label_encoders.keys())}")
             else:
                 logger.warning(f"Label encoders no encontrados: {encoders_path}")
                 return
@@ -70,7 +70,7 @@ class XGBoostPolinizacionPredictor:
                 with open(metadata_path, 'r', encoding='utf-8') as f:
                     self.metadata = json.load(f)
                     self.feature_list = self.metadata.get('feature_list', [])
-                logger.info(f"✓ Metadata cargada: {len(self.feature_list)} features")
+                logger.info(f"Metadata cargada: {len(self.feature_list)} features")
             else:
                 # Hardcodear la lista de features si no hay metadata
                 self.feature_list = [
@@ -82,13 +82,10 @@ class XGBoostPolinizacionPredictor:
                 logger.warning(f"Metadata no encontrada, usando lista de features por defecto")
 
             self.model_loaded = True
-            logger.info("="*60)
-            logger.info("MODELO XGBOOST POLINIZACIÓN CARGADO EXITOSAMENTE")
-            logger.info(f"  - Precisión: 95.63% (R²)")
-            logger.info(f"  - RMSE: ±19.43 días")
-            logger.info(f"  - MAE: ±10.22 días")
-            logger.info(f"  - Features: {len(self.feature_list)}")
-            logger.info("="*60)
+            logger.info(
+                "Modelo XGBoost polinizacion cargado: precision=95.63%%(R2), RMSE=19.43d, MAE=10.22d, features=%d",
+                len(self.feature_list)
+            )
 
         except Exception as e:
             logger.error(f"Error cargando modelo XGBoost: {e}", exc_info=True)
@@ -109,7 +106,7 @@ class XGBoostPolinizacionPredictor:
         # Si la especie empieza con el género, removerlo
         if especie_limpia.lower().startswith(genero_limpio.lower()):
             especie_limpia = especie_limpia[len(genero_limpio):].strip()
-            logger.info(f"  ✓ Especie normalizada: '{especie}' → '{especie_limpia}'")
+            logger.debug(f"Especie normalizada: '{especie}' -> '{especie_limpia}'")
 
         return especie_limpia
 
@@ -141,7 +138,7 @@ class XGBoostPolinizacionPredictor:
             ubicacion_limpia = ' '.join(partes)
 
         if ubicacion_limpia != ubicacion:
-            logger.info(f"  ✓ Ubicación normalizada: '{ubicacion}' → '{ubicacion_limpia}'")
+            logger.debug(f"Ubicacion normalizada: '{ubicacion}' -> '{ubicacion_limpia}'")
 
         return ubicacion_limpia
 
@@ -156,7 +153,7 @@ class XGBoostPolinizacionPredictor:
         responsable_limpio = str(responsable).strip().upper()
 
         if responsable_limpio != responsable:
-            logger.info(f"  ✓ Responsable normalizado: '{responsable}' → '{responsable_limpio}'")
+            logger.debug(f"Responsable normalizado: '{responsable}' -> '{responsable_limpio}'")
 
         return responsable_limpio
 
@@ -185,7 +182,7 @@ class XGBoostPolinizacionPredictor:
         tipo_normalizado = mapeo_tipos.get(tipo_limpio, tipo_limpio)
 
         if tipo_normalizado != tipo:
-            logger.info(f"  ✓ Tipo normalizado: '{tipo}' → '{tipo_normalizado}'")
+            logger.debug(f"Tipo normalizado: '{tipo}' -> '{tipo_normalizado}'")
 
         return tipo_normalizado
 
@@ -284,7 +281,7 @@ class XGBoostPolinizacionPredictor:
 
                     # Verificar si es categoría nueva
                     if valor not in le.classes_:
-                        logger.warning(f"⚠️  Categoría nueva en '{col}': '{valor}'")
+                        logger.warning(f"Categoria nueva en '{col}': '{valor}'")
                         logger.warning(f"   → Se usará la primera categoría conocida: '{le.classes_[0]}'")
                         categorias_nuevas += 1
                         # Asignar a la primera categoría conocida
@@ -304,7 +301,7 @@ class XGBoostPolinizacionPredictor:
             dias_predichos = self.model.predict(X)[0]
             dias_predichos = max(1, int(round(dias_predichos)))  # Mínimo 1 día
 
-            logger.info(f"\n✓ Días predichos: {dias_predichos}")
+            logger.info(f"Dias predichos: {dias_predichos}")
 
             # 8. Calcular fecha estimada de maduración
             fecha_estimada = fecha + timedelta(days=dias_predichos)
@@ -324,10 +321,10 @@ class XGBoostPolinizacionPredictor:
             else:
                 nivel_confianza = 'baja'
 
-            logger.info(f"✓ Fecha estimada: {fecha_estimada.strftime('%Y-%m-%d')}")
-            logger.info(f"✓ Confianza: {confianza}% ({nivel_confianza})")
-            logger.info(f"  - Categorías nuevas: {categorias_nuevas}")
-            logger.info("="*60)
+            logger.info(
+                "Prediccion: fecha_estimada=%s, confianza=%d%% (%s), categorias_nuevas=%d",
+                fecha_estimada.strftime('%Y-%m-%d'), confianza, nivel_confianza, categorias_nuevas
+            )
 
             # 10. Verificar si hubo normalizaciones
             datos_normalizados = {}
@@ -371,7 +368,7 @@ class XGBoostPolinizacionPredictor:
             # Agregar info de normalizaciones si hubo
             if datos_normalizados:
                 resultado['datos_normalizados'] = datos_normalizados
-                logger.info(f"\n✓ Datos normalizados automáticamente: {list(datos_normalizados.keys())}")
+                logger.debug(f"Datos normalizados automaticamente: {list(datos_normalizados.keys())}")
 
             return resultado
 

@@ -11,6 +11,7 @@ import logging
 from ..models import Germinacion
 from .base_service import BaseService, PaginatedService, CacheableService
 from ..utils.validation_utils import ValidationHelper, validate_codigo, validate_date_field, validate_positive_integer, validate_text_field
+from ..core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ class GerminacionService(PaginatedService, CacheableService):
             excluir_importadas: Si es True, excluye las germinaciones importadas desde archivos CSV/Excel
         """
         # Usuarios con rol de acceso completo a germinaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']:
+        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
             queryset = Germinacion.objects.all()
         else:
             queryset = Germinacion.objects.filter(creado_por=user)
@@ -178,7 +179,7 @@ class GerminacionService(PaginatedService, CacheableService):
         from django.core.paginator import Paginator
 
         # Usuarios con rol de acceso completo a germinaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']:
+        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
             queryset = Germinacion.objects.all()
         else:
             queryset = Germinacion.objects.filter(creado_por=user)
@@ -187,11 +188,11 @@ class GerminacionService(PaginatedService, CacheableService):
         if solo_historicos:
             # Mostrar SOLO registros históricos (importados desde archivos)
             queryset = queryset.exclude(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
-            logger.info(f"📦 Filtrando SOLO germinaciones históricas (importadas)")
+            logger.info(f"Filtrando SOLO germinaciones historicas (importadas)")
         elif excluir_importadas:
             # Excluir germinaciones importadas desde CSV/Excel (mostrar solo nuevas)
             queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
-            logger.info(f"🆕 Excluyendo germinaciones importadas (solo nuevas)")
+            logger.info(f"Excluyendo germinaciones importadas (solo nuevas)")
 
         # Filtrar por fecha si se especifica
         if dias_recientes:

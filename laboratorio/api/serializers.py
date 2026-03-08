@@ -294,23 +294,24 @@ class GerminacionSerializer(serializers.ModelSerializer):
         from datetime import date
         from django.utils.dateparse import parse_date
         
-        # Validar campos obligatorios primero
-        required_fields = {
-            'codigo': 'El código es obligatorio',
-            'especie_variedad': 'La especie/variedad es obligatoria',
-            'fecha_siembra': 'La fecha de siembra es obligatoria',
-            'cantidad_solicitada': 'La cantidad solicitada es obligatoria',
-            'no_capsulas': 'El número de cápsulas es obligatorio',
-            'responsable': 'El responsable es obligatorio'
-        }
-        
+        # Validar campos obligatorios solo en creación (no en updates parciales)
         errors = {}
-        
-        for field, message in required_fields.items():
-            if not data.get(field):
-                errors[field] = message
-            elif isinstance(data[field], str) and not data[field].strip():
-                errors[field] = f"{field.replace('_', ' ').title()} no puede estar vacío"
+
+        if not self.partial:
+            required_fields = {
+                'codigo': 'El código es obligatorio',
+                'especie_variedad': 'La especie/variedad es obligatoria',
+                'fecha_siembra': 'La fecha de siembra es obligatoria',
+                'cantidad_solicitada': 'La cantidad solicitada es obligatoria',
+                'no_capsulas': 'El número de cápsulas es obligatorio',
+                'responsable': 'El responsable es obligatorio'
+            }
+
+            for field, message in required_fields.items():
+                if not data.get(field):
+                    errors[field] = message
+                elif isinstance(data[field], str) and not data[field].strip():
+                    errors[field] = f"{field.replace('_', ' ').title()} no puede estar vacío"
         
         # Validar y convertir fechas
         today = date.today()
@@ -583,7 +584,7 @@ class CreateUserWithProfileSerializer(serializers.ModelSerializer):
     """Serializer para crear usuario con perfil"""
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
-    rol = serializers.ChoiceField(choices=UserProfile.ROLES_CHOICES, default='TIPO_3')
+    rol = serializers.ChoiceField(choices=UserProfile.ROLES_CHOICES, default=UserProfile.Roles.GERMINACION_SPEC)
     telefono = serializers.CharField(max_length=20, required=False, allow_blank=True)
     departamento = serializers.CharField(max_length=100, required=False, allow_blank=True)
     fecha_ingreso = serializers.DateField(required=False, allow_null=True)
@@ -623,7 +624,7 @@ class CreateUserWithProfileSerializer(serializers.ModelSerializer):
         from django.utils import timezone
 
         # Extraer datos del perfil
-        rol = validated_data.pop('rol', 'TIPO_3')
+        rol = validated_data.pop('rol', UserProfile.Roles.GERMINACION_SPEC)
         telefono = validated_data.pop('telefono', '')
         departamento = validated_data.pop('departamento', '')
         # Si no se proporciona fecha_ingreso, usar la fecha actual
@@ -663,7 +664,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and hasattr(request.user, 'profile'):
             # Solo los administradores pueden cambiar roles
-            if request.user.profile.rol != 'TIPO_4':
+            if request.user.profile.rol != UserProfile.Roles.SYSTEM_MANAGER:
                 # Los usuarios no admin solo pueden cambiar su propio perfil (excepto rol)
                 if self.instance and self.instance.user != request.user:
                     raise serializers.ValidationError(

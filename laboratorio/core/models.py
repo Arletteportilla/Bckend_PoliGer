@@ -538,21 +538,28 @@ class UserProfile(models.Model):
     """
     Perfil extendido del usuario con información de roles y permisos
     """
-    ROLES_CHOICES = [
-        ('TIPO_1', 'Técnico de Laboratorio Senior'),  # Germinaciones, polinizaciones, reportes, perfil
-        ('TIPO_2', 'Especialista en Polinización'),  # Polinizaciones, perfil
-        ('TIPO_3', 'Especialista en Germinación'),  # Germinaciones, perfil
-        ('TIPO_4', 'Gestor del Sistema'),  # Acceso total
-    ]
-    
+    class Roles(models.TextChoices):
+        SENIOR_TECH = 'TIPO_1', 'Técnico de Laboratorio Senior'
+        POLINIZACION_SPEC = 'TIPO_2', 'Especialista en Polinización'
+        GERMINACION_SPEC = 'TIPO_3', 'Especialista en Germinación'
+        SYSTEM_MANAGER = 'TIPO_4', 'Gestor del Sistema'
+
+    # Backward-compat alias used in serializers, views and management commands
+    ROLES_CHOICES = Roles.choices
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    rol = models.CharField(max_length=10, choices=ROLES_CHOICES, default='TIPO_3')
+    rol = models.CharField(max_length=10, choices=Roles.choices, default=Roles.GERMINACION_SPEC)
     
     # Información adicional del perfil
     telefono = models.CharField(max_length=20, blank=True)
     departamento = models.CharField(max_length=100, blank=True)
     fecha_ingreso = models.DateField(null=True, blank=True)
     activo = models.BooleanField(default=True)
+    debe_cambiar_password = models.BooleanField(
+        default=False,
+        verbose_name='Debe cambiar contraseña',
+        help_text='Si es True, el usuario debe cambiar su contraseña antes de usar el sistema.'
+    )
     
     # Metas de rendimiento mensual
     meta_polinizaciones = models.PositiveIntegerField(default=0, verbose_name='Meta mensual de polinizaciones')
@@ -578,57 +585,57 @@ class UserProfile(models.Model):
     @property
     def puede_ver_germinaciones(self):
         """Verifica si el usuario puede ver germinaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_crear_germinaciones(self):
         """Verifica si el usuario puede crear germinaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_editar_germinaciones(self):
         """Verifica si el usuario puede editar germinaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_ver_polinizaciones(self):
         """Verifica si el usuario puede ver polinizaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_crear_polinizaciones(self):
         """Verifica si el usuario puede crear polinizaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_editar_polinizaciones(self):
         """Verifica si el usuario puede editar polinizaciones"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_ver_reportes(self):
         """Verifica si el usuario puede ver reportes"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_generar_reportes(self):
         """Verifica si el usuario puede generar reportes"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_administrar_usuarios(self):
         """Verifica si el usuario puede administrar otros usuarios"""
-        return self.activo and self.rol == 'TIPO_4'
+        return self.activo and self.rol == UserProfile.Roles.SYSTEM_MANAGER
     
     @property
     def puede_ver_estadisticas_globales(self):
         """Verifica si el usuario puede ver estadísticas globales"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
     
     @property
     def puede_exportar_datos(self):
         """Verifica si el usuario puede exportar datos"""
-        return self.activo and self.rol in ['TIPO_1', 'TIPO_4']
+        return self.activo and self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.SYSTEM_MANAGER]
     
     def get_permisos_detallados(self):
         """Retorna un diccionario con todos los permisos del usuario"""
@@ -656,11 +663,11 @@ class UserProfile(models.Model):
 
     def puede_tener_meta_polinizaciones(self):
         """Verifica si el usuario puede tener meta de polinizaciones según su rol"""
-        return self.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']
+        return self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     def puede_tener_meta_germinaciones(self):
         """Verifica si el usuario puede tener meta de germinaciones según su rol"""
-        return self.rol in ['TIPO_1', 'TIPO_3', 'TIPO_4']
+        return self.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]
     
     def validar_metas_segun_rol(self):
         """Valida que las metas sean consistentes con el rol del usuario"""

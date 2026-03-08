@@ -10,6 +10,7 @@ import logging
 from ..models import Notification
 from ..serializers import NotificationSerializer
 from ..services.notification_service import notification_service
+from ..api.pagination import StandardResultsSetPagination
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
     
     def get_queryset(self):
         """Filtrar notificaciones por usuario"""
@@ -36,7 +38,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
             solo_no_leidas = request.GET.get('solo_no_leidas', 'false').lower() == 'true'
             incluir_archivadas = request.GET.get('incluir_archivadas', 'false').lower() == 'true'
 
-            # Usar queryset optimizado con select_related
             queryset = self.get_queryset()
 
             if solo_no_leidas:
@@ -45,23 +46,28 @@ class NotificationViewSet(viewsets.ModelViewSet):
             if not incluir_archivadas:
                 queryset = queryset.filter(archivada=False)
 
-            # Paginación: limitar a las más recientes
-            page_size = min(int(request.GET.get('page_size', 50)), 100)
-            page = max(int(request.GET.get('page', 1)), 1)
-            offset = (page - 1) * page_size
+            tipo = request.GET.get('tipo')
+            if tipo:
+                queryset = queryset.filter(tipo=tipo)
 
-            total = queryset.count()
-            notificaciones = queryset[offset:offset + page_size]
+            favorita = request.GET.get('favorita')
+            if favorita is not None and favorita.lower() == 'true':
+                queryset = queryset.filter(favorita=True)
 
-            serializer = self.get_serializer(notificaciones, many=True)
+            search = request.GET.get('search')
+            if search:
+                from django.db.models import Q
+                queryset = queryset.filter(
+                    Q(titulo__icontains=search) | Q(mensaje__icontains=search)
+                )
 
-            return Response({
-                'count': total,
-                'page': page,
-                'page_size': page_size,
-                'total_pages': (total + page_size - 1) // page_size if total > 0 else 1,
-                'results': serializer.data
-            })
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
 
         except Exception as e:
             logger.error(f"Error obteniendo notificaciones: {e}")

@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import JsonResponse
+from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
 import logging
 
@@ -198,42 +199,23 @@ def cambiar_estado_polinizacion(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def estadisticas_modelos(request):
-    """Estadísticas de modelos de predicción"""
+    """Estadísticas de modelos de predicción (info real del modelo cargado)"""
     try:
-        # Estadísticas simuladas de modelos de ML
-        # En una implementación real, esto consultaría métricas reales
+        from ..services.ml_polinizacion_service import ml_polinizacion_service
+        from ..services.ml_prediccion_service import ml_prediccion_service
+
+        info_polinizacion = ml_polinizacion_service.get_model_info() or {}
+        info_germinacion = ml_prediccion_service.get_model_info() or {}
 
         estadisticas = {
-            'modelo_germinacion': {
-                'version': '1.0',
-                'precision': 0.85,
-                'recall': 0.82,
-                'f1_score': 0.83,
-                'ultima_actualizacion': '2024-01-15',
-                'predicciones_realizadas': 1250,
-                'accuracy': 0.84
-            },
-            'modelo_polinizacion': {
-                'version': '1.0',
-                'precision': 0.78,
-                'recall': 0.75,
-                'f1_score': 0.76,
-                'ultima_actualizacion': '2024-01-10',
-                'predicciones_realizadas': 890,
-                'accuracy': 0.77
-            },
-            'estadisticas_generales': {
-                'total_predicciones': 2140,
-                'predicciones_exitosas': 1712,
-                'tasa_exito': 0.80,
-                'tiempo_promedio_respuesta': '0.3s'
-            }
+            'modelo_polinizacion': info_polinizacion,
+            'modelo_germinacion': info_germinacion,
         }
 
         return Response(estadisticas)
 
     except Exception as e:
-        logger.error(f"Error obteniendo estadísticas de modelos: {e}")
+        logger.exception(f"Error obteniendo estadísticas de modelos: {e}")
         return Response({'error': str(e)}, status=500)
 
 
@@ -330,8 +312,7 @@ def prediccion_polinizacion_ml(request):
         # USAR NUEVO PREDICTOR XGBOOST
         from ..ml.predictors import get_predictor
 
-        logger.info(f"🔮 Usuario {request.user.username} solicitando predicción de polinización (XGBoost)")
-        logger.info(f"Datos recibidos: {request.data}")
+        logger.info(f"Usuario {request.user.username} solicitando prediccion de polinizacion (XGBoost): especie={request.data.get('especie')}, tipo={request.data.get('Tipo')}")
 
         # Validar campos requeridos
         required_fields = ['fechapol', 'genero', 'especie', 'ubicacion', 'responsable', 'Tipo', 'cantidad', 'disponible']
@@ -358,7 +339,7 @@ def prediccion_polinizacion_ml(request):
 
         try:
             # Realizar predicción usando el nuevo predictor XGBoost
-            logger.info("🎯 Llamando a XGBoostPolinizacionPredictor.predecir()...")
+            logger.info("Llamando a XGBoostPolinizacionPredictor.predecir()...")
 
             resultado = predictor.predecir(
                 fechapol=request.data['fechapol'],
@@ -371,23 +352,18 @@ def prediccion_polinizacion_ml(request):
                 disponible=request.data.get('disponible', 1)
             )
 
-            logger.info("=" * 80)
-            logger.info("✅ PREDICCIÓN EXITOSA - XGBOOST")
-            logger.info("=" * 80)
-            logger.info(f"📊 Días estimados: {resultado['dias_estimados']} días")
-            logger.info(f"📅 Fecha estimada: {resultado['fecha_estimada_maduracion']}")
-            logger.info(f"💯 Confianza: {resultado['confianza']}%")
-            logger.info(f"🔢 Features usadas: {resultado['features_count']}")
-            logger.info(f"⚠️  Categorías nuevas: {resultado.get('categorias_nuevas', 0)}")
-            logger.info("=" * 80)
+            logger.info(
+                "Prediccion XGBoost exitosa: %s dias, confianza %s%%, features %s, categorias_nuevas %s",
+                resultado['dias_estimados'],
+                resultado['confianza'],
+                resultado['features_count'],
+                resultado.get('categorias_nuevas', 0)
+            )
 
             return Response(resultado, status=200)
 
         except ValueError as e:
-            logger.error("=" * 80)
-            logger.error("❌ ERROR: VALOR INVÁLIDO (ValueError)")
-            logger.error("=" * 80)
-            logger.error(f"Mensaje: {e}")
+            logger.error("ValueError en prediccion XGBoost: %s", e)
             logger.exception(e)
             return Response({
                 'error': 'Error de valor en predicción',
@@ -397,10 +373,7 @@ def prediccion_polinizacion_ml(request):
             }, status=400)
 
         except KeyError as e:
-            logger.error("=" * 80)
-            logger.error("❌ ERROR: CLAVE FALTANTE (KeyError)")
-            logger.error("=" * 80)
-            logger.error(f"Clave faltante: {e}")
+            logger.error("KeyError en prediccion XGBoost, clave faltante: %s", e)
             logger.exception(e)
             return Response({
                 'error': 'Error de datos faltantes',
@@ -410,11 +383,7 @@ def prediccion_polinizacion_ml(request):
             }, status=400)
 
         except Exception as e:
-            logger.error("=" * 80)
-            logger.error("❌ ERROR INESPERADO EN PREDICCIÓN")
-            logger.error("=" * 80)
-            logger.error(f"Tipo: {type(e).__name__}")
-            logger.error(f"Mensaje: {e}")
+            logger.error("Error inesperado en prediccion XGBoost [%s]: %s", type(e).__name__, e)
             logger.exception(e)
             return Response({
                 'error': 'Error inesperado durante la predicción',
@@ -424,7 +393,7 @@ def prediccion_polinizacion_ml(request):
             }, status=500)
 
     except Exception as e:
-        logger.error(f"❌ Error inesperado en predicción ML: {e}")
+        logger.error(f"Error inesperado en prediccion ML: {e}")
         logger.exception(e)
         return Response({
             'error': 'Error inesperado en la predicción',
@@ -511,8 +480,7 @@ def prediccion_germinacion_ml(request):
         # USAR PREDICTOR RANDOM FOREST
         from ..ml.predictors import get_germinacion_predictor
 
-        logger.info(f"Usuario {request.user.username} solicitando prediccion de germinacion (Random Forest)")
-        logger.info(f"Datos recibidos: {request.data}")
+        logger.info(f"Usuario {request.user.username} solicitando prediccion de germinacion (Random Forest): especie={request.data.get('especie')}, clima={request.data.get('clima')}")
 
         # Validar campos requeridos
         required_fields = ['fecha_siembra', 'especie', 'clima', 'estado_capsula']
@@ -550,23 +518,17 @@ def prediccion_germinacion_ml(request):
                 c_solic=request.data.get('c_solic', 0),
                 dispone=request.data.get('dispone', 0)
             )
-
-            logger.info("=" * 80)
             logger.info("PREDICCION EXITOSA - RANDOM FOREST GERMINACION")
-            logger.info("=" * 80)
             logger.info(f"Dias estimados: {resultado['dias_estimados']} dias")
             logger.info(f"Fecha estimada: {resultado['fecha_estimada_germinacion']}")
             logger.info(f"Confianza: {resultado['confianza']}%")
             logger.info(f"Features usadas: {resultado['detalles']['features_usadas']}")
             logger.info(f"Especie agrupada: {resultado['detalles']['especie_agrupada']}")
-            logger.info("=" * 80)
 
             return Response(resultado, status=200)
 
         except ValueError as e:
-            logger.error("=" * 80)
             logger.error("ERROR: VALOR INVALIDO (ValueError)")
-            logger.error("=" * 80)
             logger.error(f"Mensaje: {e}")
             logger.exception(e)
             return Response({
@@ -577,9 +539,7 @@ def prediccion_germinacion_ml(request):
             }, status=400)
 
         except KeyError as e:
-            logger.error("=" * 80)
             logger.error("ERROR: CLAVE FALTANTE (KeyError)")
-            logger.error("=" * 80)
             logger.error(f"Clave faltante: {e}")
             logger.exception(e)
             return Response({
@@ -591,9 +551,7 @@ def prediccion_germinacion_ml(request):
 
         except Exception as e:
             # Error en el pipeline del modelo (alineación, procesamiento, etc.)
-            logger.error("=" * 80)
             logger.error("ERROR EN PIPELINE DEL MODELO")
-            logger.error("=" * 80)
             logger.error(f"Tipo: {type(e).__name__}")
             logger.error(f"Mensaje: {e}")
             logger.exception(e)
@@ -700,14 +658,24 @@ def germinaciones_validadas(request):
         if hasta:
             queryset = queryset.filter(fecha_germinacion__lte=hasta)
 
+        # Filtrar por precision_minima en la DB (PostgreSQL)
+        if precision_minima:
+            queryset = queryset.annotate(
+                precision_calc=RawSQL(
+                    "GREATEST(0.0, CASE WHEN prediccion_dias_estimados > 0 "
+                    "THEN 100.0 - ABS(EXTRACT(epoch FROM (fecha_germinacion - prediccion_fecha_estimada)) / 86400.0) "
+                    "/ prediccion_dias_estimados * 100.0 "
+                    "ELSE 100.0 - ABS(EXTRACT(epoch FROM (fecha_germinacion - prediccion_fecha_estimada)) / 86400.0) * 2.0 "
+                    "END)",
+                    []
+                )
+            ).filter(precision_calc__gte=float(precision_minima))
+
         germinaciones_data = []
         for g in queryset:
             diferencia_dias = abs((g.fecha_germinacion - g.prediccion_fecha_estimada).days)
             dias_predichos = g.prediccion_dias_estimados or 1
             precision = max(0.0, 100 - (diferencia_dias / dias_predichos * 100)) if dias_predichos > 0 else max(0.0, 100 - diferencia_dias * 2)
-
-            if precision_minima and precision < float(precision_minima):
-                continue
 
             germinaciones_data.append({
                 'id': g.id,

@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
 from .models import *
+from .models import UserProfile
 from .admin_config import (
-    BaseModelAdmin, ColoredStatusMixin, LinkToRelatedMixin, 
+    BaseModelAdmin, ColoredStatusMixin, LinkToRelatedMixin,
     DateRangeMixin, ExportMixin
 )
 
@@ -269,10 +270,10 @@ class UserProfileAdmin(BaseModelAdmin, ColoredStatusMixin):
     def rol_colored(self, obj):
         """Mostrar rol con colores"""
         color_map = {
-            'TIPO_1': '#28A745',       # Verde - Germinaciones
-            'TIPO_2': '#007BFF',       # Azul - Polinizaciones  
-            'TIPO_3': '#6F42C1',       # Púrpura - Ambos
-            'TIPO_4': '#DC3545',       # Rojo - Administrador
+            UserProfile.Roles.SENIOR_TECH: '#28A745',       # Verde - Germinaciones
+            UserProfile.Roles.POLINIZACION_SPEC: '#007BFF',       # Azul - Polinizaciones  
+            UserProfile.Roles.GERMINACION_SPEC: '#6F42C1',       # Púrpura - Ambos
+            UserProfile.Roles.SYSTEM_MANAGER: '#DC3545',       # Rojo - Administrador
         }
         color = color_map.get(obj.rol, '#6C757D')
         return format_html(

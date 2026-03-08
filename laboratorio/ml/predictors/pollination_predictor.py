@@ -211,7 +211,7 @@ class PollinationPredictor:
             # Intentar transformar el valor
             try:
                 encoded_value = encoder.transform([value])[0]
-                logger.debug(f"✅ '{value}' codificado como {encoded_value} para '{column_name}'")
+                logger.debug(f"'{value}' codificado como {encoded_value} para '{column_name}'")
                 return int(encoded_value)
             except (ValueError, KeyError):
                 # Categoría no vista en entrenamiento - usar fallback seguro

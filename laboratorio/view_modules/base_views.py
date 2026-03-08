@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,41 +40,9 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
         return super().get_queryset()
     
     def list(self, request, *args, **kwargs):
-        """Lista registros usando el servicio"""
+        """Lista registros usando paginación DRF nativa"""
         try:
-            if hasattr(self.service, 'get_paginated'):
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 20))
-                
-                # Extraer filtros de los parámetros de consulta
-                filters = {}
-                for key, value in request.GET.items():
-                    if key not in ['page', 'page_size'] and value:
-                        filters[key] = value
-                
-                result = self.service.get_paginated(
-                    page=page,
-                    page_size=page_size,
-                    user=request.user,
-                    **filters
-                )
-                
-                return Response({
-                    'count': result['total_count'],
-                    'total_count': result['total_count'],
-                    'total_pages': result['total_pages'],
-                    'current_page': page,
-                    'page_size': page_size,
-                    'has_next': result['has_next'],
-                    'has_previous': result['has_previous'],
-                    'next': f"?page={page + 1}" if result['has_next'] else None,
-                    'previous': f"?page={page - 1}" if result['has_previous'] else None,
-                    'results': self.get_serializer(result['results'], many=True).data
-                })
-            else:
-                # Fallback al comportamiento estándar
-                return super().list(request, *args, **kwargs)
-        
+            return super().list(request, *args, **kwargs)
         except Exception as e:
             logger.error(f"Error en list: {e}")
             return Response(
@@ -128,6 +97,12 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except IntegrityError as e:
+            logger.warning(f"IntegrityError en create: {e}")
+            return Response(
+                {'error': 'Registro duplicado o restricción de integridad violada'},
+                status=status.HTTP_409_CONFLICT
+            )
         except Exception as e:
             logger.error(f"Error en create: {e}")
             return Response(
@@ -169,6 +144,12 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except IntegrityError as e:
+            logger.warning(f"IntegrityError en update: {e}")
+            return Response(
+                {'error': 'Registro duplicado o restricción de integridad violada'},
+                status=status.HTTP_409_CONFLICT
+            )
         except Exception as e:
             logger.error(f"Error en update: {e}")
             return Response(
@@ -194,6 +175,12 @@ class BaseServiceViewSet(viewsets.ModelViewSet):
             
             return Response(status=status.HTTP_204_NO_CONTENT)
         
+        except IntegrityError as e:
+            logger.warning(f"IntegrityError en destroy: {e}")
+            return Response(
+                {'error': 'No se puede eliminar el registro porque tiene datos asociados'},
+                status=status.HTTP_409_CONFLICT
+            )
         except Exception as e:
             logger.error(f"Error en destroy: {e}")
             return Response(
@@ -209,12 +196,21 @@ class ErrorHandlerMixin:
     
     def handle_error(self, error, default_message="Error en la operación"):
         """Maneja errores de forma consistente"""
-        if isinstance(error, ValidationError):
+        if isinstance(error, (ValidationError, DRFValidationError)):
             if hasattr(error, 'message_dict'):
                 return Response(error.message_dict, status=status.HTTP_400_BAD_REQUEST)
+            elif hasattr(error, 'detail'):
+                return Response({'error': error.detail}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'error': str(error)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+        if isinstance(error, IntegrityError):
+            logger.warning(f"{default_message} - IntegrityError: {error}")
+            return Response(
+                {'error': 'Registro duplicado o restricción de integridad violada'},
+                status=status.HTTP_409_CONFLICT
+            )
+
         logger.error(f"{default_message}: {error}")
         return Response(
             {'error': default_message},

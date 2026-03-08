@@ -246,11 +246,14 @@ class MLPrediccionService:
             especie_count = especie_q25 = especie_q75 = 0
 
         # Estadísticas de clima
+        clima_count = 0
         climate_row = self.climate_stats[self.climate_stats['clima'] == clima]
         if len(climate_row) > 0:
             clima_media = float(climate_row['clima_media'].iloc[0])
             clima_mediana = float(climate_row['clima_mediana'].iloc[0])
             clima_std = float(climate_row['clima_std'].iloc[0])
+            if 'clima_count' in climate_row.columns:
+                clima_count = int(climate_row['clima_count'].iloc[0])
         else:
             clima_media = clima_mediana = 50.0
             clima_std = 0.0
@@ -278,9 +281,13 @@ class MLPrediccionService:
         # Interacciones
         especie_clima = f"{especie}_{clima}"
 
-        # Frecuencias (estimadas)
+        # Frecuencias calculadas desde estadísticas del modelo o BD
         especie_frecuencia = especie_count if especie_count > 0 else 1
-        clima_frecuencia = 1000  # Valor estimado
+        if clima_count > 0:
+            clima_frecuencia = clima_count
+        else:
+            from ..core.models import Germinacion as GerminacionModel
+            clima_frecuencia = GerminacionModel.objects.filter(clima=clima).count() or 1
 
         # Codificar categóricas
         especie_encoded = self._encode_safe_improved('especie', especie)
@@ -366,8 +373,8 @@ class MLPrediccionService:
         try:
             encoder = self.encoders[feature_name]
             return encoder.transform([value])[0]
-        except:
-            logger.debug(f"Valor '{value}' no encontrado en encoder '{feature_name}'. Usando default.")
+        except (KeyError, ValueError, Exception):
+            logger.warning(f"Valor '{value}' no encontrado en encoder '{feature_name}'. Usando default 0.")
             return 0
 
     def _calcular_confianza(self, especie, clima, genero):
@@ -399,7 +406,7 @@ class MLPrediccionService:
             encoder = self.encoders[feature_name]
             encoder.transform([value])
             return True
-        except:
+        except (KeyError, ValueError, Exception):
             return False
 
     def _get_nivel_confianza(self, confianza):
@@ -419,8 +426,8 @@ class MLPrediccionService:
         try:
             encoder = self.encoders[feature_name]
             return encoder.transform([value])[0]
-        except:
-            logger.debug(f"Valor '{value}' no encontrado en encoder '{feature_name}' (mejorado). Usando default.")
+        except (KeyError, ValueError, Exception):
+            logger.warning(f"Valor '{value}' no encontrado en encoder '{feature_name}' (mejorado). Usando default 0.")
             return 0
 
     def _calcular_confianza_mejorada(self, especie, clima, genero, especie_count):
@@ -457,7 +464,7 @@ class MLPrediccionService:
             encoder = self.encoders[feature_name]
             encoder.transform([value])
             return True
-        except:
+        except (KeyError, ValueError, Exception):
             return False
 
     def get_model_info(self):

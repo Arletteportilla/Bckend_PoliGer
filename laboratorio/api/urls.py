@@ -50,6 +50,7 @@ urlpatterns = [
     path('api/login/', auth_views.LoginView.as_view(), name='login'),
     path('api/protected/', auth_views.ProtectedView.as_view(), name='protected'),
     path('api/health/', auth_views.HealthCheckView.as_view(), name='health'),
+    path('api/auth/cambiar-password-inicial/', auth_views.CambiarPasswordInicialView.as_view(), name='cambiar_password_inicial'),
     
     # Rutas específicas (deben ir ANTES del router para evitar conflictos)
     path('api/polinizaciones/mis-polinizaciones/', PolinizacionViewSet.as_view({'get': 'mis_polinizaciones'}), name='mis_polinizaciones'),
@@ -62,12 +63,7 @@ urlpatterns = [
     # Incluir las rutas del router
     path('api/', include(router.urls)),
     
-    # Mantener las rutas antiguas para compatibilidad
-    path('inventario/', views.add_inventario, name='add_inventario'),
-    path('inventario/<int:id>/', views.update_inventario, name='update_inventario'),
-    path('usuarios/', views.add_usuario, name='add_usuario'),
-    path('capsula/', views.add_capsula, name='add_capsula'),
-    path('siembra/', views.add_siembra, name='add_siembra'),
+    # Rutas legacy eliminadas — sin funcionalidad real ni autenticación
     path('api/estadisticas/germinaciones/', estadisticas_germinaciones, name='estadisticas_germinaciones'),
     path('api/estadisticas/polinizaciones/', estadisticas_polinizaciones, name='estadisticas_polinizaciones'),
     path('api/estadisticas/usuario/', estadisticas_usuario, name='estadisticas_usuario'),

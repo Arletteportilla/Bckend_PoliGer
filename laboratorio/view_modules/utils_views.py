@@ -5,8 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Q, F, ExpressionWrapper, fields
 from datetime import datetime, timedelta
 import json
 import logging
@@ -106,8 +105,8 @@ def generar_reporte_germinaciones(request):
                 mensaje=f'Se generó y descargó el reporte de germinaciones en formato {tipo_fmt}.',
                 detalles={'accion': 'reporte', 'tipo': 'germinaciones', 'formato': formato}
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"No se pudo crear notificacion de reporte germinaciones: {e}")
         return resultado
     except Exception as e:
         logger.error(f"Error generando reporte de germinaciones: {e}")
@@ -137,9 +136,9 @@ def generar_reporte_basico_germinaciones(request):
         
         apply_header_style(ws, 1, len(headers))
         
-        # Datos
-        germinaciones = Germinacion.objects.all().order_by('-fecha_creacion')
-        
+        # Datos (iterator para no cargar todos los registros en memoria)
+        germinaciones = Germinacion.objects.all().order_by('-fecha_creacion').iterator(chunk_size=500)
+
         for row, germ in enumerate(germinaciones, 2):
             ws.cell(row=row, column=1, value=germ.id)
             ws.cell(row=row, column=2, value=germ.codigo or '')
@@ -215,8 +214,8 @@ def generar_reporte_polinizaciones(request):
                 mensaje=f'Se generó y descargó el reporte de polinizaciones en formato {tipo_fmt}.',
                 detalles={'accion': 'reporte', 'tipo': 'polinizaciones', 'formato': formato}
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"No se pudo crear notificacion de reporte polinizaciones: {e}")
         return resultado
     except Exception as e:
         logger.error(f"Error generando reporte de polinizaciones: {e}")
@@ -246,9 +245,9 @@ def generar_reporte_basico_polinizaciones(request):
         
         apply_header_style(ws, 1, len(headers))
         
-        # Datos
-        polinizaciones = Polinizacion.objects.all().order_by('-fecha_creacion')
-        
+        # Datos (iterator para no cargar todos los registros en memoria)
+        polinizaciones = Polinizacion.objects.all().order_by('-fecha_creacion').iterator(chunk_size=500)
+
         for row, pol in enumerate(polinizaciones, 2):
             ws.cell(row=row, column=1, value=pol.numero)
             ws.cell(row=row, column=2, value=pol.codigo or '')
@@ -335,8 +334,18 @@ def estadisticas_germinaciones(request):
         # Log para debugging
         logger.info(f"Total germinaciones: {total_germinaciones}, Exitosas: {germinaciones_exitosas}, Tasa: {tasa_exito}%")
         
-        # Promedio de días para germinar (simulado)
-        promedio_dias_germinar = 15  # Valor por defecto, se puede calcular si hay datos de fechas
+        # Promedio real de días entre siembra y germinación (solo registros completados)
+        resultado_dias = base_qs.filter(
+            fecha_siembra__isnull=False,
+            fecha_germinacion__isnull=False
+        ).annotate(
+            duracion=ExpressionWrapper(
+                F('fecha_germinacion') - F('fecha_siembra'),
+                output_field=fields.DurationField()
+            )
+        ).aggregate(promedio=Avg('duracion'))
+        duracion_promedio = resultado_dias['promedio']
+        promedio_dias_germinar = round(duracion_promedio.days, 1) if duracion_promedio else None
         
         # Top especies
         top_especies = base_qs.values('especie_variedad').annotate(
@@ -444,8 +453,11 @@ def estadisticas_polinizaciones(request):
         # Log para debugging
         logger.info(f"Total polinizaciones: {total_polinizaciones}, Exitosas: {polinizaciones_exitosas}, Activas: {polinizaciones_activas}, Tasa: {tasa_exito}%")
 
-        # Promedio de semillas por fruto (simulado)
-        promedio_semillas_fruto = 25  # Valor por defecto, se puede calcular si hay datos
+        # Promedio real de semillas disponibles por polinización cosechada
+        resultado_semillas = base_qs.filter(
+            cantidad_disponible__gt=0
+        ).aggregate(promedio=Avg('cantidad_disponible'))
+        promedio_semillas_fruto = round(resultado_semillas['promedio'], 1) if resultado_semillas['promedio'] else None
 
         # Top géneros
         top_generos = base_qs.values('genero').annotate(

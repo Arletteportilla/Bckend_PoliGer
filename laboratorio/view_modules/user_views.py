@@ -6,11 +6,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import transaction, IntegrityError
+from django.db.models import Count
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 import logging
 
-from ..models import UserProfile, Notification
+from ..models import UserProfile, Notification, Germinacion, Polinizacion
 from ..serializers import (
     UserProfileSerializer, UserWithProfileSerializer, 
     CreateUserWithProfileSerializer, UpdateUserProfileSerializer,
@@ -44,7 +46,7 @@ class UserProfileViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         user = self.request.user
         
         # Los administradores ven todos los perfiles
-        if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
+        if hasattr(user, 'profile') and user.profile.rol == UserProfile.Roles.SYSTEM_MANAGER:
             return UserProfile.objects.select_related('user').all()
         
         # Otros usuarios solo ven su propio perfil
@@ -101,14 +103,16 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
 
             # Capturar contraseña en texto plano ANTES de que create_user la hashee
-            plain_password = request.data.get('password', '')
-
             # El serializer se encarga de crear tanto el usuario como el perfil
             user = serializer.save()
 
-            # Obtener el perfil creado (refresh para evitar caché del signal post_save)
+            # Obtener el perfil creado (refresh para evitar cache del signal post_save)
             user.refresh_from_db()
             profile = user.profile
+
+            # Marcar que el usuario debe cambiar su contrasena temporal en el primer login
+            profile.debe_cambiar_password = True
+            profile.save(update_fields=['debe_cambiar_password'])
 
             # Retornar usuario creado con perfil
             response_data = {
@@ -130,14 +134,17 @@ class UserManagementViewSet(viewsets.ModelViewSet):
 
             logger.info(f"Usuario creado: {user.username} con rol {profile.rol}")
 
-            # Enviar email de bienvenida (no bloquea la creación del usuario)
+            # Enviar email de bienvenida con contrasena temporal (no bloquea la creacion)
+            # NOTA: La contrasena viaja por SMTP pero es temporal - el usuario DEBE cambiarla
             email_sent = False
             try:
                 from ..services.email_service import email_service
+                _tmp_pwd = request.data.get('password', '')
                 email_sent = email_service.enviar_email_bienvenida(
                     user=user,
-                    password=plain_password,
+                    password=_tmp_pwd,
                     rol_display=profile.get_rol_display(),
+                    password_temporal=True,
                 )
             except Exception as email_error:
                 logger.error(
@@ -152,12 +159,16 @@ class UserManagementViewSet(viewsets.ModelViewSet):
         except ValidationError as e:
             logger.error(f"Error de validación creando usuario: {e}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error creando usuario: {e}")
-            import traceback
-            traceback.print_exc()
+        except IntegrityError as e:
+            logger.warning(f"IntegrityError creando usuario: {e}")
             return Response(
-                {'error': f'Error interno del servidor: {str(e)}'},
+                {'error': 'El nombre de usuario o email ya existe'},
+                status=status.HTTP_409_CONFLICT
+            )
+        except Exception as e:
+            logger.exception(f"Error creando usuario: {e}")
+            return Response(
+                {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -188,12 +199,16 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT
             )
 
-        except Exception as e:
-            logger.error(f"Error eliminando usuario: {e}")
-            import traceback
-            traceback.print_exc()
+        except IntegrityError as e:
+            logger.warning(f"IntegrityError eliminando usuario {username} (ID: {user_id}): {e}")
             return Response(
-                {'error': f'Error eliminando usuario: {str(e)}'},
+                {'error': 'No se puede eliminar el usuario porque tiene registros asociados'},
+                status=status.HTTP_409_CONFLICT
+            )
+        except Exception as e:
+            logger.exception(f"Error eliminando usuario: {e}")
+            return Response(
+                {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -249,7 +264,7 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                 )
             
             # Validar que el rol sea válido
-            roles_validos = [choice[0] for choice in UserProfile.TIPOS_USUARIO]
+            roles_validos = [choice[0] for choice in UserProfile.ROLES_CHOICES]
             if nuevo_rol not in roles_validos:
                 return Response(
                     {'error': f'Rol inválido. Roles válidos: {", ".join(roles_validos)}'},
@@ -323,18 +338,17 @@ class UserManagementViewSet(viewsets.ModelViewSet):
     def estadisticas_usuarios(self, request):
         """Estadísticas de usuarios agrupadas por rol"""
         try:
-            from django.contrib.auth.models import User as DjangoUser
-            from ..models import UserProfile
-
-            roles_display = dict(UserProfile.TIPOS_USUARIO)
-            por_rol = {}
-            for codigo, nombre in UserProfile.TIPOS_USUARIO:
-                total = UserProfile.objects.filter(rol=codigo).count()
-                por_rol[codigo] = {'nombre': nombre, 'total': total}
+            conteo_por_rol = dict(
+                UserProfile.objects.values('rol').annotate(n=Count('id')).values_list('rol', 'n')
+            )
+            por_rol = {
+                codigo: {'nombre': nombre, 'total': conteo_por_rol.get(codigo, 0)}
+                for codigo, nombre in UserProfile.ROLES_CHOICES
+            }
 
             activos = UserProfile.objects.filter(activo=True).count()
             inactivos = UserProfile.objects.filter(activo=False).count()
-            total = DjangoUser.objects.count()
+            total = User.objects.count()
 
             return Response({
                 'por_rol': por_rol,
@@ -356,13 +370,13 @@ class UserManagementViewSet(viewsets.ModelViewSet):
             permisos_info = {
                 'roles': [
                     {'codigo': choice[0], 'nombre': choice[1]}
-                    for choice in UserProfile.TIPOS_USUARIO
+                    for choice in UserProfile.ROLES_CHOICES
                 ],
                 'permisos_por_rol': {
-                    'TIPO_1': ['view_germinaciones', 'create_germinaciones'],
-                    'TIPO_2': ['view_polinizaciones', 'create_polinizaciones'],
-                    'TIPO_3': ['view_germinaciones', 'view_polinizaciones', 'create_germinaciones', 'create_polinizaciones'],
-                    'TIPO_4': ['all_permissions']
+                    UserProfile.Roles.SENIOR_TECH: ['view_germinaciones', 'create_germinaciones'],
+                    UserProfile.Roles.POLINIZACION_SPEC: ['view_polinizaciones', 'create_polinizaciones'],
+                    UserProfile.Roles.GERMINACION_SPEC: ['view_germinaciones', 'view_polinizaciones', 'create_germinaciones', 'create_polinizaciones'],
+                    UserProfile.Roles.SYSTEM_MANAGER: ['all_permissions']
                 }
             }
 
@@ -393,21 +407,21 @@ class UserManagementViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            actualizados = 0
             errores = []
+            estado_bool = bool(nuevo_estado)
 
             with transaction.atomic():
-                for user_id in user_ids:
-                    try:
-                        user = User.objects.get(pk=user_id)
-                        profile, _ = UserProfile.objects.get_or_create(user=user)
-                        profile.activo = bool(nuevo_estado)
-                        profile.save()
-                        user.is_active = profile.activo
-                        user.save()
-                        actualizados += 1
-                    except User.DoesNotExist:
-                        errores.append(f'Usuario {user_id} no encontrado')
+                # Verificar cuáles IDs existen para reportar los no encontrados
+                existentes = set(
+                    User.objects.filter(pk__in=user_ids).values_list('pk', flat=True)
+                )
+                no_encontrados = set(user_ids) - existentes
+                for uid in no_encontrados:
+                    errores.append(f'Usuario {uid} no encontrado')
+
+                # Actualizar en bloque (2 queries en lugar de N*2)
+                actualizados = User.objects.filter(pk__in=existentes).update(is_active=estado_bool)
+                UserProfile.objects.filter(user__in=existentes).update(activo=estado_bool)
 
             estado_texto = 'activados' if nuevo_estado else 'desactivados'
             logger.info(f"Bulk toggle: {actualizados} usuarios {estado_texto} por {request.user.username}")
@@ -437,7 +451,7 @@ class UserMetasViewSet(viewsets.ModelViewSet):
         user = self.request.user
         
         # Los administradores pueden ver todas las metas
-        if hasattr(user, 'profile') and user.profile.rol == 'TIPO_4':
+        if hasattr(user, 'profile') and user.profile.rol == UserProfile.Roles.SYSTEM_MANAGER:
             return UserProfile.objects.select_related('user').all()
         
         # Otros usuarios solo ven sus propias metas
@@ -447,15 +461,11 @@ class UserMetasViewSet(viewsets.ModelViewSet):
     def actualizar_progreso(self, request, pk=None):
         """Calcula y actualiza el progreso mensual del usuario vs sus metas"""
         try:
-            from django.utils import timezone
-            from django.db.models import Count
-
             profile = self.get_object()
             user = profile.user
             ahora = timezone.now()
             inicio_mes = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-            from ..models import Germinacion, Polinizacion
             germinaciones_mes = Germinacion.objects.filter(
                 creado_por=user,
                 fecha_creacion__gte=inicio_mes

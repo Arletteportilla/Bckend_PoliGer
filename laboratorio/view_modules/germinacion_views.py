@@ -8,10 +8,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.utils import timezone
+from django.conf import settings
+from datetime import timedelta
+import csv
+import io
+import os
 import logging
 
-from ..models import Germinacion
+from ..models import Germinacion, Polinizacion
 from ..serializers import GerminacionSerializer
 from ..api.serializers import GerminacionHistoricaSerializer
 from ..services.germinacion_service import germinacion_service
@@ -21,6 +27,7 @@ from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
 from ..api.pagination import StandardResultsSetPagination
 from ..api.filters import GerminacionFilter
 from ..renderers import BinaryFileRenderer
+from ..core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -138,17 +145,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 user=self.request.user
             )
 
-            # Crear notificación de nueva germinación
-            try:
-                from ..services.notification_service import notification_service
-                notification_service.crear_notificacion_germinacion(
-                    usuario=self.request.user,
-                    germinacion=germinacion,
-                    tipo='NUEVA_GERMINACION'
-                )
-                logger.info(f"Notificación creada para germinación {germinacion.id}")
-            except Exception as e:
-                logger.warning(f"No se pudo crear notificación: {e}")
+            # Nota: la notificacion NUEVA_GERMINACION la genera el signal post_save en signals.py
 
             # Calcular y guardar predicción automáticamente al crear
             try:
@@ -185,7 +182,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 from ..services.recordatorio_service import recordatorio_service
                 enviado = recordatorio_service.verificar_y_notificar_germinacion(germinacion)
                 if enviado:
-                    logger.info(f"⚡ Recordatorio inmediato enviado para germinación {germinacion.id}")
+                    logger.info(f"Recordatorio inmediato enviado para germinacion {germinacion.id}")
             except Exception as e:
                 logger.warning(f"Error verificando recordatorio inmediato: {e}")
 
@@ -250,13 +247,13 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 excluir_importadas = request.GET.get('excluir_importadas', 'false').lower() == 'true'
                 solo_historicos = False
 
-            logger.info(f"🔍 ENDPOINT mis-germinaciones - Usuario autenticado: {request.user.username} (ID: {request.user.id})")
-            logger.info(f"🔍 Parámetros recibidos: page={page}, page_size={page_size}, search='{search}', dias_recientes={dias_recientes}, tipo_registro={tipo_registro}")
-            logger.info(f"🔍 Usuario autenticado: {request.user.is_authenticated}, Usuario staff: {request.user.is_staff}")
+            logger.info(f"ENDPOINT mis-germinaciones - Usuario autenticado: {request.user.username} (ID: {request.user.id})")
+            logger.info(f"Parametros recibidos: page={page}, page_size={page_size}, search='{search}', dias_recientes={dias_recientes}, tipo_registro={tipo_registro}")
+            logger.info(f"Usuario autenticado: {request.user.is_authenticated}, Usuario staff: {request.user.is_staff}")
 
             # Si se solicita paginación, usar método paginado
             if request.GET.get('paginated', 'false').lower() == 'true' or page_size < 1000:
-                logger.info(f"📋 Usando método paginado para usuario {request.user.username}")
+                logger.info(f"Usando metodo paginado para usuario {request.user.username}")
 
                 result = self.service.get_mis_germinaciones_paginated(
                     user=request.user,
@@ -268,19 +265,19 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                     solo_historicos=solo_historicos if tipo_registro == 'historicos' else False
                 )
 
-                logger.info(f"📊 Resultado del servicio: {result['count']} germinaciones totales, página {result['current_page']}/{result['total_pages']}")
+                logger.info(f"Resultado del servicio: {result['count']} germinaciones totales, pagina {result['current_page']}/{result['total_pages']}")
 
                 # Usar serializer diferente según el tipo de registro
                 if tipo_registro == 'historicos':
                     # Para registros históricos, usar serializer sin estados
                     serializer = GerminacionHistoricaSerializer(result['results'], many=True)
-                    logger.info("📦 Usando GerminacionHistoricaSerializer (sin estados)")
+                    logger.info("Usando GerminacionHistoricaSerializer (sin estados)")
                 else:
                     # Para registros nuevos o todos, usar serializer completo
                     serializer = self.get_serializer(result['results'], many=True)
-                    logger.info("🆕 Usando GerminacionSerializer completo (con estados)")
+                    logger.info("Usando GerminacionSerializer completo (con estados)")
 
-                logger.info(f"✅ Retornando {len(serializer.data)} germinaciones serializadas al frontend")
+                logger.info(f"Retornando {len(serializer.data)} germinaciones serializadas al frontend")
 
                 return Response({
                     'results': serializer.data,
@@ -305,11 +302,11 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 if tipo_registro == 'historicos':
                     # Para registros históricos, usar serializer sin estados
                     serializer = GerminacionHistoricaSerializer(germinaciones, many=True)
-                    logger.info("📦 Usando GerminacionHistoricaSerializer (sin estados)")
+                    logger.info("Usando GerminacionHistoricaSerializer (sin estados)")
                 else:
                     # Para registros nuevos o todos, usar serializer completo
                     serializer = self.get_serializer(germinaciones, many=True)
-                    logger.info("🆕 Usando GerminacionSerializer completo (con estados)")
+                    logger.info("Usando GerminacionSerializer completo (con estados)")
                 
                 logger.info(f"Retornando {len(serializer.data)} germinaciones")
                 return Response(serializer.data)
@@ -324,7 +321,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             user = request.user
             
             # Verificar que sea administrador
-            if not hasattr(user, 'profile') or user.profile.rol != 'TIPO_4':
+            if not hasattr(user, 'profile') or user.profile.rol != UserProfile.Roles.SYSTEM_MANAGER:
                 return Response(
                     {'error': 'Solo los administradores pueden acceder a todas las germinaciones'},
                     status=status.HTTP_403_FORBIDDEN
@@ -347,7 +344,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def metricas_nuevos(self, request):
         """Obtiene métricas solo de registros creados en el sistema (no importados)"""
         try:
-            from django.db.models import Count
 
             queryset = Germinacion.objects.filter(
                 Q(archivo_origen__isnull=True) | Q(archivo_origen='')
@@ -383,7 +379,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def filtros_opciones(self, request):
         """Obtiene opciones disponibles para filtros y estadísticas de TODAS las germinaciones"""
         try:
-            from django.db.models import Count
 
             user = request.user
 
@@ -471,7 +466,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
         Limitado a 500 resultados más recientes para performance
         """
         try:
-            from ..models import Polinizacion
 
             # Parámetro de búsqueda opcional para filtrar
             search = request.GET.get('search', '').strip()
@@ -744,10 +738,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch
             from reportlab.lib.enums import TA_CENTER
-            import io
-            import os
             from datetime import datetime
-            from django.conf import settings
 
             # Crear respuesta HTTP para PDF
             response = HttpResponse(content_type='application/pdf')
@@ -985,14 +976,12 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                     mensaje=f'Se descargó el PDF con {len(germinaciones)} registro(s) de germinaciones.',
                     detalles={'accion': 'descarga_pdf', 'tipo': 'germinaciones', 'total': len(germinaciones)}
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"No se pudo crear notificacion de descarga PDF germinaciones: {e}")
             return response
 
         except Exception as e:
-            logger.error(f"Error generando PDF: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
+            logger.exception(f"Error generando PDF: {e}")
             response = HttpResponse(
                 f'Error generando PDF: {str(e)}',
                 status=500,
@@ -1083,8 +1072,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                                 status=status.HTTP_400_BAD_REQUEST
                             )
                     elif not germinacion.fecha_germinacion:
-                        from django.utils import timezone
-                        germinacion.fecha_germinacion = timezone.now().date()
+                                    germinacion.fecha_germinacion = timezone.now().date()
             
             else:
                 return Response(
@@ -1116,8 +1104,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             
         except Exception as e:
             logger.error(f"Error cambiando estado de germinación: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
             return Response(
                 {'error': f'Error cambiando estado: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -1127,8 +1113,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def alertas_germinacion(self, request):
         """Obtener alertas de germinaciones próximas a vencer"""
         try:
-            from django.utils import timezone
-            from datetime import timedelta
             
             # Obtener germinaciones del usuario
             germinaciones = self.get_queryset().filter(creado_por=request.user)
@@ -1183,8 +1167,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             progreso = request.data.get('progreso')
             dias_proxima_revision = request.data.get('dias_proxima_revision', 10)  # Por defecto 10 días
             
-            from django.utils import timezone
-            from datetime import timedelta
             
             # Actualizar fecha de última revisión
             germinacion.fecha_ultima_revision = timezone.now().date()
@@ -1248,7 +1230,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def pendientes_revision(self, request):
         """Obtiene germinaciones pendientes de revisión para el usuario actual"""
         try:
-            from django.utils import timezone
             hoy = timezone.now().date()
             
             # Filtrar por usuario
@@ -1351,8 +1332,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def exportar_predicciones_csv(self, request):
         """Exporta predicciones de germinación a CSV"""
         try:
-            import csv
-            from django.http import HttpResponse
             from datetime import datetime as dt
 
             fecha_inicio = request.GET.get('fecha_inicio')
@@ -1411,9 +1390,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def crear_backup_modelo(self, request):
         """Crea y descarga un backup del modelo ML de germinación"""
         try:
-            import os
-            from django.http import HttpResponse
-            from django.conf import settings
             from datetime import datetime as dt
 
             model_paths = [
@@ -1442,8 +1418,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def info_backup_modelo(self, request):
         """Obtiene información del modelo ML actual de germinación"""
         try:
-            import os
-            from django.conf import settings
             from datetime import datetime as dt
 
             model_paths = [
@@ -1496,7 +1470,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def completar_predicciones_faltantes(self, request):
         """Genera predicciones para germinaciones que no las tienen"""
         try:
-            from datetime import timedelta
 
             sin_prediccion = Germinacion.objects.filter(
                 prediccion_fecha_estimada__isnull=True,
@@ -1543,8 +1516,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
     def estado_modelo(self, request):
         """Obtiene el estado actual del modelo ML de germinación"""
         try:
-            import os
-            from django.conf import settings
 
             model_paths = [
                 os.path.join(settings.BASE_DIR, 'laboratorio', 'modelos', 'germinacion.pkl'),

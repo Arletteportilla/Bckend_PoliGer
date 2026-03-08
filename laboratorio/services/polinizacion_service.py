@@ -12,6 +12,7 @@ from ..models import Polinizacion
 from .base_service import BaseService, PaginatedService, CacheableService
 from ..utils.validation_utils import ValidationHelper, validate_codigo, validate_date_field, validate_positive_integer, validate_text_field
 from .ml_polinizacion_service import ml_polinizacion_service
+from ..core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +129,7 @@ class PolinizacionService(PaginatedService, CacheableService):
             excluir_importadas: Si es True (por defecto), excluye las polinizaciones importadas desde archivos CSV/Excel
         """
         # Usuarios con rol de acceso completo a polinizaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']:
+        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
             queryset = Polinizacion.objects.all()
         else:
             queryset = Polinizacion.objects.filter(creado_por=user)
@@ -177,7 +178,7 @@ class PolinizacionService(PaginatedService, CacheableService):
         from django.core.paginator import Paginator
 
         # Usuarios con rol de acceso completo a polinizaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in ['TIPO_1', 'TIPO_2', 'TIPO_4']:
+        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
             queryset = Polinizacion.objects.all()
         else:
             queryset = Polinizacion.objects.filter(creado_por=user)
@@ -358,11 +359,11 @@ class PolinizacionService(PaginatedService, CacheableService):
                     data['genero'] = genero
                     data['especie'] = especie
                     
-                    logger.info(f"✅ Predicción aplicada: {prediccion['dias_estimados']} días, método: {prediccion['metodo']}, especie: {genero} {especie}")
+                    logger.info(f"Prediccion aplicada: {prediccion['dias_estimados']} días, método: {prediccion['metodo']}, especie: {genero} {especie}")
                 else:
-                    logger.warning(f"⚠️ predecir_maduracion retornó None")
+                    logger.warning(f"predecir_maduracion retorno None")
             else:
-                logger.warning(f"❌ No se pudo calcular predicción: género='{genero}', especie='{especie}'")
+                logger.warning(f"No se pudo calcular prediccion: género='{genero}', especie='{especie}'")
 
         return super().create(data, user)
     

@@ -7,17 +7,25 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.conf import settings
+from datetime import timedelta
+import csv
+import io
+import os
+import re
 import logging
 
-from ..models import Polinizacion
+from ..models import Polinizacion, Germinacion
 from ..serializers import PolinizacionSerializer
 from ..api.serializers import PolinizacionHistoricaSerializer
 from ..services.polinizacion_service import polinizacion_service
 from ..permissions import CanViewPolinizaciones, CanCreatePolinizaciones, CanEditPolinizaciones, RoleBasedViewSetMixin
 from .base_views import BaseServiceViewSet, ErrorHandlerMixin, SearchMixin
 from ..renderers import BinaryFileRenderer
+from ..core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -83,32 +91,17 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 user=self.request.user
             )
 
-            # Crear notificación de nueva polinización
-            try:
-                from ..services.notification_service import notification_service
-                notification_service.crear_notificacion_polinizacion(
-                    usuario=self.request.user,
-                    polinizacion=polinizacion,
-                    tipo='NUEVA_POLINIZACION'
-                )
-                logger.info(f"Notificación creada para polinización {polinizacion.numero}")
-            except Exception as e:
-                logger.warning(f"No se pudo crear notificación: {e}")
+            # Nota: la notificacion NUEVA_POLINIZACION la genera el signal post_save en signals.py
 
-            # NUEVO: Verificar si ya debe enviarse recordatorio de 5 días
-            # (para casos donde la fecha ingresada ya tiene más de 5 días)
+            # Verificar si ya debe enviarse recordatorio de 5 dias
+            # (para casos donde la fecha ingresada ya tiene mas de 5 dias)
             try:
-                logger.info(f"[RECORDATORIO] Iniciando verificacion para polinizacion {polinizacion.numero}")
                 from ..services.recordatorio_service import recordatorio_service
-                logger.info(f"[RECORDATORIO] Servicio importado correctamente")
                 enviado = recordatorio_service.verificar_y_notificar_polinizacion(polinizacion)
-                logger.info(f"[RECORDATORIO] Resultado: enviado={enviado}")
                 if enviado:
-                    logger.info(f"[RECORDATORIO] Recordatorio inmediato enviado para polinizacion {polinizacion.numero}")
+                    logger.info(f"Recordatorio inmediato enviado para polinizacion {polinizacion.numero}")
             except Exception as e:
-                import traceback
-                logger.error(f"[RECORDATORIO] ERROR: {e}")
-                logger.error(f"[RECORDATORIO] Traceback: {traceback.format_exc()}")
+                logger.warning(f"No se pudo enviar recordatorio para polinizacion {polinizacion.numero}: {e}")
 
             return polinizacion
 
@@ -193,11 +186,11 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                     if tipo_registro == 'historicos':
                         # Para registros históricos, usar serializer sin estados
                         serializer = PolinizacionHistoricaSerializer(result['results'], many=True)
-                        logger.info("📦 Usando PolinizacionHistoricaSerializer (sin estados)")
+                        logger.info("Usando PolinizacionHistoricaSerializer (sin estados)")
                     else:
                         # Para registros nuevos o todos, usar serializer completo
                         serializer = self.get_serializer(result['results'], many=True)
-                        logger.info("🆕 Usando PolinizacionSerializer completo (con estados)")
+                        logger.info("Usando PolinizacionSerializer completo (con estados)")
                     
                     return Response({
                         'results': serializer.data,
@@ -212,8 +205,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                     })
                 except Exception as e:
                     logger.error(f"Error en método paginado: {e}")
-                    import traceback
-                    logger.error(traceback.format_exc())
                     raise
             else:
                 # Sin paginación (compatibilidad hacia atrás)
@@ -228,19 +219,17 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 if tipo_registro == 'historicos':
                     # Para registros históricos, usar serializer sin estados
                     serializer = PolinizacionHistoricaSerializer(polinizaciones, many=True)
-                    logger.info("📦 Usando PolinizacionHistoricaSerializer (sin estados)")
+                    logger.info("Usando PolinizacionHistoricaSerializer (sin estados)")
                 else:
                     # Para registros nuevos o todos, usar serializer completo
                     serializer = self.get_serializer(polinizaciones, many=True)
-                    logger.info("🆕 Usando PolinizacionSerializer completo (con estados)")
+                    logger.info("Usando PolinizacionSerializer completo (con estados)")
                 
                 logger.info(f"Retornando {len(serializer.data)} polinizaciones")
                 return Response(serializer.data)
             
         except Exception as e:
             logger.error(f"Error general en mis_polinizaciones: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
             return self.handle_error(e, "Error obteniendo mis polinizaciones")
     
     @action(detail=False, methods=['get'], url_path='todas-admin')
@@ -250,7 +239,7 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             user = request.user
             
             # Verificar que sea administrador
-            if not hasattr(user, 'profile') or user.profile.rol != 'TIPO_4':
+            if not hasattr(user, 'profile') or user.profile.rol != UserProfile.Roles.SYSTEM_MANAGER:
                 return Response(
                     {'error': 'Solo los administradores pueden acceder a todas las polinizaciones'},
                     status=status.HTTP_403_FORBIDDEN
@@ -280,8 +269,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            from ..models import Germinacion
-            from django.db.models import Q
 
             # Buscar en polinizaciones (nueva_codigo, madre_codigo, padre_codigo)
             polinizacion = Polinizacion.objects.filter(
@@ -357,11 +344,7 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch, cm
             from reportlab.lib.enums import TA_CENTER
-            import io
-            import os
             from datetime import datetime
-            from django.http import HttpResponse
-            from django.conf import settings
 
             # Crear respuesta HTTP para PDF
             response = HttpResponse(content_type='application/pdf')
@@ -579,14 +562,12 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                     mensaje=f'Se descargó el PDF con {len(polinizaciones)} registro(s) de polinizaciones.',
                     detalles={'accion': 'descarga_pdf', 'tipo': 'polinizaciones', 'total': len(polinizaciones)}
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"No se pudo crear notificacion de descarga PDF polinizaciones: {e}")
             return response
 
         except Exception as e:
-            logger.error(f"Error generando PDF: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
+            logger.exception(f"Error generando PDF: {e}")
             response = HttpResponse(
                 f'Error generando PDF: {str(e)}',
                 status=500,
@@ -598,8 +579,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
     def alertas_polinizacion(self, request):
         """Obtener alertas de polinizaciones próximas a madurar"""
         try:
-            from django.utils import timezone
-            from datetime import timedelta
             
             # Obtener polinizaciones del usuario
             polinizaciones = self.get_queryset().filter(creado_por=request.user)
@@ -648,7 +627,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
     def filter_options(self, request):
         """Obtiene opciones para filtros de TODAS las polinizaciones del sistema"""
         try:
-            from django.db.models import Count
 
             user = request.user
 
@@ -802,7 +780,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             def ordenar_mesa(codigo):
                 try:
                     # Extraer número de M-XY
-                    import re
                     match = re.match(r'M-(\d+)([A-Z]+)', codigo)
                     if match:
                         numero = int(match.group(1))
@@ -834,8 +811,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             progreso = request.data.get('progreso')
             dias_proxima_revision = request.data.get('dias_proxima_revision', 10)  # Por defecto 10 días
             
-            from django.utils import timezone
-            from datetime import timedelta
             
             # Actualizar fecha de última revisión
             polinizacion.fecha_ultima_revision = timezone.now().date()
@@ -899,7 +874,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
     def pendientes_revision(self, request):
         """Obtiene polinizaciones pendientes de revisión para el usuario actual"""
         try:
-            from django.utils import timezone
             hoy = timezone.now().date()
             
             # Filtrar por usuario
@@ -945,7 +919,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             # Ordenar numéricamente: P-A, P-B, P-0, P-100, P-101, etc.
             def ordenar_pared(codigo):
                 try:
-                    import re
                     # P-X o P-XY donde X puede ser número o letra
                     if re.match(r'P-\d+', codigo):
                         numero = int(codigo.split('-')[1])
@@ -973,7 +946,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
     def opciones_ubicacion(self, request):
         """Obtiene todas las opciones de ubicación (viveros, mesas, paredes) en una sola llamada - limitado para performance"""
         try:
-            import re
 
             # Funciones de ordenamiento
             def ordenar_codigo(codigo):
@@ -1042,9 +1014,7 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
         try:
             from reportlab.pdfgen import canvas
             from reportlab.lib.pagesizes import letter
-            import io
             from datetime import datetime
-            from django.http import HttpResponse
             
             # Crear respuesta HTTP para PDF
             response = HttpResponse(content_type='application/pdf')
@@ -1127,7 +1097,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
         except Exception as e:
             logger.error(f"Error generando PDF simple: {e}")
             # Retornar HttpResponse en lugar de Response para mantener consistencia
-            from django.http import HttpResponse
             return HttpResponse(
                 f'Error generando PDF: {str(e)}',
                 status=500,
@@ -1270,7 +1239,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             
             # Actualizar fecha de maduración si se proporciona
             if fecha_maduracion:
-                from django.utils.dateparse import parse_date
                 fecha_obj = parse_date(fecha_maduracion)
                 if fecha_obj:
                     polinizacion.fechamad = fecha_obj
@@ -1281,7 +1249,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             
             # Si se finaliza, asegurar que tenga fecha de maduración
             if polinizacion.estado_polinizacion == 'FINALIZADO' and not polinizacion.fechamad:
-                from django.utils import timezone
                 polinizacion.fechamad = timezone.now().date()
             
             polinizacion.save()
