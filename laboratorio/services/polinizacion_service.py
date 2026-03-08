@@ -120,7 +120,8 @@ class PolinizacionService(PaginatedService, CacheableService):
         return queryset
     
     def get_mis_polinizaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = True) -> List[Polinizacion]:
-        """Obtiene las polinizaciones accesibles para el usuario actual
+        """Obtiene las polinizaciones del propio usuario (sección perfil).
+        Siempre filtra por creado_por=user, independientemente del rol.
 
         Args:
             user: Usuario actual
@@ -128,11 +129,7 @@ class PolinizacionService(PaginatedService, CacheableService):
             dias_recientes: Si se proporciona, filtra solo polinizaciones de los últimos N días
             excluir_importadas: Si es True (por defecto), excluye las polinizaciones importadas desde archivos CSV/Excel
         """
-        # Usuarios con rol de acceso completo a polinizaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
-            queryset = Polinizacion.objects.all()
-        else:
-            queryset = Polinizacion.objects.filter(creado_por=user)
+        queryset = Polinizacion.objects.filter(creado_por=user)
 
         # Excluir datos importados del CSV si se especifica (por defecto True para mantener compatibilidad)
         if excluir_importadas:
@@ -177,11 +174,7 @@ class PolinizacionService(PaginatedService, CacheableService):
         """
         from django.core.paginator import Paginator
 
-        # Usuarios con rol de acceso completo a polinizaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
-            queryset = Polinizacion.objects.all()
-        else:
-            queryset = Polinizacion.objects.filter(creado_por=user)
+        queryset = Polinizacion.objects.filter(creado_por=user)
 
         # Filtrar por tipo de registro
         if solo_historicos:

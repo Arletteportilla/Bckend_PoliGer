@@ -128,7 +128,8 @@ class GerminacionService(PaginatedService, CacheableService):
         return queryset
     
     def get_mis_germinaciones(self, user: User, search: Optional[str] = None, dias_recientes: Optional[int] = None, excluir_importadas: bool = False) -> List[Germinacion]:
-        """Obtiene las germinaciones accesibles para el usuario actual
+        """Obtiene las germinaciones del propio usuario (sección perfil).
+        Siempre filtra por creado_por=user, independientemente del rol.
 
         Args:
             user: Usuario actual
@@ -136,11 +137,7 @@ class GerminacionService(PaginatedService, CacheableService):
             dias_recientes: Si se proporciona, filtra solo germinaciones de los últimos N días
             excluir_importadas: Si es True, excluye las germinaciones importadas desde archivos CSV/Excel
         """
-        # Usuarios con rol de acceso completo a germinaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
-            queryset = Germinacion.objects.all()
-        else:
-            queryset = Germinacion.objects.filter(creado_por=user)
+        queryset = Germinacion.objects.filter(creado_por=user)
 
         # Excluir germinaciones importadas desde CSV/Excel si se especifica
         if excluir_importadas:
@@ -178,11 +175,7 @@ class GerminacionService(PaginatedService, CacheableService):
         """
         from django.core.paginator import Paginator
 
-        # Usuarios con rol de acceso completo a germinaciones ven TODAS
-        if hasattr(user, 'profile') and user.profile.rol in [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.GERMINACION_SPEC, UserProfile.Roles.SYSTEM_MANAGER]:
-            queryset = Germinacion.objects.all()
-        else:
-            queryset = Germinacion.objects.filter(creado_por=user)
+        queryset = Germinacion.objects.filter(creado_por=user)
 
         # Filtrar por tipo de registro
         if solo_historicos:
