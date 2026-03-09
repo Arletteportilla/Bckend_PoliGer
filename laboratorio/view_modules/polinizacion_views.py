@@ -461,23 +461,19 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             elements.append(HRFlowable(width='100%', thickness=1, lineCap='square', color=colors.HexColor('#CBD5E1')))
             elements.append(Spacer(1, 10))
 
-            # Franja de metadatos
-            third_w = usable_w / 3
-            meta_table = Table([[
-                [Paragraph('ID DEL REPORTE', meta_label_style), Paragraph(report_id, meta_value_style)],
+            # Metadatos — texto plano, sin tabla ni fondo
+            meta_row = Table([[
                 [Paragraph('FECHA DE GENERACIÓN', meta_label_style), Paragraph(fecha_larga, meta_value_style)],
                 [Paragraph('RANGO DE DATOS', meta_label_style), Paragraph(rango_datos, meta_value_style)],
-            ]], colWidths=[third_w, third_w, third_w])
-            meta_table.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#EFF6FF')),
+            ]], colWidths=[usable_w * 0.4, usable_w * 0.6])
+            meta_row.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                ('LEFTPADDING', (0,0), (-1,-1), 14),
-                ('RIGHTPADDING', (0,0), (-1,-1), 14),
-                ('TOPPADDING', (0,0), (-1,-1), 10),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-                ('LINEAFTER', (0,0), (1,-1), 1, colors.HexColor('#BFDBFE')),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
             ]))
-            elements.append(meta_table)
+            elements.append(meta_row)
             elements.append(Spacer(1, 20))
             # ─── FIN ENCABEZADO ───────────────────────────────────────────────────────
 
