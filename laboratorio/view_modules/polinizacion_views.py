@@ -415,10 +415,10 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 textColor=colors.HexColor('#0F172A'), alignment=TA_RIGHT, leading=18)
             report_sub_style_h = ParagraphStyle('ReportSubH', fontName='Helvetica', fontSize=10,
                 textColor=colors.HexColor('#64748B'), alignment=TA_RIGHT, leading=13, spaceBefore=3)
-            meta_label_style = ParagraphStyle('MetaLabel', fontName='Helvetica-Bold', fontSize=7,
-                textColor=colors.HexColor('#64748B'), leading=9, spaceAfter=3)
-            meta_value_style = ParagraphStyle('MetaValue', fontName='Helvetica-Bold', fontSize=12,
-                textColor=colors.HexColor('#0F172A'), leading=15)
+            meta_label_style = ParagraphStyle('MetaLabel', fontName='Helvetica', fontSize=6,
+                textColor=colors.HexColor('#64748B'), leading=8, spaceAfter=2)
+            meta_value_style = ParagraphStyle('MetaValue', fontName='Helvetica', fontSize=8,
+                textColor=colors.HexColor('#0F172A'), leading=11)
 
             page_w = landscape(A4)[0]
             usable_w = page_w - 2 * inch  # márgenes 1" cada lado
