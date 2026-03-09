@@ -913,21 +913,21 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             gcard1 = [
                 Paragraph('COMPLETADAS', ParagraphStyle('gc1l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#16A34A'), leading=10)),
                 Spacer(1, 6),
-                Paragraph(str(completadas), ParagraphStyle('gc1n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#15803D'), leading=34)),
+                Paragraph(str(completadas), ParagraphStyle('gc1n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#15803D'), leading=22)),
                 Spacer(1, 10),
                 _bar_ger(ratio_comp_g, '#16A34A', '#BBF7D0', bar_inner_w),
             ]
             gcard2 = [
                 Paragraph('PENDIENTES', ParagraphStyle('gc2l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#D97706'), leading=10)),
                 Spacer(1, 6),
-                Paragraph(str(pendientes), ParagraphStyle('gc2n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#B45309'), leading=34)),
+                Paragraph(str(pendientes), ParagraphStyle('gc2n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#B45309'), leading=22)),
                 Spacer(1, 10),
                 _bar_ger(ratio_pend_g, '#F59E0B', '#FDE68A', bar_inner_w),
             ]
             gcard3 = [
                 Paragraph('TOTAL GERMINACIONES', ParagraphStyle('gc3l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#2563EB'), leading=10)),
                 Spacer(1, 6),
-                Paragraph(f"{total_registros_ger:,}".replace(',', '.'), ParagraphStyle('gc3n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#0F172A'), leading=34)),
+                Paragraph(f"{total_registros_ger:,}".replace(',', '.'), ParagraphStyle('gc3n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#0F172A'), leading=22)),
             ]
 
             gcards_table = Table([[gcard1, gcard2, gcard3]], colWidths=[card_w, card_w, card_w])
