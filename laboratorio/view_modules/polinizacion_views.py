@@ -567,36 +567,39 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             ratio_pend = total_pendientes / total_registros if total_registros else 0
 
             card1 = [
-                Paragraph('COMPLETADAS', ParagraphStyle('c1l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#16A34A'), leading=10)),
+                Paragraph('COMPLETADAS', ParagraphStyle('c1l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(str(total_completadas), ParagraphStyle('c1n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#1e3a8a'), leading=15)),
                 Spacer(1, 6),
-                Paragraph(str(total_completadas), ParagraphStyle('c1n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#15803D'), leading=22)),
-                Spacer(1, 10),
-                _bar(ratio_comp, '#16A34A', '#BBF7D0', bar_inner_w),
+                _bar(ratio_comp, '#1e3a8a', '#BFDBFE', bar_inner_w),
             ]
             card2 = [
-                Paragraph('PENDIENTES', ParagraphStyle('c2l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#D97706'), leading=10)),
+                Paragraph('PENDIENTES', ParagraphStyle('c2l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#b8860b'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(str(total_pendientes), ParagraphStyle('c2n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#b8860b'), leading=15)),
                 Spacer(1, 6),
-                Paragraph(str(total_pendientes), ParagraphStyle('c2n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#B45309'), leading=22)),
-                Spacer(1, 10),
-                _bar(ratio_pend, '#F59E0B', '#FDE68A', bar_inner_w),
+                _bar(ratio_pend, '#e9ad14', '#FDE68A', bar_inner_w),
             ]
             card3 = [
-                Paragraph('TOTAL POLINIZACIONES', ParagraphStyle('c3l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#2563EB'), leading=10)),
-                Spacer(1, 6),
-                Paragraph(f"{total_registros:,}".replace(',', '.'), ParagraphStyle('c3n', fontName='Helvetica-Bold', fontSize=18, textColor=colors.HexColor('#0F172A'), leading=22)),
+                Paragraph('TOTAL POLINIZACIONES', ParagraphStyle('c3l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(f"{total_registros:,}".replace(',', '.'), ParagraphStyle('c3n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#0F172A'), leading=15)),
             ]
 
             cards_table = Table([[card1, card2, card3]], colWidths=[card_w, card_w, card_w])
             cards_table.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#DCFCE7')),
-                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FEF9C3')),
-                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#EFF6FF')),
+                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#EFF6FF')),
+                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FFFBEB')),
+                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#F1F5F9')),
                 ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                ('LEFTPADDING', (0,0), (-1,-1), 14),
-                ('RIGHTPADDING', (0,0), (-1,-1), 14),
-                ('TOPPADDING', (0,0), (-1,-1), 14),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+                ('LEFTPADDING', (0,0), (-1,-1), 12),
+                ('RIGHTPADDING', (0,0), (-1,-1), 12),
+                ('TOPPADDING', (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
                 ('LINEAFTER', (0,0), (1,-1), 1, colors.white),
+                ('BOX', (0,0), (0,-1), 1, colors.HexColor('#BFDBFE')),
+                ('BOX', (1,0), (1,-1), 1, colors.HexColor('#FDE68A')),
+                ('BOX', (2,0), (2,-1), 1, colors.HexColor('#CBD5E1')),
             ]))
             elements.append(cards_table)
             # ─── FIN RESUMEN ─────────────────────────────────────────────────────────
