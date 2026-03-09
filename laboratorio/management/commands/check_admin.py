@@ -84,5 +84,5 @@ class Command(BaseCommand):
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error: {e}"))
-            import traceback
-            traceback.print_exc()
+            import logging
+            logging.getLogger(__name__).exception(f"Error en check_admin: {e}")

@@ -30,7 +30,7 @@ class CalendarViewSet(viewsets.ViewSet):
             status_filter = request.query_params.get('status')
             predicted_only = request.query_params.get('predicted_only', 'false').lower() == 'true'
             
-            logger.info(f"📅 CalendarViewSet.events - Parámetros: start_date={start_date}, end_date={end_date}, date={date}, status={status_filter}, predicted_only={predicted_only}")
+            logger.info(f"CalendarViewSet.events - Parámetros: start_date={start_date}, end_date={end_date}, date={date}, status={status_filter}, predicted_only={predicted_only}")
             
             events = []
             
@@ -49,12 +49,12 @@ class CalendarViewSet(viewsets.ViewSet):
             # Ordenar por fecha
             events.sort(key=lambda x: x['date'])
             
-            logger.info(f"📅 CalendarViewSet.events - Total eventos encontrados: {len(events)}")
+            logger.info(f"CalendarViewSet.events - Total eventos encontrados: {len(events)}")
             
             return Response(events)
             
         except Exception as e:
-            logger.error(f"❌ CalendarViewSet.events - Error: {str(e)}")
+            logger.error(f"ERROR CalendarViewSet.events - Error: {str(e)}")
             return Response(
                 {'error': 'Error al obtener eventos del calendario'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -89,7 +89,7 @@ class CalendarViewSet(viewsets.ViewSet):
                     Q(prediccion_tipo__isnull=False)
                 )
             
-            logger.info(f"📅 CalendarViewSet._get_polinizaciones - Polinizaciones encontradas: {queryset.count()}")
+            logger.info(f"CalendarViewSet._get_polinizaciones - Polinizaciones encontradas: {queryset.count()}")
             
             events = []
             for polinizacion in queryset:
@@ -123,7 +123,7 @@ class CalendarViewSet(viewsets.ViewSet):
             return events
             
         except Exception as e:
-            logger.error(f"❌ CalendarViewSet._get_polinizaciones - Error: {str(e)}")
+            logger.error(f"ERROR CalendarViewSet._get_polinizaciones - Error: {str(e)}")
             return []
 
     def _get_germinaciones(self, start_date, end_date, date, status_filter, predicted_only):
@@ -160,7 +160,7 @@ class CalendarViewSet(viewsets.ViewSet):
                     Q(polinizacion__prediccion_tipo__isnull=False)
                 )
             
-            logger.info(f"📅 CalendarViewSet._get_germinaciones - Germinaciones encontradas: {queryset.count()}")
+            logger.info(f"CalendarViewSet._get_germinaciones - Germinaciones encontradas: {queryset.count()}")
             
             events = []
             for germinacion in queryset:
@@ -205,7 +205,7 @@ class CalendarViewSet(viewsets.ViewSet):
             return events
             
         except Exception as e:
-            logger.error(f"❌ CalendarViewSet._get_germinaciones - Error: {str(e)}")
+            logger.error(f"ERROR CalendarViewSet._get_germinaciones - Error: {str(e)}")
             return []
 
     def _get_germinacion_event_type(self, germinacion):
@@ -319,12 +319,12 @@ class CalendarViewSet(viewsets.ViewSet):
                 'predicted': polinizaciones_predichas + germinaciones_predichas,
             }
             
-            logger.info(f"📅 CalendarViewSet.stats - Estadísticas: {stats}")
+            logger.info(f"CalendarViewSet.stats - Estadisticas: {stats}")
             
             return Response(stats)
             
         except Exception as e:
-            logger.error(f"❌ CalendarViewSet.stats - Error: {str(e)}")
+            logger.error(f"ERROR CalendarViewSet.stats - Error: {str(e)}")
             return Response(
                 {'error': 'Error al obtener estadísticas del calendario'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

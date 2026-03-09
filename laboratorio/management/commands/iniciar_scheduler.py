@@ -34,17 +34,15 @@ def enviar_recordatorios_job():
     from django.core.management import call_command
     from io import StringIO
 
-    logger.info("=" * 50)
-    logger.info("🔄 Ejecutando envío de recordatorios automáticos...")
-    logger.info("=" * 50)
+    logger.info("Ejecutando envio de recordatorios automaticos...")
 
     try:
         out = StringIO()
         call_command('enviar_recordatorios_automaticos', stdout=out)
         resultado = out.getvalue()
-        logger.info(f"✅ Recordatorios completados:\n{resultado}")
+        logger.info(f"Recordatorios completados:\n{resultado}")
     except Exception as e:
-        logger.error(f"❌ Error en envío de recordatorios: {e}")
+        logger.error(f"Error en envio de recordatorios: {e}")
 
 
 def verificar_alertas_revision_job():
@@ -55,17 +53,15 @@ def verificar_alertas_revision_job():
     from django.core.management import call_command
     from io import StringIO
 
-    logger.info("=" * 50)
-    logger.info("🔔 Ejecutando verificación de alertas de revisión...")
-    logger.info("=" * 50)
+    logger.info("Ejecutando verificacion de alertas de revision...")
 
     try:
         out = StringIO()
         call_command('generar_alertas_revision', stdout=out)
         resultado = out.getvalue()
-        logger.info(f"✅ Alertas de revisión completadas:\n{resultado}")
+        logger.info(f"Alertas de revision completadas:\n{resultado}")
     except Exception as e:
-        logger.error(f"❌ Error en alertas de revisión: {e}")
+        logger.error(f"Error en alertas de revision: {e}")
 
 
 class Command(BaseCommand):

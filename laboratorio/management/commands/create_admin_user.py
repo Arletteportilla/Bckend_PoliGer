@@ -98,7 +98,7 @@ class Command(BaseCommand):
             profile, created = UserProfile.objects.get_or_create(
                 user=user,
                 defaults={
-                    'rol': 'TIPO_4',  # Gestor del Sistema - Acceso total
+                    'rol': UserProfile.Roles.SYSTEM_MANAGER,  # Gestor del Sistema - Acceso total
                     'activo': True,
                     'departamento': 'Administración',
                     'telefono': '000-000-0000',
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 )
             else:
                 # Actualizar el perfil existente para asegurar permisos completos
-                profile.rol = 'TIPO_4'
+                profile.rol = UserProfile.Roles.SYSTEM_MANAGER
                 profile.activo = True
                 if not profile.departamento:
                     profile.departamento = 'Administración'

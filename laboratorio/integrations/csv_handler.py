@@ -2,7 +2,6 @@ import csv
 import io
 from datetime import datetime
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -21,7 +20,6 @@ from django.contrib.auth.models import User
 #Especie.objects.all().delete()
 #Genero.objects.all().delete()
 
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_csv_polinizaciones(request):
@@ -132,7 +130,6 @@ def upload_csv_polinizaciones(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_csv_germinaciones(request):

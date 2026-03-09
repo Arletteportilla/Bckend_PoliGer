@@ -28,28 +28,26 @@ logger = logging.getLogger(__name__)
 def ejecutar_alertas_diarias():
     """Ejecuta el comando de generación de alertas diarias"""
     try:
-        logger.info("🚀 Iniciando ejecución de alertas diarias")
-        
+        logger.info("Iniciando ejecucion de alertas diarias")
+
         from django.core.management import call_command
         from io import StringIO
-        
+
         # Capturar la salida del comando
         out = StringIO()
         call_command('generar_alertas_revision', stdout=out)
         output = out.getvalue()
-        
+
         # Log de la salida
-        logger.info("📋 Resultado de la ejecución:")
+        logger.info("Resultado de la ejecucion:")
         for line in output.split('\n'):
             if line.strip():
                 logger.info(f"   {line}")
-        
-        logger.info("✅ Ejecución de alertas diarias completada exitosamente")
-        
+
+        logger.info("Ejecucion de alertas diarias completada exitosamente")
+
     except Exception as e:
-        logger.error(f"❌ Error ejecutando alertas diarias: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
+        logger.exception(f"Error ejecutando alertas diarias: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

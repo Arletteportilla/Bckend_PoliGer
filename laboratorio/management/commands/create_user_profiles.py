@@ -10,7 +10,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--default-role',
             type=str,
-            default='TIPO_3',
+            default=UserProfile.Roles.GERMINACION_SPEC,
             help='Rol por defecto para usuarios sin perfil (default: TIPO_3)'
         )
 

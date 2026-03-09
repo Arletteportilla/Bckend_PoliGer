@@ -28,11 +28,11 @@ class UserProfileTest(TestCase):
         """Test que el perfil se cree automáticamente"""
         self.assertTrue(hasattr(self.user, 'profile'))
         self.assertIsInstance(self.user.profile, UserProfile)
-        self.assertEqual(self.user.profile.rol, 'TIPO_3')  # Rol por defecto
+        self.assertEqual(self.user.profile.rol, UserProfile.Roles.GERMINACION_SPEC)  # Rol por defecto
 
     def test_permisos_tipo_1_tecnico_senior(self):
         """Test permisos para TIPO_1 - Técnico de Laboratorio Senior"""
-        self.user.profile.rol = 'TIPO_1'
+        self.user.profile.rol = UserProfile.Roles.SENIOR_TECH
         self.user.profile.save()
         
         # Debe tener acceso a germinaciones
@@ -56,7 +56,7 @@ class UserProfileTest(TestCase):
 
     def test_permisos_tipo_2_especialista_polinizacion(self):
         """Test permisos para TIPO_2 - Especialista en Polinización"""
-        self.user.profile.rol = 'TIPO_2'
+        self.user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.user.profile.save()
         
         # NO debe tener acceso a germinaciones
@@ -80,7 +80,7 @@ class UserProfileTest(TestCase):
 
     def test_permisos_tipo_3_especialista_germinacion(self):
         """Test permisos para TIPO_3 - Especialista en Germinación"""
-        self.user.profile.rol = 'TIPO_3'
+        self.user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.user.profile.save()
         
         # SÍ debe tener acceso a germinaciones
@@ -128,7 +128,7 @@ class UserProfileTest(TestCase):
 
     def test_get_permisos_detallados(self):
         """Test obtener permisos detallados"""
-        self.user.profile.rol = 'TIPO_1'
+        self.user.profile.rol = UserProfile.Roles.SENIOR_TECH
         self.user.profile.save()
         
         permisos = self.user.profile.get_permisos_detallados()
@@ -166,7 +166,7 @@ class MetasRendimientoTest(TestCase):
 
     def test_metas_segun_rol_tipo_1(self):
         """Test metas para TIPO_1"""
-        self.user.profile.rol = 'TIPO_1'
+        self.user.profile.rol = UserProfile.Roles.SENIOR_TECH
         self.user.profile.save()
         
         # Puede tener ambas metas
@@ -175,7 +175,7 @@ class MetasRendimientoTest(TestCase):
 
     def test_metas_segun_rol_tipo_2(self):
         """Test metas para TIPO_2"""
-        self.user.profile.rol = 'TIPO_2'
+        self.user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.user.profile.save()
         
         # Solo puede tener meta de polinizaciones
@@ -184,7 +184,7 @@ class MetasRendimientoTest(TestCase):
 
     def test_metas_segun_rol_tipo_3(self):
         """Test metas para TIPO_3"""
-        self.user.profile.rol = 'TIPO_3'
+        self.user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.user.profile.save()
         
         # Solo puede tener meta de germinaciones
@@ -193,7 +193,7 @@ class MetasRendimientoTest(TestCase):
 
     def test_validar_metas_segun_rol(self):
         """Test validación de metas según rol"""
-        self.user.profile.rol = 'TIPO_2'  # Solo polinizaciones
+        self.user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC  # Solo polinizaciones
         self.user.profile.meta_germinaciones = 10  # Inválido para este rol
         self.user.profile.save()
         
@@ -239,13 +239,13 @@ class PermissionsTest(APITestCase):
         self.pol_user = User.objects.create_user(
             username='pol_user', password='test123'
         )
-        self.pol_user.profile.rol = 'TIPO_2'
+        self.pol_user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.pol_user.profile.save()
         
         self.ger_user = User.objects.create_user(
             username='ger_user', password='test123'
         )
-        self.ger_user.profile.rol = 'TIPO_3'
+        self.ger_user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.ger_user.profile.save()
         
         self.client = APIClient()
@@ -334,14 +334,14 @@ class IntegrationRBACTest(APITestCase):
             username='pol_specialist',
             password='test123'
         )
-        self.pol_user.profile.rol = 'TIPO_2'
+        self.pol_user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.pol_user.profile.save()
         
         self.ger_user = User.objects.create_user(
             username='ger_specialist',
             password='test123'
         )
-        self.ger_user.profile.rol = 'TIPO_3'
+        self.ger_user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.ger_user.profile.save()
         
         self.client = APIClient()

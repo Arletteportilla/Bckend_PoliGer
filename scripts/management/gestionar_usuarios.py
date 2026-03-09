@@ -44,7 +44,7 @@ def listar_usuarios():
     print(f"Total de usuarios: {usuarios.count()}")
     print("="*80 + "\n")
 
-def crear_usuario(username, password, email, rol='TIPO_3', is_superuser=False):
+def crear_usuario(username, password, email, rol=UserProfile.Roles.GERMINACION_SPEC, is_superuser=False):
     """Crea un nuevo usuario"""
 
     if User.objects.filter(username=username).exists():
@@ -98,7 +98,7 @@ def resetear_password(username, nueva_password):
 def cambiar_rol(username, nuevo_rol):
     """Cambia el rol de un usuario"""
 
-    roles_validos = ['TIPO_1', 'TIPO_2', 'TIPO_3', 'TIPO_4']
+    roles_validos = [UserProfile.Roles.SENIOR_TECH, UserProfile.Roles.POLINIZACION_SPEC, UserProfile.Roles.GERMINACION_SPEC, 'TIPO_4']
 
     if nuevo_rol not in roles_validos:
         print(f"[ERROR] Rol inválido. Roles válidos: {', '.join(roles_validos)}")
@@ -175,7 +175,7 @@ def menu_interactivo():
             print("  TIPO_3 - Usuario con permisos avanzados")
             print("  TIPO_4 - Administrador (todos los permisos)")
 
-            rol = input("Rol (default: TIPO_3): ").strip() or 'TIPO_3'
+            rol = input("Rol (default: TIPO_3): ").strip() or UserProfile.Roles.GERMINACION_SPEC
             is_superuser = input("¿Es superusuario? (s/n): ").strip().lower() == 's'
 
             crear_usuario(username, password, email, rol, is_superuser)
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     parser.add_argument('--crear', metavar='USERNAME', help='Crear un nuevo usuario')
     parser.add_argument('--password', metavar='PASSWORD', help='Contraseña para el nuevo usuario')
     parser.add_argument('--email', metavar='EMAIL', help='Email para el nuevo usuario')
-    parser.add_argument('--rol', metavar='ROL', default='TIPO_3', help='Rol del usuario (TIPO_1, TIPO_2, TIPO_3, TIPO_4)')
+    parser.add_argument('--rol', metavar='ROL', default=UserProfile.Roles.GERMINACION_SPEC, help='Rol del usuario (TIPO_1, TIPO_2, TIPO_3, TIPO_4)')
     parser.add_argument('--superuser', action='store_true', help='Crear como superusuario')
     parser.add_argument('--resetear-password', metavar='USERNAME', help='Resetear contraseña de un usuario')
     parser.add_argument('--nueva-password', metavar='PASSWORD', help='Nueva contraseña')

@@ -31,7 +31,7 @@ class PolinizacionViewSetTest(APITestCase):
             password='test123',
             email='pol@test.com'
         )
-        self.pol_user.profile.rol = 'TIPO_2'
+        self.pol_user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.pol_user.profile.save()
         
         self.ger_user = User.objects.create_user(
@@ -39,7 +39,7 @@ class PolinizacionViewSetTest(APITestCase):
             password='test123',
             email='ger@test.com'
         )
-        self.ger_user.profile.rol = 'TIPO_3'
+        self.ger_user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.ger_user.profile.save()
         
         # Crear datos de prueba
@@ -178,7 +178,7 @@ class GerminacionViewSetTest(APITestCase):
             password='test123',
             email='ger@test.com'
         )
-        self.ger_user.profile.rol = 'TIPO_3'
+        self.ger_user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.ger_user.profile.save()
         
         self.pol_user = User.objects.create_user(
@@ -186,7 +186,7 @@ class GerminacionViewSetTest(APITestCase):
             password='test123',
             email='pol@test.com'
         )
-        self.pol_user.profile.rol = 'TIPO_2'
+        self.pol_user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.pol_user.profile.save()
         
         self.germinacion_data = {
@@ -367,7 +367,7 @@ class PerformanceTest(APITestCase):
             username='perf_test',
             password='test123'
         )
-        self.user.profile.rol = 'TIPO_1'
+        self.user.profile.rol = UserProfile.Roles.SENIOR_TECH
         self.user.profile.save()
         
         self.client = APIClient()

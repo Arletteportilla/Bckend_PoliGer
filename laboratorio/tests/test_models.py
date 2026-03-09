@@ -137,11 +137,11 @@ class UserProfileModelTest(TestCase):
         """Test que se cree automáticamente el perfil"""
         # El perfil se crea automáticamente por la señal
         self.assertTrue(hasattr(self.user, 'profile'))
-        self.assertEqual(self.user.profile.rol, 'TIPO_3')  # Rol por defecto
+        self.assertEqual(self.user.profile.rol, UserProfile.Roles.GERMINACION_SPEC)  # Rol por defecto
 
     def test_permisos_tipo_1(self):
         """Test permisos para TIPO_1"""
-        self.user.profile.rol = 'TIPO_1'
+        self.user.profile.rol = UserProfile.Roles.SENIOR_TECH
         self.user.profile.save()
         
         self.assertTrue(self.user.profile.puede_ver_germinaciones)
@@ -153,7 +153,7 @@ class UserProfileModelTest(TestCase):
 
     def test_permisos_tipo_2(self):
         """Test permisos para TIPO_2"""
-        self.user.profile.rol = 'TIPO_2'
+        self.user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.user.profile.save()
         
         self.assertFalse(self.user.profile.puede_ver_germinaciones)
@@ -164,7 +164,7 @@ class UserProfileModelTest(TestCase):
 
     def test_permisos_tipo_3(self):
         """Test permisos para TIPO_3"""
-        self.user.profile.rol = 'TIPO_3'
+        self.user.profile.rol = UserProfile.Roles.GERMINACION_SPEC
         self.user.profile.save()
         
         self.assertTrue(self.user.profile.puede_ver_germinaciones)
@@ -188,7 +188,7 @@ class UserProfileModelTest(TestCase):
     def test_validar_metas_segun_rol(self):
         """Test validación de metas según rol"""
         # TIPO_2 no puede tener meta de germinaciones
-        self.user.profile.rol = 'TIPO_2'
+        self.user.profile.rol = UserProfile.Roles.POLINIZACION_SPEC
         self.user.profile.meta_germinaciones = 10
         
         errores = self.user.profile.validar_metas_segun_rol()
