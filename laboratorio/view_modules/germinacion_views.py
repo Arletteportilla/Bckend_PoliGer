@@ -824,7 +824,6 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             # Bloque derecho: título reporte
             right_block = [
                 Paragraph('Reporte Interno de Producción', report_title_style_h),
-                Paragraph('Laboratorio de Germinación In Vitro', report_sub_style_h),
             ]
 
             header_main = Table([[inner_left, right_block]], colWidths=[usable_w * 0.55, usable_w * 0.45])
@@ -860,63 +859,76 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             elements.append(Spacer(1, 20))
             # ─── FIN ENCABEZADO ───────────────────────────────────────────────────────
 
-            # Calcular estadísticas de estado
+            # ─── RESUMEN DE OPERACIÓN ────────────────────────────────────────────────
             completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
             pendientes = len(germinaciones) - completadas
+            total_registros_ger = len(germinaciones)
 
-            # Tabla de resumen de estados
-            summary_data = [
-                ['Estado', 'Cantidad'],
-                ['Completadas (con fecha de germinación)', str(completadas)],
-                ['Pendientes (sin fecha de germinación)', str(pendientes)],
-                ['TOTAL', str(len(germinaciones))]
+            elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitleG',
+                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#0F172A'), leading=16)))
+            elements.append(Spacer(1, 10))
+
+            card_w = usable_w / 3
+            bar_inner_w = card_w - 28
+
+            def _bar_ger(ratio, fill_hex, bg_hex, width):
+                filled = max(width * ratio, 2)
+                empty = width - filled
+                if empty > 1:
+                    b = Table([['', '']], colWidths=[filled, empty], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('BACKGROUND', (1,0), (1,0), colors.HexColor(bg_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                else:
+                    b = Table([['',]], colWidths=[width], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                return b
+
+            ratio_comp_g = completadas / total_registros_ger if total_registros_ger else 0
+            ratio_pend_g = pendientes / total_registros_ger if total_registros_ger else 0
+
+            gcard1 = [
+                Paragraph('COMPLETADAS', ParagraphStyle('gc1l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#16A34A'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(str(completadas), ParagraphStyle('gc1n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#15803D'), leading=34)),
+                Spacer(1, 10),
+                _bar_ger(ratio_comp_g, '#16A34A', '#BBF7D0', bar_inner_w),
+            ]
+            gcard2 = [
+                Paragraph('PENDIENTES', ParagraphStyle('gc2l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#D97706'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(str(pendientes), ParagraphStyle('gc2n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#B45309'), leading=34)),
+                Spacer(1, 10),
+                _bar_ger(ratio_pend_g, '#F59E0B', '#FDE68A', bar_inner_w),
+            ]
+            gcard3 = [
+                Paragraph('TOTAL GERMINACIONES', ParagraphStyle('gc3l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#2563EB'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(f"{total_registros_ger:,}".replace(',', '.'), ParagraphStyle('gc3n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#0F172A'), leading=34)),
             ]
 
-            summary_table = Table(summary_data, colWidths=[4*inch, 1.5*inch])
-            summary_table.setStyle(TableStyle([
-                # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('TOPPADDING', (0, 0), (-1, 0), 8),
-
-                # Filas de datos (Completadas)
-                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),
-                ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
-                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, 1), 10),
-                ('ALIGN', (0, 1), (0, 1), 'LEFT'),
-                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-
-                # Filas de datos (Pendientes)
-                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),
-                ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
-                ('FONTNAME', (0, 2), (-1, 2), 'Helvetica'),
-                ('FONTSIZE', (0, 2), (-1, 2), 10),
-                ('ALIGN', (0, 2), (0, 2), 'LEFT'),
-                ('ALIGN', (1, 2), (1, 2), 'CENTER'),
-
-                # Fila TOTAL
-                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),
-                ('TEXTCOLOR', (0, 3), (-1, 3), colors.black),
-                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 3), (-1, 3), 11),
-                ('ALIGN', (0, 3), (-1, 3), 'CENTER'),
-
-                # Bordes y padding
-                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 8),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-                ('TOPPADDING', (0, 1), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            gcards_table = Table([[gcard1, gcard2, gcard3]], colWidths=[card_w, card_w, card_w])
+            gcards_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#DCFCE7')),
+                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FEF9C3')),
+                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#EFF6FF')),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 14),
+                ('RIGHTPADDING', (0,0), (-1,-1), 14),
+                ('TOPPADDING', (0,0), (-1,-1), 14),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+                ('LINEAFTER', (0,0), (1,-1), 1, colors.white),
             ]))
-
-            elements.append(summary_table)
+            elements.append(gcards_table)
             elements.append(Spacer(1, 20))
+            # ─── FIN RESUMEN ─────────────────────────────────────────────────────────
 
             # Crear tabla de datos
             data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]

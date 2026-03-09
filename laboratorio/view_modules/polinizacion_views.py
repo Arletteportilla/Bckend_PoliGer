@@ -442,7 +442,6 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             # Bloque derecho: título reporte
             right_block = [
                 Paragraph('Reporte Interno de Producción', report_title_style_h),
-                Paragraph('Laboratorio de Germinación In Vitro', report_sub_style_h),
             ]
 
             header_main = Table([[inner_left, right_block]], colWidths=[usable_w * 0.55, usable_w * 0.45])
@@ -526,49 +525,76 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
 
             elements.append(table)
 
-            # Resumen de totales
-            elements.append(Spacer(1, 20))
-
-            # Calcular totales
+            # ─── RESUMEN DE OPERACIÓN ────────────────────────────────────────────────
             total_completadas = sum(1 for pol in polinizaciones if pol.fechamad)
             total_pendientes = len(polinizaciones) - total_completadas
+            total_registros = len(polinizaciones)
 
-            summary_style = ParagraphStyle(
-                'Summary',
-                parent=styles['Normal'],
-                fontSize=10,
-                textColor=colors.HexColor('#1e3a8a'),
-                alignment=TA_CENTER,
-                spaceAfter=5
-            )
+            elements.append(Spacer(1, 20))
+            elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitle',
+                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#0F172A'), leading=16)))
+            elements.append(Spacer(1, 10))
 
-            summary_title = Paragraph("<b>RESUMEN DE POLINIZACIONES</b>", summary_style)
-            elements.append(summary_title)
+            card_w = usable_w / 3
+            bar_inner_w = card_w - 28
 
-            # Tabla de resumen
-            summary_data = [
-                ['Estado', 'Cantidad'],
-                ['Completadas (con fecha de maduración)', str(total_completadas)],
-                ['Pendientes (sin fecha de maduración)', str(total_pendientes)],
-                ['TOTAL', str(len(polinizaciones))]
+            def _bar(ratio, fill_hex, bg_hex, width):
+                filled = max(width * ratio, 2)
+                empty = width - filled
+                if empty > 1:
+                    b = Table([['', '']], colWidths=[filled, empty], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('BACKGROUND', (1,0), (1,0), colors.HexColor(bg_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                else:
+                    b = Table([['',]], colWidths=[width], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                return b
+
+            ratio_comp = total_completadas / total_registros if total_registros else 0
+            ratio_pend = total_pendientes / total_registros if total_registros else 0
+
+            card1 = [
+                Paragraph('COMPLETADAS', ParagraphStyle('c1l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#16A34A'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(str(total_completadas), ParagraphStyle('c1n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#15803D'), leading=34)),
+                Spacer(1, 10),
+                _bar(ratio_comp, '#16A34A', '#BBF7D0', bar_inner_w),
+            ]
+            card2 = [
+                Paragraph('PENDIENTES', ParagraphStyle('c2l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#D97706'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(str(total_pendientes), ParagraphStyle('c2n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#B45309'), leading=34)),
+                Spacer(1, 10),
+                _bar(ratio_pend, '#F59E0B', '#FDE68A', bar_inner_w),
+            ]
+            card3 = [
+                Paragraph('TOTAL POLINIZACIONES', ParagraphStyle('c3l', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#2563EB'), leading=10)),
+                Spacer(1, 6),
+                Paragraph(f"{total_registros:,}".replace(',', '.'), ParagraphStyle('c3n', fontName='Helvetica-Bold', fontSize=30, textColor=colors.HexColor('#0F172A'), leading=34)),
             ]
 
-            summary_table = Table(summary_data, colWidths=[3.5*inch, 1.5*inch])
-            summary_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-                ('TOPPADDING', (0, 0), (-1, -1), 8),
-                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d1fae5')),  # Verde claro para completadas
-                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#fef3c7')),  # Amarillo claro para pendientes
-                ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#e5e7eb')),  # Gris para total
-                ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            cards_table = Table([[card1, card2, card3]], colWidths=[card_w, card_w, card_w])
+            cards_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#DCFCE7')),
+                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FEF9C3')),
+                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#EFF6FF')),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 14),
+                ('RIGHTPADDING', (0,0), (-1,-1), 14),
+                ('TOPPADDING', (0,0), (-1,-1), 14),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+                ('LINEAFTER', (0,0), (1,-1), 1, colors.white),
             ]))
-            elements.append(summary_table)
+            elements.append(cards_table)
+            # ─── FIN RESUMEN ─────────────────────────────────────────────────────────
 
             # Generar PDF con pie de página en cada página
             doc.build(elements, onFirstPage=add_page_footer, onLaterPages=add_page_footer)
