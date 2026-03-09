@@ -748,9 +748,25 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             response['Cache-Control'] = 'no-cache'
 
+            # Función para cabecera/pie de página
+            def add_page_footer(canvas, doc):
+                canvas.saveState()
+                page_width, page_height = letter
+                # Franja azul superior
+                canvas.setFillColor(colors.HexColor('#1e3a8a'))
+                canvas.rect(0, page_height - 4, page_width, 4, fill=1, stroke=0)
+                # Pie de página
+                footer_text = "PoliGer \u2014 Sistema de Gestión de Laboratorio | Generado automáticamente"
+                canvas.setFont('Helvetica', 8)
+                canvas.setFillColor(colors.HexColor('#1e3a8a'))
+                canvas.drawCentredString(page_width / 2, 0.4 * inch, footer_text)
+                canvas.setFont('Helvetica-Bold', 8)
+                canvas.drawRightString(page_width - inch, 0.4 * inch, f"Pág. {doc.page}")
+                canvas.restoreState()
+
             # Crear PDF
             buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.75*inch)
 
             # Contenedor de elementos
             elements = []
@@ -865,7 +881,7 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             total_registros_ger = len(germinaciones)
 
             elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitleG',
-                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#0F172A'), leading=16)))
+                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#1e3a8a'), leading=16)))
             elements.append(Spacer(1, 10))
 
             card_w = usable_w / 3
@@ -946,8 +962,18 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                     str(germ.responsable or '')[:15]
                 ])
 
-            # Crear tabla
-            table = Table(data, colWidths=[0.9*inch, 0.7*inch, 1.3*inch, 0.8*inch, 0.6*inch, 0.6*inch, 0.8*inch, 0.5*inch, 1*inch])
+            # Crear tabla — anchos ajustados a letter usable_w (6.5")
+            table = Table(data, colWidths=[
+                usable_w * 0.138,  # Código
+                usable_w * 0.100,  # Género
+                usable_w * 0.185,  # Especie/Variedad
+                usable_w * 0.108,  # Fecha Siembra
+                usable_w * 0.077,  # Cant. Solic.
+                usable_w * 0.077,  # Cápsulas
+                usable_w * 0.108,  # Estado
+                usable_w * 0.054,  # Clima
+                usable_w * 0.153,  # Responsable
+            ])
 
             # Estilo de la tabla
             table.setStyle(TableStyle([
@@ -956,25 +982,19 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
                 ('TOPPADDING', (0, 0), (-1, 0), 8),
-
+                ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#1e3a8a')),
                 # Datos
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-                ('ALIGN', (1, 1), (1, -1), 'LEFT'),
-                ('ALIGN', (2, 1), (2, -1), 'LEFT'),
-                ('ALIGN', (3, 1), (3, -1), 'CENTER'),
-                ('ALIGN', (4, 1), (4, -1), 'CENTER'),
-                ('ALIGN', (5, 1), (5, -1), 'CENTER'),
-                ('ALIGN', (6, 1), (6, -1), 'CENTER'),
-                ('ALIGN', (7, 1), (7, -1), 'LEFT'),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 1), (2, -1), 'LEFT'),
+                ('ALIGN', (3, 1), (7, -1), 'CENTER'),
+                ('ALIGN', (8, 1), (8, -1), 'LEFT'),
                 ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EFF6FF')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BFDBFE')),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 4),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
@@ -984,20 +1004,8 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
 
             elements.append(table)
 
-            # Pie de página
-            elements.append(Spacer(1, 20))
-            footer_style = ParagraphStyle(
-                'Footer',
-                parent=styles['Normal'],
-                fontSize=8,
-                textColor=colors.grey,
-                alignment=TA_CENTER
-            )
-            footer = Paragraph(f"PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente", footer_style)
-            elements.append(footer)
-
-            # Generar PDF
-            doc.build(elements)
+            # Generar PDF con pie de página en cada página
+            doc.build(elements, onFirstPage=add_page_footer, onLaterPages=add_page_footer)
 
             # Obtener PDF del buffer
             pdf_data = buffer.getvalue()

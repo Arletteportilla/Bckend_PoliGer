@@ -354,16 +354,20 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
             response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             response['Cache-Control'] = 'no-cache'
 
-            # Función para agregar pie de página en cada página
+            # Función para agregar cabecera/pie de página en cada página
             def add_page_footer(canvas, doc):
                 canvas.saveState()
-                footer_text = "PoliGer - Sistema de Gestión de Laboratorio | Generado automáticamente"
+                page_width, page_height = landscape(A4)
+                # Franja azul superior
+                canvas.setFillColor(colors.HexColor('#1e3a8a'))
+                canvas.rect(0, page_height - 4, page_width, 4, fill=1, stroke=0)
+                # Pie de página
+                footer_text = "PoliGer \u2014 Sistema de Gestión de Laboratorio | Generado automáticamente"
                 canvas.setFont('Helvetica', 8)
-                canvas.setFillColor(colors.grey)
-                page_width = landscape(A4)[0]
+                canvas.setFillColor(colors.HexColor('#1e3a8a'))
                 canvas.drawCentredString(page_width / 2, 0.5 * cm, footer_text)
-                # Número de página
-                canvas.drawRightString(page_width - 1 * cm, 0.5 * cm, f"Página {doc.page}")
+                canvas.setFont('Helvetica-Bold', 8)
+                canvas.drawRightString(page_width - 1 * cm, 0.5 * cm, f"Pág. {doc.page}")
                 canvas.restoreState()
 
             # Crear PDF en modo landscape A4 para más columnas
@@ -514,8 +518,9 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 ('ALIGN', (2, 1), (2, -1), 'CENTER'),  # Fecha
                 ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 1), (-1, -1), 7),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#EFF6FF')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BFDBFE')),
+                ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#1e3a8a')),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 3),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 3),
@@ -532,7 +537,7 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
 
             elements.append(Spacer(1, 20))
             elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitle',
-                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#0F172A'), leading=16)))
+                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#1e3a8a'), leading=16)))
             elements.append(Spacer(1, 10))
 
             card_w = usable_w / 3
