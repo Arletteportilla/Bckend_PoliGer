@@ -734,10 +734,10 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             # Generar PDF directamente usando HttpResponse
             from reportlab.lib import colors
             from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch
-            from reportlab.lib.enums import TA_CENTER
+            from reportlab.lib.enums import TA_CENTER, TA_RIGHT
             from datetime import datetime
 
             # Crear respuesta HTTP para PDF
@@ -756,82 +756,109 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             elements = []
             styles = getSampleStyleSheet()
 
-            # Agregar logo si existe
-            # Buscar el logo en diferentes ubicaciones posibles
+            # ─── ENCABEZADO ──────────────────────────────────────────────────────────
+            MESES_ES = {1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',
+                        7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'}
+            now = datetime.now()
+            fecha_larga = f"{now.day} de {MESES_ES[now.month]}, {now.year}"
+            report_id = f"GER-{now.strftime('%Y%m%d%H%M%S')}"
+
+            fechas_ger = [g.fecha_siembra for g in germinaciones if g.fecha_siembra]
+            if fechas_ger:
+                rango_datos = f"{min(fechas_ger).strftime('%d/%m/%Y')} \u2014 {max(fechas_ger).strftime('%d/%m/%Y')}"
+            else:
+                rango_datos = "Todos los registros"
+
+            # Buscar logo
             logo_paths = [
                 os.path.join(settings.BASE_DIR, '..', 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
                 os.path.join(settings.BASE_DIR, 'PoliGer', 'assets', 'images', 'Ecuagenera.png'),
-                '/app/PoliGer/assets/images/Ecuagenera.png',  # Ruta en producción
+                '/app/PoliGer/assets/images/Ecuagenera.png',
             ]
-
             logo_img = None
             for logo_path in logo_paths:
                 if os.path.exists(logo_path):
                     try:
                         logo_img = Image(logo_path, width=0.8*inch, height=0.8*inch)
-                        logo_img.hAlign = 'RIGHT'
-                        elements.append(logo_img)
-                        elements.append(Spacer(1, 6))
                         break
                     except Exception as e:
                         logger.warning(f"No se pudo cargar el logo desde {logo_path}: {e}")
 
-            # Estilo personalizado para el encabezado principal
-            header_style = ParagraphStyle(
-                'CustomHeader',
-                parent=styles['Heading1'],
-                fontSize=20,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=6,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
+            # Estilos
+            company_name_style = ParagraphStyle('CompanyName', fontName='Helvetica-Bold', fontSize=17,
+                textColor=colors.HexColor('#0F172A'), leading=20)
+            system_name_style = ParagraphStyle('SystemName', fontName='Helvetica-Bold', fontSize=8,
+                textColor=colors.HexColor('#2563EB'), leading=11, spaceBefore=3)
+            report_title_style_h = ParagraphStyle('ReportTitleH', fontName='Helvetica-Bold', fontSize=14,
+                textColor=colors.HexColor('#0F172A'), alignment=TA_RIGHT, leading=18)
+            report_sub_style_h = ParagraphStyle('ReportSubH', fontName='Helvetica', fontSize=10,
+                textColor=colors.HexColor('#64748B'), alignment=TA_RIGHT, leading=13, spaceBefore=3)
+            meta_label_style = ParagraphStyle('MetaLabel', fontName='Helvetica-Bold', fontSize=7,
+                textColor=colors.HexColor('#64748B'), leading=9, spaceAfter=3)
+            meta_value_style = ParagraphStyle('MetaValue', fontName='Helvetica-Bold', fontSize=12,
+                textColor=colors.HexColor('#0F172A'), leading=15)
 
-            # Estilo personalizado para el título
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=18,
-                textColor=colors.HexColor('#1e3a8a'),
-                spaceAfter=12,
-                alignment=TA_CENTER,
-                fontName='Helvetica-Bold'
-            )
+            page_w = letter[0]
+            usable_w = page_w - 2 * inch  # márgenes 1" cada lado
 
-            # Estilo para subtítulos
-            subtitle_style = ParagraphStyle(
-                'CustomSubtitle',
-                parent=styles['Normal'],
-                fontSize=11,
-                textColor=colors.HexColor('#475569'),
-                spaceAfter=6,
-                alignment=TA_CENTER
-            )
+            # Bloque izquierdo: logo + nombre empresa
+            text_left = [Paragraph('ECUAGENERA', company_name_style), Paragraph('SISTEMA POLIGER', system_name_style)]
+            if logo_img:
+                inner_left = Table([[logo_img, text_left]], colWidths=[0.85*inch, usable_w * 0.5 - 0.85*inch])
+                inner_left.setStyle(TableStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('LEFTPADDING', (0,0), (-1,-1), 0),
+                    ('RIGHTPADDING', (0,0), (0,0), 10),
+                    ('TOPPADDING', (0,0), (-1,-1), 0),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                ]))
+            else:
+                inner_left = Table([[text_left]], colWidths=[usable_w * 0.5])
+                inner_left.setStyle(TableStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('LEFTPADDING', (0,0), (-1,-1), 0),
+                    ('TOPPADDING', (0,0), (-1,-1), 0),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                ]))
 
-            # Encabezado poliger ecuagenera
-            header = Paragraph("<b>POLIGER ECUAGENERA</b>", header_style)
-            elements.append(header)
-            elements.append(Spacer(1, 6))
+            # Bloque derecho: título reporte
+            right_block = [
+                Paragraph('Reporte Interno de Producción', report_title_style_h),
+                Paragraph('Laboratorio de Germinación In Vitro', report_sub_style_h),
+            ]
 
-            # Título
-            user_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-            title = Paragraph(f"<b>Reporte de Germinaciones</b>", title_style)
-            elements.append(title)
+            header_main = Table([[inner_left, right_block]], colWidths=[usable_w * 0.55, usable_w * 0.45])
+            header_main.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 6),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ]))
+            elements.append(header_main)
+            elements.append(Spacer(1, 8))
+            elements.append(HRFlowable(width='100%', thickness=1, lineCap='square', color=colors.HexColor('#CBD5E1')))
+            elements.append(Spacer(1, 10))
 
-            # Subtítulo con información del usuario
-            subtitle = Paragraph(f"Usuario: {user_name} ({request.user.username})", subtitle_style)
-            elements.append(subtitle)
-
-            # Información adicional
-            fecha_generacion = datetime.now().strftime('%d/%m/%Y %H:%M')
-            info_text = f"Fecha de generación: {fecha_generacion}"
-            if search:
-                info_text += f" | Búsqueda: {search}"
-            info_text += f" | Total: {len(germinaciones)} registros"
-
-            info = Paragraph(info_text, subtitle_style)
-            elements.append(info)
+            # Franja de metadatos
+            third_w = usable_w / 3
+            meta_table = Table([[
+                [Paragraph('ID DEL REPORTE', meta_label_style), Paragraph(report_id, meta_value_style)],
+                [Paragraph('FECHA DE GENERACIÓN', meta_label_style), Paragraph(fecha_larga, meta_value_style)],
+                [Paragraph('RANGO DE DATOS', meta_label_style), Paragraph(rango_datos, meta_value_style)],
+            ]], colWidths=[third_w, third_w, third_w])
+            meta_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#EFF6FF')),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 14),
+                ('RIGHTPADDING', (0,0), (-1,-1), 14),
+                ('TOPPADDING', (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+                ('LINEAFTER', (0,0), (1,-1), 1, colors.HexColor('#BFDBFE')),
+            ]))
+            elements.append(meta_table)
             elements.append(Spacer(1, 20))
+            # ─── FIN ENCABEZADO ───────────────────────────────────────────────────────
 
             # Calcular estadísticas de estado
             completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
