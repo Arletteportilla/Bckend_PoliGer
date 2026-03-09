@@ -875,79 +875,10 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             elements.append(Spacer(1, 20))
             # ─── FIN ENCABEZADO ───────────────────────────────────────────────────────
 
-            # ─── RESUMEN DE OPERACIÓN ────────────────────────────────────────────────
+            # Calcular totales para el resumen (se insertan después de la tabla)
             completadas = sum(1 for g in germinaciones if g.fecha_germinacion)
             pendientes = len(germinaciones) - completadas
             total_registros_ger = len(germinaciones)
-
-            elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitleG',
-                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#1e3a8a'), leading=16)))
-            elements.append(Spacer(1, 10))
-
-            card_w = usable_w / 3
-            bar_inner_w = card_w - 28
-
-            def _bar_ger(ratio, fill_hex, bg_hex, width):
-                filled = max(width * ratio, 2)
-                empty = width - filled
-                if empty > 1:
-                    b = Table([['', '']], colWidths=[filled, empty], rowHeights=[5])
-                    b.setStyle(TableStyle([
-                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
-                        ('BACKGROUND', (1,0), (1,0), colors.HexColor(bg_hex)),
-                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
-                    ]))
-                else:
-                    b = Table([['',]], colWidths=[width], rowHeights=[5])
-                    b.setStyle(TableStyle([
-                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
-                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
-                    ]))
-                return b
-
-            ratio_comp_g = completadas / total_registros_ger if total_registros_ger else 0
-            ratio_pend_g = pendientes / total_registros_ger if total_registros_ger else 0
-
-            gcard1 = [
-                Paragraph('COMPLETADAS', ParagraphStyle('gc1l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
-                Spacer(1, 4),
-                Paragraph(str(completadas), ParagraphStyle('gc1n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#1e3a8a'), leading=15)),
-                Spacer(1, 6),
-                _bar_ger(ratio_comp_g, '#1e3a8a', '#BFDBFE', bar_inner_w),
-            ]
-            gcard2 = [
-                Paragraph('PENDIENTES', ParagraphStyle('gc2l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#b8860b'), leading=9)),
-                Spacer(1, 4),
-                Paragraph(str(pendientes), ParagraphStyle('gc2n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#b8860b'), leading=15)),
-                Spacer(1, 6),
-                _bar_ger(ratio_pend_g, '#e9ad14', '#FDE68A', bar_inner_w),
-            ]
-            gcard3 = [
-                Paragraph('TOTAL GERMINACIONES', ParagraphStyle('gc3l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
-                Spacer(1, 4),
-                Paragraph(f"{total_registros_ger:,}".replace(',', '.'), ParagraphStyle('gc3n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#0F172A'), leading=15)),
-            ]
-
-            gcards_table = Table([[gcard1, gcard2, gcard3]], colWidths=[card_w, card_w, card_w])
-            gcards_table.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#EFF6FF')),
-                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FFFBEB')),
-                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#F1F5F9')),
-                ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                ('LEFTPADDING', (0,0), (-1,-1), 12),
-                ('RIGHTPADDING', (0,0), (-1,-1), 12),
-                ('TOPPADDING', (0,0), (-1,-1), 10),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-                ('LINEAFTER', (0,0), (1,-1), 1, colors.white),
-                ('BOX', (0,0), (0,-1), 1, colors.HexColor('#BFDBFE')),
-                ('BOX', (1,0), (1,-1), 1, colors.HexColor('#FDE68A')),
-                ('BOX', (2,0), (2,-1), 1, colors.HexColor('#CBD5E1')),
-            ]))
-            elements.append(gcards_table)
-            elements.append(Spacer(1, 20))
-            # ─── FIN RESUMEN ─────────────────────────────────────────────────────────
 
             # Crear tabla de datos
             data = [['Código', 'Género', 'Especie/Variedad', 'Fecha\nSiembra', 'Cant.\nSolic.', 'Cápsulas', 'Estado', 'Clima', 'Responsable']]
@@ -1006,6 +937,76 @@ class GerminacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandler
             ]))
 
             elements.append(table)
+
+            # ─── RESUMEN DE OPERACIÓN (después de la tabla) ──────────────────────────
+            card_w = usable_w / 3
+            bar_inner_w = card_w - 28
+
+            def _bar_ger(ratio, fill_hex, bg_hex, width):
+                filled = max(width * ratio, 2)
+                empty = width - filled
+                if empty > 1:
+                    b = Table([['', '']], colWidths=[filled, empty], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('BACKGROUND', (1,0), (1,0), colors.HexColor(bg_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                else:
+                    b = Table([['',]], colWidths=[width], rowHeights=[5])
+                    b.setStyle(TableStyle([
+                        ('BACKGROUND', (0,0), (0,0), colors.HexColor(fill_hex)),
+                        ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                        ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ]))
+                return b
+
+            ratio_comp_g = completadas / total_registros_ger if total_registros_ger else 0
+            ratio_pend_g = pendientes / total_registros_ger if total_registros_ger else 0
+
+            gcard1 = [
+                Paragraph('COMPLETADAS', ParagraphStyle('gc1l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(str(completadas), ParagraphStyle('gc1n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#1e3a8a'), leading=15)),
+                Spacer(1, 6),
+                _bar_ger(ratio_comp_g, '#1e3a8a', '#BFDBFE', bar_inner_w),
+            ]
+            gcard2 = [
+                Paragraph('PENDIENTES', ParagraphStyle('gc2l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#b8860b'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(str(pendientes), ParagraphStyle('gc2n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#b8860b'), leading=15)),
+                Spacer(1, 6),
+                _bar_ger(ratio_pend_g, '#e9ad14', '#FDE68A', bar_inner_w),
+            ]
+            gcard3 = [
+                Paragraph('TOTAL GERMINACIONES', ParagraphStyle('gc3l', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor('#1e3a8a'), leading=9)),
+                Spacer(1, 4),
+                Paragraph(f"{total_registros_ger:,}".replace(',', '.'), ParagraphStyle('gc3n', fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor('#0F172A'), leading=15)),
+            ]
+
+            elements.append(Spacer(1, 20))
+            elements.append(Paragraph('Resumen de Operación', ParagraphStyle('SecTitleG',
+                fontName='Helvetica-Bold', fontSize=13, textColor=colors.HexColor('#1e3a8a'), leading=16)))
+            elements.append(Spacer(1, 10))
+
+            gcards_table = Table([[gcard1, gcard2, gcard3]], colWidths=[card_w, card_w, card_w])
+            gcards_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#EFF6FF')),
+                ('BACKGROUND', (1,0), (1,-1), colors.HexColor('#FFFBEB')),
+                ('BACKGROUND', (2,0), (2,-1), colors.HexColor('#F1F5F9')),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 12),
+                ('RIGHTPADDING', (0,0), (-1,-1), 12),
+                ('TOPPADDING', (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+                ('LINEAFTER', (0,0), (1,-1), 1, colors.white),
+                ('BOX', (0,0), (0,-1), 1, colors.HexColor('#BFDBFE')),
+                ('BOX', (1,0), (1,-1), 1, colors.HexColor('#FDE68A')),
+                ('BOX', (2,0), (2,-1), 1, colors.HexColor('#CBD5E1')),
+            ]))
+            elements.append(gcards_table)
+            # ─── FIN RESUMEN ─────────────────────────────────────────────────────────
 
             # Generar PDF con pie de página en cada página
             doc.build(elements, onFirstPage=add_page_footer, onLaterPages=add_page_footer)
