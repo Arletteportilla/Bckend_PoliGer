@@ -275,4 +275,177 @@ class EmailService:
 </html>"""
 
 
+    @staticmethod
+    def enviar_email_reset_password(user, code: str) -> bool:
+        """
+        Envía un email con el código de 6 dígitos para recuperar contraseña.
+
+        Returns:
+            bool: True si el email se envió correctamente, False si falló
+        """
+        if not user.email:
+            logger.warning(
+                f"No se puede enviar email de reset: "
+                f"usuario {user.username} no tiene email"
+            )
+            return False
+
+        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+            logger.warning(
+                "No se puede enviar email de reset: EMAIL_HOST_USER o "
+                "EMAIL_HOST_PASSWORD no están configurados en .env"
+            )
+            return False
+
+        try:
+            app_name = getattr(settings, 'APP_NAME', 'PoliGer - EcuaGenera')
+            subject = f"{app_name} - Código de recuperación de contraseña"
+
+            text_content = (
+                f"Hola {user.first_name or user.username},\n\n"
+                f"Recibimos una solicitud para restablecer tu contraseña en {app_name}.\n\n"
+                f"Tu código de verificación es: {code}\n\n"
+                f"Este código es válido por 15 minutos.\n\n"
+                f"Si no solicitaste este cambio, ignora este mensaje.\n\n"
+                f"Saludos,\n"
+                f"El equipo de {app_name}"
+            )
+
+            html_content = EmailService._generar_html_reset(user=user, code=code)
+
+            from_email = f"{app_name} <{settings.EMAIL_HOST_USER}>"
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=from_email,
+                to=[user.email],
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=False)
+
+            logger.info(
+                f"Email de reset enviado exitosamente a "
+                f"{user.email} (usuario: {user.username})"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(
+                f"Error enviando email de reset a {user.email} "
+                f"(usuario: {user.username}): {e}"
+            )
+            return False
+
+    @staticmethod
+    def _generar_html_reset(user, code: str) -> str:
+        """Genera el HTML para el email de recuperación de contraseña."""
+        app_url = getattr(settings, 'APP_URL', 'https://www.poligerecuagenera.org/login')
+        app_name = getattr(settings, 'APP_NAME', 'PoliGer - EcuaGenera')
+        c = COLORS
+        nombre = user.first_name or user.username
+
+        return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: {c['bg_light']};">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: {c['bg_light']};">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: {c['bg_card']}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, {c['primary']}, {c['primary_light']}); padding: 36px 40px; text-align: center;">
+                            <div style="display: inline-block; width: 80px; height: 80px; border-radius: 50%; background-color: {c['accent']}; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 16px; line-height: 80px; font-size: 32px; font-weight: 900; color: {c['primary']}; text-align: center;">
+                                PG
+                            </div>
+                            <h1 style="color: {c['text_light']}; margin: 0 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">
+                                {app_name}
+                            </h1>
+                            <p style="color: {c['accent']}; margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                                Recuperaci&oacute;n de Contrase&ntilde;a
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Barra dorada -->
+                    <tr>
+                        <td style="background-color: {c['accent']}; height: 4px; font-size: 0; line-height: 0;">&nbsp;</td>
+                    </tr>
+
+                    <!-- Mensaje -->
+                    <tr>
+                        <td style="padding: 36px 40px 16px 40px;">
+                            <h2 style="color: {c['primary']}; margin: 0 0 14px 0; font-size: 22px; font-weight: 700;">
+                                Hola, {nombre}
+                            </h2>
+                            <p style="color: {c['text_muted']}; margin: 0 0 20px 0; font-size: 15px; line-height: 1.7;">
+                                Recibimos una solicitud para restablecer la contrase&ntilde;a de tu cuenta en
+                                <strong style="color: {c['primary']};">{app_name}</strong>.
+                                Usa el siguiente c&oacute;digo de verificaci&oacute;n:
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Código -->
+                    <tr>
+                        <td style="padding: 0 40px 28px 40px; text-align: center;">
+                            <div style="display: inline-block; background-color: {c['credentials_bg']}; border: 2px solid {c['accent']}; border-radius: 12px; padding: 24px 48px;">
+                                <p style="color: {c['text_muted']}; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                                    C&oacute;digo de verificaci&oacute;n
+                                </p>
+                                <p style="color: {c['primary']}; margin: 0; font-size: 42px; font-weight: 900; font-family: 'Courier New', monospace; letter-spacing: 8px;">
+                                    {code}
+                                </p>
+                                <p style="color: {c['text_muted']}; margin: 8px 0 0 0; font-size: 12px;">
+                                    V&aacute;lido por <strong>15 minutos</strong>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Advertencia -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: {c['warning_bg']}; border-radius: 8px; border-left: 4px solid {c['warning_border']};">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <p style="color: {c['accent_hover']}; margin: 0 0 4px 0; font-size: 14px; font-weight: 700;">
+                                            &#9888; Si no solicitaste este c&oacute;digo
+                                        </p>
+                                        <p style="color: {c['warning_text']}; margin: 0; font-size: 13px; line-height: 1.6;">
+                                            Ignora este mensaje. Tu contrase&ntilde;a no ser&aacute; cambiada. No compartas este c&oacute;digo con nadie.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: {c['primary']}; padding: 24px 40px; text-align: center;">
+                            <p style="color: {c['accent']}; margin: 0 0 4px 0; font-size: 13px; font-weight: 600;">
+                                {app_name}
+                            </p>
+                            <p style="color: rgba(255,255,255,0.5); margin: 0 0 2px 0; font-size: 11px;">
+                                Orqu&iacute;deas del Ecuador
+                            </p>
+                            <p style="color: rgba(255,255,255,0.35); margin: 8px 0 0 0; font-size: 11px;">
+                                Este es un correo autom&aacute;tico. No responder a este mensaje.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>"""
+
+
 email_service = EmailService()

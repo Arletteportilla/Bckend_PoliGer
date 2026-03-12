@@ -3,6 +3,7 @@ Vistas para predicciones y alertas
 """
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from ..permissions import IsAdministrator
 from rest_framework.response import Response
 from django.http import JsonResponse
 from django.db.models.expressions import RawSQL
@@ -759,3 +760,77 @@ def exportar_reentrenamiento_germinacion(request):
     except Exception as e:
         logger.error(f"Error exportando datos de reentrenamiento: {e}")
         return Response({'error': str(e)}, status=500)
+
+
+# =============================================================================
+# REENTRENAMIENTO DE MODELOS ML
+# =============================================================================
+
+@api_view(['POST'])
+@permission_classes([IsAdministrator])
+def reentrenar_modelos(request):
+    """
+    Reentrena los modelos ML con datos actuales de la DB.
+    Solo admins. Requiere mínimo 1000 registros válidos por modelo.
+
+    Body: { "modelo": "polinizacion" | "germinacion" | "ambos" }
+    """
+    from ..services.reentrenamiento_service import ReentrenamientoService
+    from ..ml.predictors.xgboost_polinizacion_predictor import reload_predictor
+    from ..ml.predictors.germinacion_predictor import reload_germinacion_predictor
+
+    modelo = request.data.get('modelo', 'ambos')
+    modelos_validos = ('polinizacion', 'germinacion', 'ambos')
+
+    if modelo not in modelos_validos:
+        return Response(
+            {'error': f'Modelo inválido. Opciones válidas: {", ".join(modelos_validos)}'},
+            status=400
+        )
+
+    service = ReentrenamientoService()
+
+    try:
+        if modelo == 'polinizacion':
+            resultado = service.reentrenar_polinizacion()
+            reload_predictor()
+            logger.info(f"Modelo de Polinización reentrenado por {request.user.username}")
+            return Response(resultado, status=200)
+
+        elif modelo == 'germinacion':
+            resultado = service.reentrenar_germinacion()
+            reload_germinacion_predictor()
+            logger.info(f"Modelo de Germinación reentrenado por {request.user.username}")
+            return Response(resultado, status=200)
+
+        else:  # ambos
+            resultado_pol = service.reentrenar_polinizacion()
+            reload_predictor()
+            resultado_germ = service.reentrenar_germinacion()
+            reload_germinacion_predictor()
+            logger.info(f"Ambos modelos ML reentrenados por {request.user.username}")
+            return Response({'polinizacion': resultado_pol, 'germinacion': resultado_germ}, status=200)
+
+    except ValueError as e:
+        logger.warning(f"Reentrenamiento rechazado: {e}")
+        return Response({'error': str(e)}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error en reentrenamiento de modelos: {e}", exc_info=True)
+        return Response({'error': f'Error interno durante el reentrenamiento: {str(e)}'}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdministrator])
+def conteos_reentrenamiento(request):
+    """
+    Retorna el conteo de registros FINALIZADOS disponibles para reentrenamiento.
+    Solo admins.
+    """
+    from ..services.reentrenamiento_service import ReentrenamientoService
+    service = ReentrenamientoService()
+    return Response({
+        'polinizacion': service.contar_datos_polinizacion(),
+        'germinacion': service.contar_datos_germinacion(),
+        'minimo_requerido': ReentrenamientoService.MIN_REGISTROS,
+    }, status=200)

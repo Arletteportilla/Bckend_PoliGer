@@ -21,6 +21,7 @@ from ..view_modules.prediccion_views import (
     especies_promedios_germinacion, prediccion_polinizacion_ml, model_info,
     prediccion_germinacion_ml, germinacion_model_info,
     germinaciones_validadas, exportar_reentrenamiento_germinacion,
+    reentrenar_modelos, conteos_reentrenamiento,
 )
 
 # Configurar el router para los ViewSets
@@ -51,6 +52,8 @@ urlpatterns = [
     path('api/protected/', auth_views.ProtectedView.as_view(), name='protected'),
     path('api/health/', auth_views.HealthCheckView.as_view(), name='health'),
     path('api/auth/cambiar-password-inicial/', auth_views.CambiarPasswordInicialView.as_view(), name='cambiar_password_inicial'),
+    path('api/auth/solicitar-reset-password/', auth_views.SolicitarResetPasswordView.as_view(), name='solicitar_reset_password'),
+    path('api/auth/confirmar-reset-password/', auth_views.ConfirmarResetPasswordView.as_view(), name='confirmar_reset_password'),
     
     # Rutas específicas (deben ir ANTES del router para evitar conflictos)
     path('api/polinizaciones/mis-polinizaciones/', PolinizacionViewSet.as_view({'get': 'mis_polinizaciones'}), name='mis_polinizaciones'),
@@ -125,5 +128,11 @@ urlpatterns = [
     # =============================================================================
     path('api/predicciones/germinaciones/validadas/', germinaciones_validadas, name='germinaciones_validadas'),
     path('api/predicciones/exportar-reentrenamiento-germinacion/', exportar_reentrenamiento_germinacion, name='exportar_reentrenamiento_germinacion'),
+
+    # =============================================================================
+    # REENTRENAMIENTO DE MODELOS ML (solo admins)
+    # =============================================================================
+    path('api/predicciones/reentrenar/', reentrenar_modelos, name='reentrenar_modelos'),
+    path('api/predicciones/conteos-reentrenamiento/', conteos_reentrenamiento, name='conteos_reentrenamiento'),
 
 ]

@@ -197,6 +197,119 @@ class CambiarPasswordInicialView(APIView):
         return Response({'message': 'Contrasena cambiada exitosamente. Ya puedes usar el sistema.'})
 
 
+class SolicitarResetPasswordView(APIView):
+    """
+    Paso 1: el usuario ingresa su correo electrónico.
+    Si existe una cuenta activa, envía el código de 6 dígitos.
+    Si no existe, retorna error explícito.
+    No requiere autenticación.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        import random
+        from ..core.models import PasswordResetToken
+        from ..services.email_service import email_service
+
+        email = request.data.get('email', '').strip()
+
+        if not email:
+            return Response(
+                {'error': 'El correo electrónico es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(email__iexact=email, is_active=True)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'No existe una cuenta activa con ese correo electrónico.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Invalidar tokens previos no usados
+        PasswordResetToken.objects.filter(user=user, used=False).update(used=True)
+
+        code = f"{random.randint(0, 999999):06d}"
+        PasswordResetToken.objects.create(user=user, code=code)
+
+        sent = email_service.enviar_email_reset_password(user=user, code=code)
+        if not sent:
+            logger.error(f"No se pudo enviar email de reset para {email}")
+
+        logger.info(f"Código de reset generado para {user.username}")
+        return Response(
+            {'message': 'Código enviado. Revisa tu bandeja de entrada.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class ConfirmarResetPasswordView(APIView):
+    """
+    Paso 2: el usuario envía email + código + nueva contraseña.
+    No requiere autenticación.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from ..core.models import PasswordResetToken
+
+        email = request.data.get('email', '').strip()
+        code = request.data.get('code', '').strip()
+        password_nuevo = request.data.get('password_nuevo', '')
+
+        if not email or not code or not password_nuevo:
+            return Response(
+                {'error': 'email, code y password_nuevo son requeridos'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if len(password_nuevo) < 8:
+            return Response(
+                {'error': 'La nueva contraseña debe tener al menos 8 caracteres'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(email__iexact=email, is_active=True)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Código inválido o expirado'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        token = (
+            PasswordResetToken.objects
+            .filter(user=user, code=code, used=False)
+            .order_by('-created_at')
+            .first()
+        )
+
+        if not token or token.is_expired():
+            return Response(
+                {'error': 'Código inválido o expirado'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        token.used = True
+        token.save(update_fields=['used'])
+
+        user.set_password(password_nuevo)
+        user.save()
+
+        # Si tenía contraseña temporal pendiente, limpiarla también
+        profile = getattr(user, 'profile', None)
+        if profile and profile.debe_cambiar_password:
+            profile.debe_cambiar_password = False
+            profile.save(update_fields=['debe_cambiar_password'])
+
+        logger.info(f"Contraseña restablecida exitosamente para {user.username}")
+        return Response(
+            {'message': 'Contraseña restablecida exitosamente. Ya puedes iniciar sesión.'},
+            status=status.HTTP_200_OK
+        )
+
+
 class TokenRefreshView(APIView):
     permission_classes = [AllowAny]
 

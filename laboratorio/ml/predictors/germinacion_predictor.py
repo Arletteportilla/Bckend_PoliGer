@@ -427,3 +427,11 @@ def get_germinacion_predictor():
     if _predictor_instance is None or not _predictor_instance.model_loaded:
         _predictor_instance = GerminacionPredictor()
     return _predictor_instance
+
+
+def reload_germinacion_predictor():
+    """Fuerza la recarga del modelo desde disco. Llamar después de reentrenar."""
+    global _predictor_instance
+    _predictor_instance = None
+    GerminacionPredictor._instance = None
+    return get_germinacion_predictor()

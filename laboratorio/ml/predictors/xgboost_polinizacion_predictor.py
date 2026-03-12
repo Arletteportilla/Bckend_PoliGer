@@ -387,3 +387,10 @@ def get_predictor():
     if _predictor_instance is None or not _predictor_instance.model_loaded:
         _predictor_instance = XGBoostPolinizacionPredictor()
     return _predictor_instance
+
+
+def reload_predictor():
+    """Fuerza la recarga del modelo desde disco. Llamar después de reentrenar."""
+    global _predictor_instance
+    _predictor_instance = None
+    return get_predictor()

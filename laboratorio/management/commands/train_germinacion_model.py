@@ -1,208 +1,266 @@
 """
-Comando Django para entrenar el modelo de predicción de germinaciones
-Usa LightGBM para modelos más pequeños y rápidos
+Comando Django para entrenar el modelo de predicción de germinaciones.
+
+Genera exactamente los 3 archivos que carga GerminacionPredictor:
+  - laboratorio/modelos/Germinacion/random_forest_germinacion.joblib
+  - laboratorio/modelos/Germinacion/germinacion_transformador.pkl
+  - laboratorio/modelos/Germinacion/feature_order_germinacion.json
+
+El feature engineering aplicado aquí es idéntico al de _create_features()
+y _apply_ohe_encoding() del predictor en producción.
 """
-from django.core.management.base import BaseCommand
-import pandas as pd
-import numpy as np
-import lightgbm as lgb
-import joblib
+import json
 import os
-from datetime import datetime
+import pickle
+
+import joblib
+import numpy as np
+import pandas as pd
+from django.core.management.base import BaseCommand
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import RobustScaler
 
 
 class Command(BaseCommand):
-    help = 'Entrena el modelo de predicción de días hasta germinación'
+    help = 'Entrena el modelo Random Forest de predicción de días hasta germinación'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--csv-path',
             type=str,
             default='data/Germinacion_Consolidado - Consolidado.csv',
-            help='Ruta al archivo CSV con datos de germinaciones'
+            help='Ruta al archivo CSV con datos de germinaciones',
         )
         parser.add_argument(
             '--output-path',
             type=str,
-            default='laboratorio/modelos/germinacion.pkl',
-            help='Ruta donde guardar el modelo entrenado'
-        )
-        parser.add_argument(
-            '--model-type',
-            type=str,
-            default='lightgbm',
-            choices=['lightgbm', 'randomforest'],
-            help='Tipo de modelo a entrenar'
+            default='laboratorio/modelos/Germinacion',
+            help='Directorio donde guardar los 3 archivos del modelo',
         )
 
     def handle(self, *args, **options):
         csv_path = options['csv_path']
-        output_path = options['output_path']
-        model_type = options['model_type']
+        output_dir = options['output_path']
 
-        self.stdout.write('=' * 60)
-        self.stdout.write('   ENTRENAMIENTO MODELO GERMINACIÓN')
-        self.stdout.write('=' * 60)
+        self.stdout.write('=' * 80)
+        self.stdout.write('   ENTRENAMIENTO MODELO GERMINACION')
+        self.stdout.write('=' * 80)
         self.stdout.write('')
 
+        # ------------------------------------------------------------------
         # 1. Cargar datos
+        # ------------------------------------------------------------------
         self.stdout.write(f'Cargando datos desde {csv_path}...')
         try:
-            df = pd.read_csv(csv_path)
-            self.stdout.write(self.style.SUCCESS(f'✓ {len(df)} registros cargados'))
+            df = pd.read_csv(csv_path, encoding='utf-8')
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f'✗ Error cargando CSV: {e}'))
+            self.stdout.write(self.style.ERROR(f'Error cargando CSV: {e}'))
             return
 
-        # 2. Preparar datos
-        self.stdout.write('\nPreparando datos...')
+        self.stdout.write(self.style.SUCCESS(f'  {len(df):,} registros cargados'))
 
-        # La columna 'No_dias_pol' ya contiene los días
-        df = df[df['No_dias_pol'].notna()]
-
-        # Filtrar outliers (días muy altos parecen errores)
-        df = df[(df['No_dias_pol'] >= 0) & (df['No_dias_pol'] <= 500)]
+        # ------------------------------------------------------------------
+        # 2. Filtrar y validar target
+        # ------------------------------------------------------------------
+        df = df.dropna(subset=['DIAS_GERMINACION'])
+        df = df[(df['DIAS_GERMINACION'] > 0) & (df['DIAS_GERMINACION'] < 800)]
 
         if len(df) < 50:
             self.stdout.write(self.style.ERROR(
-                f'✗ Datos insuficientes después de limpieza: {len(df)} registros'
+                f'Datos insuficientes tras limpieza: {len(df)} registros (mínimo 50)'
             ))
             return
 
-        self.stdout.write(self.style.SUCCESS(f'✓ {len(df)} registros válidos'))
+        self.stdout.write(self.style.SUCCESS(f'  {len(df):,} registros válidos tras filtrar outliers'))
 
-        # 3. Feature engineering
+        # ------------------------------------------------------------------
+        # 3. Parsear fecha de siembra
+        # ------------------------------------------------------------------
+        df['F.SIEMBRA'] = pd.to_datetime(df['F.SIEMBRA'], errors='coerce')
+        df = df.dropna(subset=['F.SIEMBRA'])
+
+        # ------------------------------------------------------------------
+        # 4. Calcular top_especies (top 100 más frecuentes)
+        # ------------------------------------------------------------------
+        top_especies = (
+            df['ESPECIE']
+            .value_counts()
+            .head(100)
+            .index
+            .tolist()
+        )
+        self.stdout.write(f'\n  Top especies: {len(top_especies)}')
+
+        # ------------------------------------------------------------------
+        # 5. Feature engineering — idéntico a GerminacionPredictor._create_features()
+        # ------------------------------------------------------------------
         self.stdout.write('\nCreando features...')
 
-        # Features categóricas
-        features = pd.DataFrame()
-        features['nombre'] = df['NOMBRE'].fillna('desconocido').astype(str)
-        features['tipo_poliniz'] = df['TIPO POLINIZ'].fillna('desconocido').astype(str)
-        features['finca'] = df['FINCA'].fillna('desconocida').astype(str)
-        features['estado_capsulas'] = df['ESTADO DE CAPSULAS'].fillna('desconocido').astype(str)
-        features['etapa'] = df['Etapa'].fillna('desconocida').astype(str)
+        # 5a. Features temporales
+        df['MES_SIEMBRA'] = df['F.SIEMBRA'].dt.month
+        df['DIA_AÑO_SIEMBRA'] = df['F.SIEMBRA'].dt.dayofyear
+        df['TRIMESTRE_SIEMBRA'] = df['F.SIEMBRA'].dt.quarter
+        df['SEMANA_AÑO'] = df['F.SIEMBRA'].dt.isocalendar().week.astype(int)
 
-        # Features numéricas
-        features['no_capsulas'] = df['No_CAPSULAS'].fillna(0)
+        # 5b. Features cíclicas
+        df['MES_SIN'] = np.sin(2 * np.pi * df['MES_SIEMBRA'] / 12)
+        df['MES_COS'] = np.cos(2 * np.pi * df['MES_SIEMBRA'] / 12)
+        df['DIA_AÑO_SIN'] = np.sin(2 * np.pi * df['DIA_AÑO_SIEMBRA'] / 365)
+        df['DIA_AÑO_COS'] = np.cos(2 * np.pi * df['DIA_AÑO_SIEMBRA'] / 365)
 
-        # Features de fecha
-        df['FECHA DE INGRESO'] = pd.to_datetime(df['FECHA DE INGRESO'], errors='coerce')
-        features['mes_ingreso'] = df['FECHA DE INGRESO'].dt.month.fillna(0).astype(int)
-        features['trimestre'] = df['FECHA DE INGRESO'].dt.quarter.fillna(0).astype(int)
+        # 5c. Features derivadas numéricas
+        df['C.SOLIC_LOG'] = np.log1p(df['C.SOLIC'])
+        df['S.STOCK_LOG'] = np.log1p(df['S.STOCK'])
+        df['RATIO_STOCK_SOLIC'] = np.where(
+            df['C.SOLIC'] > 0,
+            df['S.STOCK'] / (df['C.SOLIC'] + 1),
+            0,
+        )
 
-        # Target
-        y = df['No_dias_pol']
+        # 5d. Estadísticas hardcodeadas — igual que en el predictor
+        df['ESP_MEAN'] = 90
+        df['ESP_MEDIAN'] = 85
+        df['ESP_STD'] = 50
+        df['ESP_COUNT'] = 1
+        df['CLIMA_MEAN'] = 90
+        df['CLIMA_STD'] = 50
 
-        # Encoding de variables categóricas
-        from sklearn.preprocessing import LabelEncoder
+        # 5e. Agrupación de especie
+        df['ESPECIE_AGRUPADA'] = df['ESPECIE'].apply(
+            lambda x: x if x in top_especies else 'OTRAS'
+        )
 
-        le_nombre = LabelEncoder()
-        le_tipo = LabelEncoder()
-        le_finca = LabelEncoder()
-        le_estado = LabelEncoder()
-        le_etapa = LabelEncoder()
+        # ------------------------------------------------------------------
+        # 6. Definir listas de features — igual que el predictor
+        # ------------------------------------------------------------------
+        categorical_features = ['ESPECIE_AGRUPADA', 'CLIMA', 'E.CAPSU']
 
-        features['nombre_encoded'] = le_nombre.fit_transform(features['nombre'])
-        features['tipo_encoded'] = le_tipo.fit_transform(features['tipo_poliniz'])
-        features['finca_encoded'] = le_finca.fit_transform(features['finca'])
-        features['estado_encoded'] = le_estado.fit_transform(features['estado_capsulas'])
-        features['etapa_encoded'] = le_etapa.fit_transform(features['etapa'])
+        numerical_features = [
+            'MES_SIEMBRA', 'DIA_AÑO_SIEMBRA', 'TRIMESTRE_SIEMBRA', 'SEMANA_AÑO',
+            'MES_SIN', 'MES_COS', 'DIA_AÑO_SIN', 'DIA_AÑO_COS',
+            'C.SOLIC_LOG', 'S.STOCK_LOG', 'RATIO_STOCK_SOLIC',
+            'ESP_MEAN', 'ESP_MEDIAN', 'ESP_STD', 'ESP_COUNT',
+            'CLIMA_MEAN', 'CLIMA_STD',
+            'S.STOCK', 'C.SOLIC', 'DISPONE',
+        ]
 
-        # Seleccionar solo features numéricas para el modelo
-        X = features[[
-            'nombre_encoded', 'tipo_encoded', 'finca_encoded',
-            'estado_encoded', 'etapa_encoded', 'no_capsulas',
-            'mes_ingreso', 'trimestre'
-        ]]
+        self.stdout.write(self.style.SUCCESS('  Features creadas'))
 
-        self.stdout.write(self.style.SUCCESS(f'✓ {X.shape[1]} features creadas'))
+        # ------------------------------------------------------------------
+        # 7. One-Hot Encoding — idéntico a _apply_ohe_encoding()
+        # ------------------------------------------------------------------
+        df_for_ohe = df[categorical_features + numerical_features].copy()
 
-        # 4. Split train/test
+        df_encoded = pd.get_dummies(
+            df_for_ohe,
+            columns=categorical_features,
+            drop_first=True,
+            dtype=int,
+        )
+
+        # numeric_cols = columnas numéricas tras OHE (las que NO son OHE dummies)
+        ohe_columns = [c for c in df_encoded.columns if c not in numerical_features]
+        numeric_cols = [c for c in df_encoded.columns if c not in ohe_columns]
+
+        # feature_order = todas las columnas del DataFrame tras OHE
+        feature_order = list(df_encoded.columns)
+
+        self.stdout.write(f'\n  Features totales tras OHE:  {len(feature_order)}')
+        self.stdout.write(f'  Columnas numericas (scaler): {len(numeric_cols)}')
+        self.stdout.write(f'  Columnas OHE:                {len(ohe_columns)}')
+
+        # ------------------------------------------------------------------
+        # 8. Ajustar RobustScaler sobre numeric_cols
+        # ------------------------------------------------------------------
+        scaler = RobustScaler()
+        df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
+
+        # ------------------------------------------------------------------
+        # 9. Preparar X / y y split
+        # ------------------------------------------------------------------
+        X = df_encoded[feature_order].copy()
+        y = df['DIAS_GERMINACION'].copy()
+
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
 
-        self.stdout.write(f'\nDatos de entrenamiento: {len(X_train)}')
-        self.stdout.write(f'Datos de prueba: {len(X_test)}')
+        self.stdout.write(f'\n  Train: {len(X_train):,}   Test: {len(X_test):,}')
 
-        # 5. Entrenar modelo
-        self.stdout.write(f'\nEntrenando modelo {model_type}...')
+        # ------------------------------------------------------------------
+        # 10. Entrenar RandomForestRegressor
+        # ------------------------------------------------------------------
+        self.stdout.write('\nEntrenando modelo Random Forest...')
 
-        if model_type == 'lightgbm':
-            modelo = lgb.LGBMRegressor(
-                n_estimators=100,           # Modelo pequeño
-                max_depth=10,               # Profundidad limitada
-                learning_rate=0.05,
-                num_leaves=25,
-                min_child_samples=20,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                n_jobs=-1,
-                random_state=42,
-                verbose=-1
-            )
-        else:  # randomforest
-            from sklearn.ensemble import RandomForestRegressor
-            modelo = RandomForestRegressor(
-                n_estimators=50,            # Pocos árboles para dataset pequeño
-                max_depth=12,
-                min_samples_split=10,
-                min_samples_leaf=5,
-                max_features='sqrt',
-                n_jobs=-1,
-                random_state=42
-            )
-
+        modelo = RandomForestRegressor(
+            n_estimators=300,
+            max_depth=None,
+            min_samples_split=5,
+            min_samples_leaf=2,
+            random_state=42,
+            n_jobs=-1,
+        )
         modelo.fit(X_train, y_train)
-        self.stdout.write(self.style.SUCCESS('✓ Modelo entrenado'))
+        self.stdout.write(self.style.SUCCESS('  Modelo entrenado'))
 
-        # 6. Evaluar modelo
+        # ------------------------------------------------------------------
+        # 11. Evaluar
+        # ------------------------------------------------------------------
         self.stdout.write('\nEvaluando modelo...')
         y_pred = modelo.predict(X_test)
 
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
+        mae = float(mean_absolute_error(y_test, y_pred))
+        rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
+        r2 = float(r2_score(y_test, y_pred))
 
-        self.stdout.write(f'  MAE (Error Absoluto Medio): {mae:.2f} días')
-        self.stdout.write(f'  R² Score: {r2:.4f}')
+        self.stdout.write(f'  MAE:  {mae:.2f} dias')
+        self.stdout.write(f'  RMSE: {rmse:.2f} dias')
+        self.stdout.write(f'  R2:   {r2:.4f} ({r2 * 100:.2f}%)')
 
-        # 7. Guardar modelo con compresión máxima
-        self.stdout.write(f'\nGuardando modelo en {output_path}...')
+        # ------------------------------------------------------------------
+        # 12. Guardar los 3 archivos que necesita el predictor
+        # ------------------------------------------------------------------
+        self.stdout.write(f'\nGuardando archivos en {output_dir}...')
+        os.makedirs(output_dir, exist_ok=True)
 
-        # Crear directorio si no existe
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        # 12a. Modelo solo (RandomForestRegressor object)
+        model_path = os.path.join(output_dir, 'random_forest_germinacion.joblib')
+        joblib.dump(modelo, model_path, compress=3)
+        self.stdout.write(f'  Guardado: {model_path}')
 
-        # Guardar con compresión máxima
-        joblib.dump(modelo, output_path, compress=9)
+        # 12b. Transformador — estructura exacta que usa pickle.load() en el predictor
+        transformador = {
+            'scaler': scaler,
+            'numeric_cols': numeric_cols,
+            'top_especies': top_especies,
+            'categorical_features': categorical_features,
+            'numerical_features': numerical_features,
+        }
+        transformador_path = os.path.join(output_dir, 'germinacion_transformador.pkl')
+        with open(transformador_path, 'wb') as f:
+            pickle.dump(transformador, f)
+        self.stdout.write(f'  Guardado: {transformador_path}')
 
-        # Guardar también los encoders
-        encoders_path = output_path.replace('.pkl', '_encoders.pkl')
-        joblib.dump({
-            'nombre': le_nombre,
-            'tipo': le_tipo,
-            'finca': le_finca,
-            'estado': le_estado,
-            'etapa': le_etapa
-        }, encoders_path, compress=9)
+        # 12c. Orden de features
+        feature_order_path = os.path.join(output_dir, 'feature_order_germinacion.json')
+        with open(feature_order_path, 'w', encoding='utf-8') as f:
+            json.dump(feature_order, f, indent=2, ensure_ascii=False)
+        self.stdout.write(f'  Guardado: {feature_order_path}')
 
-        # Verificar tamaño
-        size_mb = os.path.getsize(output_path) / (1024 * 1024)
-        encoders_size_mb = os.path.getsize(encoders_path) / (1024 * 1024)
-
+        # ------------------------------------------------------------------
+        # 13. Resumen
+        # ------------------------------------------------------------------
         self.stdout.write('')
-        self.stdout.write('=' * 60)
-        self.stdout.write(self.style.SUCCESS('   ✓ ENTRENAMIENTO COMPLETADO'))
-        self.stdout.write('=' * 60)
-        self.stdout.write(f'\n  Registros usados: {len(df)}')
-        self.stdout.write(f'  Tipo de modelo: {model_type}')
-        self.stdout.write(f'  Features: {X.shape[1]}')
-        self.stdout.write(f'  MAE: {mae:.2f} días')
-        self.stdout.write(f'  R²: {r2:.4f}')
-        self.stdout.write(f'\n  Modelo guardado: {output_path}')
-        self.stdout.write(f'  Tamaño modelo: {size_mb:.2f} MB')
-        self.stdout.write(f'  Encoders guardados: {encoders_path}')
-        self.stdout.write(f'  Tamaño encoders: {encoders_size_mb:.2f} MB')
-        self.stdout.write(f'\n  Tamaño total: {size_mb + encoders_size_mb:.2f} MB')
+        self.stdout.write('=' * 80)
+        self.stdout.write(self.style.SUCCESS('   ENTRENAMIENTO COMPLETADO'))
+        self.stdout.write('=' * 80)
+        self.stdout.write(f'\n  Modelo:     Random Forest')
+        self.stdout.write(f'  Registros:  {len(df):,}')
+        self.stdout.write(f'  Features:   {len(feature_order)}')
+        self.stdout.write(f'  MAE:        {mae:.2f} dias')
+        self.stdout.write(f'  RMSE:       {rmse:.2f} dias')
+        self.stdout.write(f'  R2:         {r2:.4f} ({r2 * 100:.2f}%)')
+        self.stdout.write(f'\n  Archivos guardados en: {output_dir}')
         self.stdout.write('')

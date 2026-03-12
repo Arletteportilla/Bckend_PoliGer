@@ -1150,3 +1150,23 @@ class HistorialPredicciones(models.Model):
             'aceptables': self.predicciones_aceptables,
             'pobres': self.predicciones_pobres
         }
+
+
+class PasswordResetToken(models.Model):
+    """Token de un solo uso para recuperar contraseña olvidada."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_tokens')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Token de Recuperación'
+        verbose_name_plural = 'Tokens de Recuperación'
+
+    def is_expired(self):
+        from django.utils import timezone
+        from datetime import timedelta
+        return timezone.now() > self.created_at + timedelta(minutes=15)
+
+    def __str__(self):
+        return f"Reset token for {self.user.username}"
