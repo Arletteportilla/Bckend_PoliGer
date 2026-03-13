@@ -77,9 +77,16 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
     
     def get_queryset(self):
         """Optimizar consulta con select_related"""
-        return Polinizacion.objects.select_related(
+        from django.db.models import Q
+        queryset = Polinizacion.objects.select_related(
             'creado_por'
         ).order_by('-fecha_creacion')
+        tipo_registro = self.request.query_params.get('tipo_registro')
+        if tipo_registro == 'nuevos':
+            queryset = queryset.filter(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        elif tipo_registro == 'historicos':
+            queryset = queryset.exclude(Q(archivo_origen__isnull=True) | Q(archivo_origen=''))
+        return queryset
     
     def perform_create(self, serializer):
         """Crear polinización usando el servicio"""
@@ -631,6 +638,38 @@ class PolinizacionViewSet(RoleBasedViewSetMixin, BaseServiceViewSet, ErrorHandle
                 content_type='text/plain'
             )
             return response
+
+    @action(detail=False, methods=['get'], url_path='codigos-con-especies')
+    def codigos_con_especies(self, request):
+        """
+        Obtiene códigos de plantas con especie/género para autocompletado en formularios.
+        Accesible para roles con permiso CanViewPolinizaciones.
+        """
+        try:
+            from django.db.models import Q
+            search = request.GET.get('search', '').strip()
+            queryset = Polinizacion.objects.exclude(
+                codigo__isnull=True
+            ).exclude(
+                codigo__exact=''
+            )
+            if search:
+                queryset = queryset.filter(
+                    Q(codigo__icontains=search) | Q(especie__icontains=search)
+                )
+            plantas = queryset.values(
+                'codigo', 'genero', 'especie', 'nueva_clima'
+            ).distinct().order_by('-codigo')[:500]
+            result = [{
+                'codigo': p['codigo'],
+                'genero': p['genero'] or '',
+                'especie': p['especie'] or '',
+                'clima': p['nueva_clima'] or 'I'
+            } for p in plantas]
+            return Response(result)
+        except Exception as e:
+            logger.error(f"Error obteniendo códigos con especies: {e}")
+            return self.handle_error(e, "Error obteniendo códigos con especies")
 
     @action(detail=False, methods=['get'], url_path='alertas_polinizacion')
     def alertas_polinizacion(self, request):
